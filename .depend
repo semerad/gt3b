@@ -1,0 +1,7 @@
+main.o: main.c  gt3b.h 
+ppm.o: ppm.c  gt3b.h  
+lcd.o: lcd.c  gt3b.h  
+input.o: input.c  gt3b.h 
+buzzer.o: buzzer.c  gt3b.h 
+timer.o: timer.c  gt3b.h 
+vector.o: vector.c  gt3b.h 

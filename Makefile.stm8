@@ -1,0 +1,102 @@
+
+# paths
+
+
+INCDIR	= $(TOOLSET)/Hstm8
+LIBDIR	= $(TOOLSET)/Lib
+# in linux, use wine to call compiler
+ifdef WINEPREFIX
+export WINEPREFIX
+WINE	= wine
+else
+WINE	=
+endif
+
+
+# flags
+
+CFLAGS	= +warn +proto +mods$(SMODE)0 $(DEBUG) -i. -i$(INCDIR) -l $(VERBOSE) -pxp -ac
+AFLAGS	= -xx -xp -l $(VERBOSE) -c -i. -i$(INCDIR)
+LDFLAGS	= -l$(LIBDIR)
+
+
+# used programs
+
+AS	= $(WINE) $(TOOLSET)/castm8
+CC	= $(WINE) $(TOOLSET)/cxstm8
+LD	= $(WINE) $(TOOLSET)/clnk
+TOELF	= $(WINE) $(TOOLSET)/cvdwarf
+BIN	= $(WINE) $(TOOLSET)/chex
+RM	= rm -f
+
+
+# object files
+
+OBJ	= $(SRCC:.c=.o) $(INTRS:.c=.o)
+
+
+# common compile
+
+%o: %c
+	$(CC) $(CFLAGS) $<
+
+%s: %c
+	$(CC) -s $(CFLAGS) $<
+
+%o: %s
+	$(AS) $(AFLAGS) $<
+	
+
+# program
+
+all: $(PROGRAM).elf $(PROGRAM).s19
+
+
+$(PROGRAM).sm8: $(OBJ)
+	@echo "+seg .const -b 0x8080 -m 0x7f80 -n .const -it" >$(PROGRAM).lkf
+	@echo "+seg .text -a .const -n .text" >>$(PROGRAM).lkf
+	@echo "+seg .eeprom -b 0x4000 -m 0x400 -n .eeprom" >>$(PROGRAM).lkf
+	@echo "+seg .bsct -b 0x0 -m 0x100 -n .bsct" >>$(PROGRAM).lkf
+	@echo "+seg .ubsct -a .bsct -n .ubsct" >>$(PROGRAM).lkf
+	@echo "+seg .bit -a .ubsct -n .bit -id" >>$(PROGRAM).lkf
+	@echo "+seg .share -a .bit -n .share -is" >>$(PROGRAM).lkf
+	@echo "+seg .data -b 0x100 -m "$(ENDMEMORY)"+1-0x100 -n .data" >>$(PROGRAM).lkf
+	@echo "+seg .bss -a .data -n .bss" >>$(PROGRAM).lkf
+	@echo "crtsi0.sm8" >>$(PROGRAM).lkf
+	@echo $(SRCC:.c=.o) >>$(PROGRAM).lkf
+	@echo $(LIBS) >>$(PROGRAM).lkf
+	@echo "libis"$(SMODE)"0.sm8" >>$(PROGRAM).lkf
+	@echo "libm0.sm8" >>$(PROGRAM).lkf
+	@echo "+seg .const -b 0x8000 -k" >>$(PROGRAM).lkf
+	@echo $(INTRS:.c=.o) >>$(PROGRAM).lkf
+	@echo "+def __endzp=@.ubsct" >>$(PROGRAM).lkf
+	@echo "+def __memory=@.bss" >>$(PROGRAM).lkf
+	@echo "+def __stack="$(STACK) >>$(PROGRAM).lkf
+	@echo "+def __startmem=@.bss" >>$(PROGRAM).lkf
+	@echo "+def __endmem="$(ENDMEMORY) >>$(PROGRAM).lkf
+	$(LD) $(LDFLAGS) -o $@ -m$(PROGRAM).map $(PROGRAM).lkf
+
+$(PROGRAM).elf: $(PROGRAM).sm8
+	$(TOELF) $<
+
+$(PROGRAM).s19: $(PROGRAM).sm8
+	$(BIN) -o $@ $<
+
+
+
+
+clean:
+	$(RM) $(OBJ) $(OBJ:.o=.s) $(OBJ:.o=.ls) $(PROGRAM).sm8 $(PROGRAM).elf $(PROGRAM).s19 $(PROGRAM).map $(PROGRAM).lkf
+
+
+
+depend:
+	$(CC) -sm $(CFLAGS) $(SRCC) $(INTRS) \
+		| sed -e 's/\<\(mods[^.]*\|iostm8s\|string\)\.h\>//g' >.depend
+
+# include dependences if they exists
+
+ifeq (.depend, $(wildcard .depend))
+include .depend
+endif
+
