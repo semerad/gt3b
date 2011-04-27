@@ -30,7 +30,7 @@
 #define HT_WRITE	0b101
 #define HT_READ		0b110
 
-// HT1621B commands, 9bits, but last bit is not use in all commands
+// HT1621B commands, 9bits, but last bit is used in no command
 #define HT_SYS_DIS	0b00000000
 #define HT_SYS_EN	0b00000001
 #define HT_LCD_OFF	0b00000010
