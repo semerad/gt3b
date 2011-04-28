@@ -92,7 +92,8 @@ clean:
 
 depend:
 	$(CC) -sm $(CFLAGS) $(SRCC) $(INTRS) \
-		| sed -e 's/\<\(mods[^.]*\|iostm8s\|string\)\.h\>//g' >.depend
+		| sed -e 's/\<\(mods[^.]*\|iostm8s\|string\)\.h\>//g' \
+		      -e 's/\r//' >.depend
 
 # include dependences if they exists
 
