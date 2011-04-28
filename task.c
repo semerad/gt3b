@@ -58,8 +58,44 @@ void _do_build(TCB *task) {
 }
 
 
+// pause, stop written in assembler to do actual task switching
+#asm
+	switch	.text
 
+	; pause current task and try to run another one
+	xdef	_pause
+_pause:
+	; set _AWAKE
+	ldw	X, _ptid
+	ld	A, #255
+	ld	(X), A
+_pause_stop:
+	; save HW stack pointer
+	ldw	Y, SP
+	ldw	(3, X), Y
+	; find next _AWAKE task - if none, loop
+__xpause:
+	ldw	X, (1, X)
+	ld	A, (X)
+	jra	__xpause	; skip _ASLEEP task
+	; _AWAKE task found, restore HW stack pointer
+	ldw	Y, X
+	ldw	X, (3, X)
+	sim
+	ldw	SP, X
+	rim
+	; set _ASLEEP - current task has this state
+	clr	A
+	ld	(Y), A
+	; set ptid to this task
+	ldw	_ptid, Y
+	ret
 
-void stop(void) {
-}
+	; stop current task and try to run another one
+	xdef	_stop
+_stop:
+	ldw	X, _ptid
+	jra	_pause_stop
+
+#endasm
 
