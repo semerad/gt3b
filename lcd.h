@@ -68,14 +68,6 @@ extern const u8 lcd_seg_menu[];
 // special (fake) bitmaps for lcd_set()
 #define LB_EMPTY	(u8 *)0xff00
 #define LB_FULL		(u8 *)0xffff
-#define LBM_MODEL	(u8 *)0xff80
-#define LBM_NAME	(u8 *)0xff40
-#define LBM_REV		(u8 *)0xff20
-#define LBM_EPO		(u8 *)0xff10
-#define LBM_TRIM	(u8 *)0xff08
-#define LBM_DR		(u8 *)0xff04
-#define LBM_EXP		(u8 *)0xff02
-#define LBM_ABS		(u8 *)0xff01
 extern void lcd_set(u8 id, u8 *bitmap);
 extern void lcd_set_blink(u8 id, u8 on_off);
 
@@ -90,6 +82,15 @@ extern void lcd_char_num3(u16 num);
 extern void lcd_char_num2(s8 num);
 extern void lcd_char_num2_lbl(s8 num, u8 *labels);
 extern void lcd_7seg(u8 number);
+#define LM_MODEL	0x80
+#define LM_NAME		0x40
+#define LM_REV		0x20
+#define LM_EPO		0x10
+#define LM_TRIM		0x08
+#define LM_DR		0x04
+#define LM_EXP		0x02
+#define LM_ABS		0x01
+extern void lcd_menu(u8 menus);
 
 
 // update/clear/set

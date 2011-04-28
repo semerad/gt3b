@@ -596,39 +596,85 @@ static const u8 lcd_7segmap[] = {
 };
 
 
-// write char to LCD item id (LCHAR1..3)
+// write char to LCD item id (LCHR1..3)
 void lcd_char(u8 id, u8 c) {
-    // XXX
+    lcd_set(id, lcd_charmap + (c - LCHAR_MIN) * LCD_CHAR_COLS);
 }
 
 
 // write 3 chars
 void lcd_chars(u8 *chars) {
-    // XXX
+    lcd_char(LCHR1, *chars++);
+    lcd_char(LCHR2, *chars++);
+    lcd_char(LCHR3, *chars);
+}
+
+
+// common conversion to 2 chars
+static u8 chr[3];  // results of number->string conversions
+static void lcd_num2char(u8 num) {
+    chr[1] = (u8)('0' + num / 10);
+    chr[2] = (u8)('0' + num % 10);
 }
 
 
 // write unsigned number to 3 chars (>=1000 as 'A')
 void lcd_char_num3(u16 num) {
-    // XXX
+    chr[0] = (u8)('0' + num / 100);
+    lcd_num2char((u8)(num % 100));
+    // if more than 999, go to letters
+    if (chr[0] > '9')  chr[0] += 'A' - '0' - 10;
+    // remove leading spaces
+    if (chr[0] == '0') {
+	chr[0] = ' ';
+	if (chr[1] == 0)  chr[1] = ' ';
+    }
+    lcd_chars(chr);
 }
 
 
 // write signed number, max -99..99
 void lcd_char_num2(s8 num) {
-    // XXX
+    // check signum
+    u8 sig = ' ';
+    if (num < 0) {
+	sig = '-';
+	num = (u8)-num;
+    }
+    lcd_num2char(num);
+    // remove leading spaces
+    if (chr[1] == '0') {
+	chr[1] = sig;
+	chr[0] = ' ';
+    }
+    else  chr[0] = sig;
+    lcd_chars(chr);
 }
 
 
 // write signed number, use labels for <0, =0, >0 (eg. "LNR")
 void lcd_char_num2_lbl(s8 num, u8 *labels) {
-    // XXX
+    // set label based on signum
+    if (num == 0)  chr[0] = labels[1];
+    else if (num > 0)  chr[0] = labels[2];
+    else {
+	num = (u8)-num;
+	chr[0] = labels[0];
+    }
+    lcd_num2char(num);
+    lcd_chars(chr);
 }
 
 
 // write given number to 7-segment display
 void lcd_7seg(u8 number) {
-    // XXX
+    lcd_set(L7SEG, lcd_7segmap + number);
+}
+
+
+// select menu-s
+void lcd_menu(u8 menus) {
+    lcd_set(LMENU, (u8 *)(menus | 0xff00));
 }
 
 
