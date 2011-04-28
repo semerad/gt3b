@@ -44,5 +44,6 @@ extern void ppm_calc_sync(void);
 
 
 /* timer */
-extern u16 time;
+extern u16 time_sec;
+extern u8  time_5ms;
 

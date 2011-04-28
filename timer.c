@@ -19,30 +19,48 @@
 
 
 #include "gt3b.h"
+#include "lcd.h"
 
 
 // initialise timer 2 used to count seconds
-#define TIMER_1S  (KHZ / 64 * 125 - 1)
+#define TIMER_5MS  (KHZ / 2 * 5 - 1)
 void timer_init(void) {
     BSET(CLK_PCKENR1, 5);	// enable clock to TIM2
     TIM2_CNTRH = 0;		// start at 0
     TIM2_CNTRL = 0;
-    TIM2_PSCR = 9;		// clock / 512
+    TIM2_PSCR = 1;		// clock / 2
     TIM2_IER = 0b00000001;	// enable update interrupt
-    TIM2_ARRH = hi8(TIMER_1S);	// count till 1s time
-    TIM2_ARRL = lo8(TIMER_1S);
+    TIM2_ARRH = hi8(TIMER_5MS);	// count till 5ms time
+    TIM2_ARRL = lo8(TIMER_5MS);
     TIM2_CR1 = 0b00000101;	// URS-overflow, enable
 }
 
 
 // count seconds from power on
-u16 time;
+u16 time_sec;
+u8  time_5ms;
 
-// interrupt every 1s
-// increment time
+extern TCB LCD;
+
+// interrupt every 5ms
 @interrupt void timer_interrupt(void) {
     BRES(TIM2_SR1, 0);  // erase interrupt flag
 
-    time++;
+    // increment time from start
+    if (++time_5ms >= 200) {
+	time_5ms = 0;
+	time_sec++;
+    }
+
+    // lcd blink timer
+    if (++lcd_blink_cnt >= LCD_BLNK_CNT_MAX) {
+	lcd_blink_cnt = 0;
+	lcd_blink_flag = 1;
+	awake(LCD);
+    }
+    else if (lcd_blink_cnt == LCD_BLNK_CNT_BLANK) {
+	lcd_blink_flag = 1;
+	awake(LCD);
+    }
 }
 

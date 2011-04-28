@@ -4,5 +4,5 @@ ppm.o: ppm.c  gt3b.h stm8.h  task.h
 lcd.o: lcd.c  gt3b.h stm8.h  task.h lcd.h 
 input.o: input.c  gt3b.h stm8.h  task.h
 buzzer.o: buzzer.c  gt3b.h stm8.h  task.h
-timer.o: timer.c  gt3b.h stm8.h  task.h
+timer.o: timer.c  gt3b.h stm8.h  task.h lcd.h
 vector.o: vector.c  gt3b.h stm8.h  task.h
