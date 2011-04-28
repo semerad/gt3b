@@ -21,6 +21,7 @@
 /* LCD controler is HOLTEK HT1621B */
 
 #include "gt3b.h"
+#include "lcd.h"
 #include <string.h>
 
 
@@ -65,7 +66,7 @@
 #define HT_NORMAL	0b11100011
 
 
-// pins setting
+// microcontroller pins setting
 #define CS0 BRES(PC_ODR, 3)
 #define CS1 BSET(PC_ODR, 3)
 #define WR0 BRES(PF_ODR, 4)
@@ -77,13 +78,18 @@
 
 
 
+
+
+
+/* low level LCD routines and initialisation */
+
 // send cnt bits to LCD controller, only low bits of "bits" are used
 // use timer4 to get 600kHz clock for driving WR/ signal
 // XXX move it to interrupt code and sleep current task till done
 static void lcd_send_bits(u8 cnt, u16 bits) {
     bits <<= 16 - cnt;
-    TIM4_CNTR = 0;  // reset timer value
-    BSET(TIM4_CR1, 0);  // enable timer
+    TIM4_CNTR = 0;	// reset timer value
+    BSET(TIM4_CR1, 0);	// enable timer
     do {
 	// WR low and set data pin
 	WR0;
@@ -131,11 +137,11 @@ void lcd_init(void) {
     BCK0;
 
     // initialize timer 4 used to time WR/ signal
-    BSET(CLK_PCKENR1, 4);   // enable clock to TIM4
-    TIM4_CR1 = 0b00000100;  // no auto-reload, URS-overflow, disable
-    TIM4_IER = 0;           // no interrupts XXX change to 1
-    TIM4_PSCR = 0;          // prescaler = 1
-    TIM4_ARR = 30;          // it will be about 600kHz for WR/ signal
+    BSET(CLK_PCKENR1, 4);     // enable clock to TIM4
+    TIM4_CR1 = 0b00000100;    // no auto-reload, URS-overflow, disable
+    TIM4_IER = 0;             // no interrupts XXX change to 1
+    TIM4_PSCR = 0;            // prescaler = 1
+    TIM4_ARR = 30;            // it will be about 600kHz for WR/ signal
 
     // initialize HT1621B
     lcd_command(HT_BIAS_13 | (0b10 << HT_BIAS_SHIFT));  // BIAS 1/3, 4 COMs
@@ -147,173 +153,393 @@ void lcd_init(void) {
 }
 
 
-// array of current values of LCD controller memory of segments (32x 4bit)
+
+
+
+
+/* actual LCD segment memory and updating routine */
+
 #define MAX_SEGMENT 32
 static u8 lcd_segments[MAX_SEGMENT];
-static u32 lcd_modified_segments;
+// bit flags of segments, which were modified from last update
+static u16 lcd_modified_segments;
+static u16 lcd_modified_segments2;
+
+// flags used for communicating between tasks to activate LCD update
+static _Bool lcd_update_flag;
+static _Bool lcd_clr_flag;
+static _Bool lcd_set_flag;
 
 
-// following variables represents current state of display
-// it is used when blinking items
-static u8 lcd_sav_char1[LCD_CHAR_COLS];
-static u8 lcd_sav_char2[LCD_CHAR_COLS];
-static u8 lcd_sav_char3[LCD_CHAR_COLS];
-static u8 lcd_sav_number;	// 7-segment number (channel, model, ...)
-static u8 lcd_sav_menu;		// bit for each menu in the top of LCD
-static u8 lcd_sav_symbols;	// symbols: % V - CHANNEL_NO ...
+// set LCD segment to given comms, remember modified only when different
+// will be sent to LCD controller after update
+static void lcd_seg_comms(u8 segment, u8 comms) {
+    u8 *seg = &lcd_segments[segment];
+    if (*seg == comms)  return;		// no change
+    *seg = comms;
+    if (segment < 16) {
+	lcd_modified_segments |= (u16)1 << segment;
+    }
+    else {
+	lcd_modified_segments2 |= (u16)1 << (segment - 16);
+    }
+}
 
 
-// set LCD segment "pos" ON of OFF
+// send changed LCD segments to LCD controller
+static void lcd_seg_update(void) {
+    u8 i;
+    u16 bit;
+    for (i = 0; i < MAX_SEGMENT; i++) {
+	if (i < 16) {
+	    bit = (u16)1 << i;
+	    if (!(lcd_modified_segments & bit))  continue;
+	    lcd_modified_segments &= ~bit;
+	}
+	else {
+	    bit = (u16)1 << (i - 16);
+	    if (!(lcd_modified_segments2 & bit))  continue;
+	    lcd_modified_segments2 &= ~bit;
+	}
+	CS0;
+	lcd_send_bits(13, (HT_WRITE << 10) | (i << 4) | lcd_segments[i]);
+	CS1;
+	if (lcd_clr_flag || lcd_set_flag)  break;
+    }
+}
+
+
+
+
+
+/* routines for manipulating each segment individually and blinking */
+
+// low 4 bits contains actual segment values
+// high 8 bits contains segments, which will be blinking
+static u8 lcd_bitmap[MAX_SEGMENT];
+static _Bool lcd_was_inverted;		// 1=there was some blink inversion
+_Bool lcd_blink_flag;			// set in timer interrupt
+u8 lcd_blink_cnt;			// blink counter updated in timer
+
+
+// set LCD segment "pos" ON or OFF
 // pos contains SEGMENT address in bits 0-4 and COM number in bits 7-8
 // set bit in array lcs_segments only and set flag that this segment was
 //   changed (segment can be changed more times and we will send it to
 //   LCD controller only once)
-static void lcd_data(u8 pos, u8 on_off) {
+void lcd_segment(u8 pos, u8 on_off) {
     u8 segment = (u8)(pos & 0b00011111);
     u8 com_bit = (u8)(1 << ((pos & 0b11000000) >> 6));
     if (on_off) {
-	lcd_segments[segment] |= com_bit;
+	lcd_bitmap[segment] |= com_bit;
     }
     else {
-	lcd_segments[segment] &= (u8)~com_bit;
+	lcd_bitmap[segment] &= (u8)~com_bit;
     }
-    lcd_modified_segments |= (u32)1 << segment;
 }
 
 
-// send changed segments to LCD controller
-void lcd_end_write(void) {
+// set blinking state for given segment
+// 0 - off
+// 1 - on only when corresponding LCD segment is on
+// 2 - on always
+void lcd_segment_blink(u8 pos, u8 on_off) {
+    u8 segment = (u8)(pos & 0b00011111);
+    u8 com_bit = (u8)(1 << ((pos & 0b11000000) >> 6));
+    u8 blnk_bit = (u8)(com_bit << 4);
+    if (on_off) {
+	if (on_off == 1 && !(lcd_bitmap[segment] & com_bit))  return;  // is OFF
+	lcd_bitmap[segment] |= blnk_bit;
+    }
+    else {
+	lcd_bitmap[segment] &= (u8)~blnk_bit;
+    }
+}
+
+
+// show normal LCD bitmap
+static void lcd_show_normal(void) {
     u8 i;
+    lcd_update_flag = 0;
+    lcd_was_inverted = 0;
+    lcd_blink_cnt = 0;		// reset blink counter
     for (i = 0; i < MAX_SEGMENT; i++) {
-	if (!(lcd_modified_segments & ((u32)1 << i)))  continue;
-	CS0;
-	lcd_send_bits(13, (HT_WRITE << 10) | (i << 4) | lcd_segments[i]);
-	CS1;
+	lcd_seg_comms(i, (u8)(lcd_bitmap[i] & 0xf));
     }
-    lcd_modified_segments = 0;
+    lcd_seg_update();
 }
+
+
+// show blinked LCD bitmap
+static void lcd_show_inverted(void) {
+    u8 i, c;
+    lcd_was_inverted = 0;
+    for (i = 0; i < MAX_SEGMENT; i++) {
+	c = lcd_bitmap[i];
+	if (!(c & 0xf0))  continue;	// nothing to invert
+	lcd_seg_comms(i, (u8)((c & 0xf) ^ ((c & 0xf0) >> 4)));
+	lcd_was_inverted = 1;
+    }
+    if (lcd_was_inverted)  lcd_seg_update();
+}
+
+
+// do LCD item blinking in regular timer times
+static void lcd_blink(void) {
+    u8 on_off;
+    lcd_blink_flag = 0;
+    if (lcd_blink_cnt < LCD_BLNK_CNT_BLANK) {
+	// do it only when something was inverted
+	if (lcd_was_inverted)  lcd_show_normal();
+    }
+    else {
+	lcd_show_inverted();
+    }
+}
+
+
+
+
 
 
 // full LCD clear or set all segments ON
 // quicker way, doing continuous-write to LCD controller
-// memory locations representing LCD state must be set accordingly
-void lcd_clr_set(u8 on_off) {
-    u8 data;
+// memory locations representing LCD states must be set accordingly
+static void lcd_clr_set(u16 data) {
     u8 i;
-    u16 data4;
-    if (on_off) {
-	data = 0xf;
-	data4 = 0xffff;
-	memset(lcd_sav_char1, 0x7f, LCD_CHAR_COLS);
-	memset(lcd_sav_char2, 0x7f, LCD_CHAR_COLS);
-	memset(lcd_sav_char3, 0x7f, LCD_CHAR_COLS);
-	lcd_sav_number = 0x7f;
-	lcd_sav_menu = lcd_sav_symbols = 0xff;
-    }
-    else {
-	data = 0;
-	data4 = 0;
-	memset(lcd_sav_char1, 0, LCD_CHAR_COLS);
-	memset(lcd_sav_char2, 0, LCD_CHAR_COLS);
-	memset(lcd_sav_char3, 0, LCD_CHAR_COLS);
-	lcd_sav_number = lcd_sav_menu = lcd_sav_symbols = 0;
-    }
-    memset(lcd_segments, data, MAX_SEGMENT);
+    // clear flags
+    lcd_clr_flag = 0;
+    lcd_set_flag = 0;
+    lcd_update_flag = 0;
+    lcd_blink_flag = 0;
+    lcd_blink_cnt = 0;		// reset blink counter
+    // set memory locations
+    memset(lcd_segments, (u8)(data & 0x0f), MAX_SEGMENT);
+    memset(lcd_bitmap, (u8)(data & 0x0f), MAX_SEGMENT);
+    lcd_modified_segments = 0;
+    lcd_modified_segments2 = 0;
+    lcd_was_inverted = 0;
     CS0;
-    lcd_send_bits(9, HT_WRITE << 6);  // set lcd address to 0
+    // set lcd address to 0
+    lcd_send_bits(9, HT_WRITE << 6);
     // send 32x 4bits of data in group of 16 bits
     for (i = 0; i < MAX_SEGMENT / 4; i++) {
-	lcd_send_bits(16, data4);
+	lcd_send_bits(16, data);
     }
     CS1;
-    lcd_modified_segments = 0;
 }
 
 
-// functions to set LCD items to given bitmap
-static void lcd_set_multi(u8 *sav, u8 bits, u8 *seg, u8 *bitmap, u8 count) {
+
+
+
+// main LCD task, handle update/cle/set/blink requests
+static void lcd_loop(void) {
+    u8 i;
+    while (1) {
+	// process clear flag
+	if (lcd_clr_flag) {
+	    lcd_clr_set(0);
+	    continue;
+	}
+	// process set flag
+	if (lcd_set_flag) {
+	    lcd_clr_set(0xffff);
+	    continue;
+	}
+	// process update flag
+	if (lcd_update_flag) {
+	    lcd_show_normal();
+	    continue;
+	}
+	// process blink flag
+	if (lcd_blink_flag) {
+	    lcd_blink();
+	    continue;
+	}
+	// wait for next wakeup
+	stop();
+    }
 }
 
+
+
+
+
+
+// LCD segment addresses
 
 // bits from left-top down, then next column
-static const u8 lcd_seg_char1[7 * LCD_CHAR_COLS] = {
+const u8 lcd_seg_char1[] = {
     0xda, 0x1a, 0x5a, 0x9a, 0x9d, 0x5d, 0x1d,
     0xd9, 0x19, 0x59, 0x99, 0x9e, 0x5e, 0x1e,
     0xd8, 0x18, 0x58, 0x98, 0x9f, 0x5f, 0x1f,
     0xd7, 0x17, 0x57, 0x97, 0x91, 0x51, 0x11,
-    0xd6, 0x16, 0x56, 0x96, 0x90, 0x50, 0x10
+    0xd6, 0x16, 0x56, 0x96, 0x90, 0x50, 0x10,
+    0
 };
-void lcd_set_char1(u8 *bitmap) {
-    lcd_set_multi(lcd_sav_char1, 7, lcd_seg_char1, bitmap, LCD_CHAR_COLS);
-}
-
-
-// bits from left-top down, then next column
-static const u8 lcd_seg_char2[7 * LCD_CHAR_COLS] = {
+const u8 lcd_seg_char2[] = {
     0xd5, 0x15, 0x55, 0x95, 0x8f, 0x4f, 0x0f,
     0xd4, 0x14, 0x54, 0x94, 0x8e, 0x4e, 0x0e,
     0xd3, 0x13, 0x53, 0x93, 0x8d, 0x4d, 0x0d,
     0xd2, 0x12, 0x52, 0x92, 0x8c, 0x4c, 0x0c,
-    0xc0, 0x00, 0x40, 0x80, 0x8b, 0x4b, 0x0b
+    0xc0, 0x00, 0x40, 0x80, 0x8b, 0x4b, 0x0b,
+    0
 };
-void lcd_set_char2(u8 *bitmap) {
-    lcd_set_multi(lcd_sav_char2, 7, lcd_seg_char2, bitmap, LCD_CHAR_COLS);
-}
-
-
-// bits from left-top down, then next column
-static const u8 lcd_seg_char3[7 * LCD_CHAR_COLS] = {
+const u8 lcd_seg_char3[] = {
     0xc1, 0x01, 0x41, 0x81, 0x8a, 0x4a, 0x0a,
     0xc2, 0x02, 0x42, 0x82, 0x89, 0x49, 0x09,
     0xc3, 0x03, 0x43, 0x83, 0x88, 0x48, 0x08,
     0xc4, 0x04, 0x44, 0x84, 0x87, 0x47, 0x07,
-    0xc5, 0x05, 0x45, 0x85, 0x86, 0x46, 0x06
+    0xc5, 0x05, 0x45, 0x85, 0x86, 0x46, 0x06,
+    0
 };
-void lcd_set_char3(u8 *bitmap) {
-    lcd_set_multi(lcd_sav_char3, 7, lcd_seg_char3, bitmap, LCD_CHAR_COLS);
-}
-
-
-static const u8 lcd_seg_number[7] = {  // from left-top down, then next column
-    0x9c, 0x1c, 0x9b, 0x5c, 0xdb, 0x5b, 0x1b
+const u8 lcd_seg_7seg[] = {
+    0x9c, 0x1c, 0x9b, 0x5c, 0xdb, 0x5b, 0x1b,
+    0
 };
-void lcd_set_number(u8 bitmap) {
-    lcd_set_multi(&lcd_sav_number, 7, lcd_seg_number, &bitmap, 1);
-}
-
-
-static const u8 lcd_seg_menu[8] = {  // first line, second line
-    0xd0, 0xcd, 0xcb, 0xca, 0xd1, 0xce, 0xcc, 0xc9
+// first line, second line
+const u8 lcd_seg_menu[] = {
+    0xd0, 0xcd, 0xcb, 0xca, 0xd1, 0xce, 0xcc, 0xc9,
+    0
 };
-void lcd_set_menu(u8 bitmap) {
-    lcd_set_multi(&lcd_sav_menu, 8, lcd_seg_menu, &bitmap, 1);
-}
 
-
-static const u8 lcd_seg_symbols[8] = {
-    0xdf, 0xde, 0xdd, 0xc7, 0xcf, 0xc8, 0xc6, 0xdc  // XXX last two may be swapped, check it
+static const struct lcd_items_s {
+    u8 *segments;	// address of lcd_seg_...
+    u8 bits;		// number of bits used in each bitmap byte
+} lcd_items[5] = {
+    { lcd_seg_char1, 7 },
+    { lcd_seg_char2, 7 },
+    { lcd_seg_char2, 7 },
+    { lcd_seg_7seg, 7 },
+    { lcd_seg_menu, 8 }
 };
-void lcd_set_symbols(u8 bitmap) {
-    lcd_set_multi(&lcd_sav_symbols, 8, lcd_seg_symbols, &bitmap, 1);
+
+
+
+
+// set LCD element id to given bitmap
+void lcd_set(u8 id, u8 *bitmap) {
+    struct lcd_items_s *li = &lcd_items[id];
+    u8 *seg = li->segments;	// actual lcd segment pointer
+    u8 sp = *seg++;		// actual lcd segment
+    u8 bits = li->bits;		// number of bits in bitmap
+    u8 bitpos = 8;		// bit position in bitmap byte
+    u8 fake_bitmap = (u8)(bitmap >= (u8 *)0xff00);
+    u8 bm;			// actual byte of bitmap
+    if (fake_bitmap) {
+	// special addresses are actually bitmap for all segments
+	bm = (u8)((u16)bitmap & 0xff);
+    }
+    else {
+	bm = *bitmap++;
+    }
+    do {
+	// for seven-bits bitmaps, rotate first
+	if (bitpos > bits) {
+	    bm <<= 1;
+	    bitpos -= 1;
+	}
+	// set segment
+	lcd_segment(sp, (u8)((s8)bm < 0 ? LS_ON : LS_OFF));
+	if (!(sp = *seg++))  break; 
+	// to next bitmap bit/byte
+	if (bitpos > 0) {
+	    // next bit
+	    bm <<= 1;
+	    bitpos -= 1;
+	}
+	else {
+	    // next bitmap byte
+	    bitpos = 8;
+	    if (fake_bitmap) {
+		bm = (u8)((u16)bitmap & 0xff);
+	    }
+	    else {
+		bm = *bitmap++;
+	    }
+	}
+    } while (1);
 }
 
 
-// functions to write characters from character map
-void lcd_char1(u8 c) {
+// set blink for LCD element id
+void lcd_set_blink(u8 id, u8 on_off) {
+    u8 *seg = lcd_items[id].segments;
+    do {
+	lcd_segment_blink(*seg, on_off);
+    } while (*++seg);
 }
 
-void lcd_char2(u8 c) {
+
+
+
+
+
+// functions to write characters from character map to char id
+
+// write char to LCD item id (LCHAR1..3)
+void lcd_char(u8 id, u8 c) {
+    // XXX
 }
 
-void lcd_char3(u8 c) {
 
-}
-
+// write 3 chars
 void lcd_chars(u8 *chars) {
+    // XXX
+}
+
+
+// write unsigned number to 3 chars (>=1000 as 'A')
+void lcd_char_num3(u16 num) {
+    // XXX
+}
+
+
+// write signed number, max -99..99
+void lcd_char_num2(s8 num) {
+    // XXX
+}
+
+
+// write signed number, use labels for <0, =0, >0 (eg. "LNR")
+void lcd_char_num2_lbl(s8 num, u8 *labels) {
+    // XXX
 }
 
 
 // write given number to 7-segment display
-void lcd_number(u8 number) {
+void lcd_7seg(u8 number) {
+    // XXX
+}
+
+
+
+
+
+
+// update/clear/set LCD display
+
+// send modified data to LCD controller
+void lcd_update(void) {
+    lcd_update_flag = 1;
+    // XXX wakeup LCD task
+    stop();
+}
+
+
+// clear entire LCD
+void lcd_clr(void) {
+    lcd_clr_flag = 1;
+    // XXX wakeup LCD task
+    stop();
+}
+
+
+// set all LCD segments ON
+void lcd_set_full_on(void) {
+    lcd_set_flag = 1;
+    // XXX wakeup LCD task
+    stop();
 }
 

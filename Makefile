@@ -1,6 +1,6 @@
 
 PROGRAM	= gt3b
-SRCC	= main.c ppm.c lcd.c input.c buzzer.c timer.c
+SRCC	= task.c main.c ppm.c lcd.c input.c buzzer.c timer.c
 INTRS	= vector.c
 SMODE	= 
 #SMODE	= l

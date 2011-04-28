@@ -19,6 +19,7 @@
 
 
 #include <iostm8s.h>
+#include "task.h"
 
 
 // frequency of crystal in kHz
@@ -77,31 +78,6 @@ extern u8 channels;
 extern void ppm_set_channels(u8 n);
 extern void ppm_set_value(u8 channel, u16 microsec);
 extern void ppm_calc_sync(void);
-
-
-/* LCD */
-extern void lcd_clr_set(u8 on_off);
-extern void lcd_end_write(void);
-#define lcd_clr()  lcd_clr_set(0);
-
-#define LCD_CHAR_COLS 5
-#define LCD_MENU_MODEL 0x80
-#define LCD_MENU_NAME  0x40
-#define LCD_MENU_REV   0x20
-#define LCD_MENU_EPO   0x10
-#define LCD_MENU_TRIM  0x08
-#define LCD_MENU_DR    0x04
-#define LCD_MENU_EXP   0x02
-#define LCD_MENU_ABS   0x01
-
-#define LCD_SYM_LOWPWR  0x80
-#define LCD_SYM_CHANNEL 0x40
-#define LCD_SYM_MODELNO 0x20
-#define LCD_SYM_PERCENT 0x10
-#define LCD_SYM_LEFT    0x08
-#define LCD_SYM_RIGHT   0x04
-#define LCD_SYM_DOT     0x02
-#define LCD_SYM_VOLTS   0x01
 
 
 /* INPUT - keys, steering, throttle */
