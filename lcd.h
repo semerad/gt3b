@@ -81,6 +81,9 @@ extern void lcd_set_blink(u8 id, u8 on_off);
 
 
 // high level functions to write chracters and numbers
+#define LCHAR_MIN ' '
+#define LCHAR_MAX 'Z'
+#define L7SEG_MAX 15
 extern void lcd_char(u8 id, u8 c);
 extern void lcd_chars(u8 *chars);
 extern void lcd_char_num3(u16 num);
