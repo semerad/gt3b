@@ -18,7 +18,7 @@
 
 
 
-#include <iostm8s.h>
+#include "stm8.h"
 #include "task.h"
 
 
@@ -26,49 +26,6 @@
 #define KHZ  ((u16)18432)
 // development board has another crystal
 //#define KHZ  ((u16)16000)
-
-
-/* enabling/disabling interrupts */
-#define sim()  _asm("sim")
-#define rim()  _asm("rim")
-
-
-/* define types sX, uX */
-typedef signed char    s8;
-typedef unsigned char  u8;
-typedef signed short   s16;
-typedef unsigned short u16;
-typedef signed long    s32;
-typedef unsigned long  u32;
-#define hi8(val) ((u8)((val) >> 8))
-#define lo8(val) ((u8)((val) & 0xff))
-
-
-/* macros for setting bit to 0 or 1 */
-#define BSET(addr, pin) \
-    addr |= 1 << pin
-#define BRES(addr, pin) \
-    addr &= (u8)~(1 << pin)
-
-
-/* macros for defining I/O pins */
-#define IO_IF(port, pin) \
-    BRES(P ## port ## _DDR, pin); \
-    BRES(P ## port ## _CR1, pin); \
-    BRES(P ## port ## _CR2, pin)
-#define IO_IP(port, pin) \
-    BRES(P ## port ## _DDR, pin); \
-    BSET(P ## port ## _CR1, pin); \
-    BRES(P ## port ## _CR2, pin)
-#define IO_OP(port, pin) \
-    BSET(P ## port ## _DDR, pin); \
-    BSET(P ## port ## _CR1, pin); \
-    BRES(P ## port ## _CR2, pin)
-#define IO_OPF(port, pin) \
-    BSET(P ## port ## _DDR, pin); \
-    BSET(P ## port ## _CR1, pin); \
-    BSET(P ## port ## _CR2, pin)
-
 
 
 

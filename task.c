@@ -20,7 +20,46 @@
 #include "task.h"
 
 
+// main OPER task
+TCB OPER;
+
+
+// pointer to current task
+TCB *ptid;
+
+
+// initialise tasks
+void task_init(void) {
+    // initialize current task id
+    ptid = &OPER;
+    // OPER is running -> running task has ASLEEP state
+    sleep(OPER);
+    // initialize LINK in OPER task
+    OPER.link = &OPER;
+}
+
+
+// activate task - set pointers and AWAKE
+void _do_activate(TCB *task, u8 *stack, u16 stack_size,
+		  void (*function)(void)) {
+    u8 *stack_ret = stack + stack_size - 2;
+    *(u16 *)stack_ret = (u16)function;
+    task->hwstack = stack_ret - 1;  // SP points below last value
+    task->link = 0;
+    task->status = _AWAKE;
+}
+
+
+// build - link in task
+void _do_build(TCB *task) {
+    task->status = _ASLEEP;	// do not run this yet
+    task->link = &OPER;
+    OPER.link = task;
+}
+
+
+
+
 void stop(void) {
-    
 }
 

@@ -17,5 +17,47 @@
 */
 
 
+#include "stm8.h"
+
+
+// Task Control Block
+struct TCB_s {
+    u8 status;
+    struct TCB_s *link;
+    u8 *hwstack;
+};
+typedef struct TCB_s TCB;
+extern TCB *ptid;
+
+
+// TASK - create TCB, stack
+#define TASK(name, stack_size) \
+    TCB name; \
+    @near u8 name ## _stack[stack_size]; \
+    const u16 name ## _stack_size = stack_size
+
+
+// sleep, awake
+#define _ASLEEP 0
+#define _AWAKE  0xff
+#define sleep(task)  (&task)->status = _ASLEEP
+#define awake(task)  (&task)->status = _AWAKE
+
+
+// activate
+#define activate(task, function) \
+    _do_activate(&task, task ## _stack, task ## _stack_size, function);
+extern void _do_activate(TCB *task, u8 *stack, u16 stack_size,
+			 void (*function)(void));
+    
+
+// build, unbuild
+#define build(task) \
+    _do_build(&task)
+extern void _do_build(TCB *task);
+
+
+// pause, stop
+extern void pause(void);
 extern void stop(void);
 
