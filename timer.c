@@ -40,8 +40,6 @@ void timer_init(void) {
 u16 time_sec;
 u8  time_5ms;
 
-extern TCB LCD;
-
 // interrupt every 5ms
 @interrupt void timer_interrupt(void) {
     BRES(TIM2_SR1, 0);  // erase interrupt flag

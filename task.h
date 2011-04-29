@@ -44,8 +44,8 @@ extern TCB *ptid;
 // sleep, awake
 #define _ASLEEP 0
 #define _AWAKE  0xff
-#define sleep(task)  (&task)->status = _ASLEEP
-#define awake(task)  (&task)->status = _AWAKE
+#define sleep(task)  task.status = _ASLEEP
+#define awake(task)  task.status = _AWAKE
 
 
 // activate
@@ -55,7 +55,7 @@ extern void _do_activate(TCB *task, u8 *stack, u16 stack_size,
 			 void (*function)(void));
     
 
-// build, unbuild
+// build
 #define build(task) \
     _do_build(&task)
 extern void _do_build(TCB *task);

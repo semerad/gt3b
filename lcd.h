@@ -110,5 +110,9 @@ extern volatile _Bool lcd_blink_flag;
 extern volatile u8 lcd_blink_cnt;
 
 
+// LCD task
+extern TCB LCD;
+
+
 #endif
 
