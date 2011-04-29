@@ -45,6 +45,8 @@ typedef unsigned long  u32;
     addr |= 1 << pin
 #define BRES(addr, pin) \
     addr &= (u8)~(1 << pin)
+#define BCHK(addr, pin) \
+    (addr & (1 << pin))
 
 
 /* macros for defining I/O pins */

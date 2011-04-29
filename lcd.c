@@ -119,7 +119,7 @@ static u8  lcd_tmr_cnt;
 // use timer4 to get 600kHz clock for driving WR/ signal
 static void lcd_send_bits(u8 cnt, u16 bits) {
     // if last sending not yet done, wait for it stopping task
-    while (TIM4_CR1 & 0x01) {
+    while (BCHK(TIM4_CR1, 0)) {
 	stop();
     }
     // initialise variables

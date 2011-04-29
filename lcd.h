@@ -17,6 +17,9 @@
 */
 
 
+#ifndef _LCD_INCLUDED
+#define _LCD_INCLUDED
+
 
 // manipulating individual segments
 #define LS_OFF	0
@@ -105,4 +108,7 @@ extern void lcd_set_full_on(void);
 #define LCD_BLNK_CNT_BLANK	120
 extern volatile _Bool lcd_blink_flag;
 extern volatile u8 lcd_blink_cnt;
+
+
+#endif
 

@@ -17,6 +17,10 @@
 */
 
 
+#ifndef _GT3B_INCLUDED
+#define _GT3B_INCLUDED
+
+
 
 #include "stm8.h"
 #include "task.h"
@@ -46,4 +50,7 @@ extern void ppm_calc_sync(void);
 /* timer */
 extern u16 time_sec;
 extern u8  time_5ms;
+
+
+#endif
 

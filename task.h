@@ -17,6 +17,10 @@
 */
 
 
+#ifndef _TASK_INCLUDED
+#define _TASK_INCLUDED
+
+
 #include "stm8.h"
 
 
@@ -60,4 +64,7 @@ extern void _do_build(TCB *task);
 // pause, stop
 extern void pause(void);
 extern void stop(void);
+
+
+#endif
 
