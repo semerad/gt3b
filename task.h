@@ -39,6 +39,8 @@ extern TCB *ptid;
     TCB name; \
     @near u8 name ## _stack[stack_size]; \
     const u16 name ## _stack_size = stack_size
+#define E_TASK(name) \
+    extern TCB name
 
 
 // sleep, awake

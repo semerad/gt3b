@@ -111,7 +111,7 @@ extern volatile u8 lcd_blink_cnt;
 
 
 // LCD task
-extern TCB LCD;
+E_TASK(LCD);
 
 
 #endif
