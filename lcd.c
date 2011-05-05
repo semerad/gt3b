@@ -123,8 +123,8 @@ static void lcd_send_bits(u8 cnt, u16 bits) {
 	stop();
     }
     // initialise variables
-    lcd_tmr_bits = bits << 16 - cnt;
-    lcd_tmr_cnt = (u8)(cnt << 1); // 2 timer more to generate WR0 and WR1
+    lcd_tmr_bits = bits << (16 - cnt);
+    lcd_tmr_cnt = (u8)(cnt << 1); // 2 times more to generate WR0 and WR1
     // reset and start timer
     TIM4_CNTR = 0;		// reset timer value
     BSET(TIM4_CR1, 0);		// enable timer
@@ -171,7 +171,7 @@ void lcd_init(void) {
     TIM4_PSCR = 0;            // prescaler = 1
     TIM4_ARR = 30;            // it will be about 600kHz for WR/ signal
 
-    // initialize LCD task, will be used in following lcd_command-s
+    // initialize LCD task, will be used when sending following lcd_command-s
     build(LCD);
     activate(LCD, lcd_loop);
 
@@ -190,7 +190,7 @@ void lcd_init(void) {
 
 
 
-/* actual LCD segment memory and updating routine */
+/* actual LCD controller segment memory and updating routine */
 
 #define MAX_SEGMENT 32
 static u8 lcd_segments[MAX_SEGMENT];
@@ -237,6 +237,7 @@ static void lcd_seg_update(void) {
 	CS0;
 	lcd_send_bits(13, (HT_WRITE << 10) | (i << 4) | lcd_segments[i]);
 	CS1;
+	// stop updating, when clear/set was requested
 	if (lcd_clr_flag || lcd_set_flag)  break;
     }
 }
@@ -245,7 +246,7 @@ static void lcd_seg_update(void) {
 
 
 
-/* routines for manipulating each segment individually and blinking */
+/* routines for manipulating each segment individually and for blinking */
 
 // low 4 bits contains actual segment values
 // high 8 bits contains segments, which will be blinking
@@ -257,7 +258,7 @@ volatile u8 lcd_blink_cnt;		// blink counter updated in timer
 
 // set LCD segment "pos" ON or OFF
 // pos contains SEGMENT address in bits 0-4 and COM number in bits 7-8
-// set bit in array lcs_segments only and set flag that this segment was
+// sets bit in array lcs_segments only and sets flag that this segment was
 //   changed (segment can be changed more times and we will send it to
 //   LCD controller only once)
 void lcd_segment(u8 pos, u8 on_off) {
@@ -269,6 +270,8 @@ void lcd_segment(u8 pos, u8 on_off) {
     else {
 	lcd_bitmap[segment] &= (u8)~com_bit;
     }
+    // turn blinking off for this bit
+    lcd_bitmap[segment] &= (u8)~(com_bit << 4);
 }
 
 
@@ -281,7 +284,7 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
     u8 com_bit = (u8)(1 << ((pos & 0b11000000) >> 6));
     u8 blnk_bit = (u8)(com_bit << 4);
     if (on_off) {
-	if (on_off == 1 && !(lcd_bitmap[segment] & com_bit))  return;  // is OFF
+	if (on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))  return;  // is OFF
 	lcd_bitmap[segment] |= blnk_bit;
     }
     else {
@@ -290,11 +293,12 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
 }
 
 
-// show normal LCD bitmap
+// show normal (non-blinked) LCD bitmap
 static void lcd_show_normal(void) {
     u8 i;
     lcd_update_flag = 0;
     lcd_was_inverted = 0;
+    lcd_blink_flag = 0;
     lcd_blink_cnt = 0;		// reset blink counter
     for (i = 0; i < MAX_SEGMENT; i++) {
 	lcd_seg_comms(i, (u8)(lcd_bitmap[i] & 0xf));
@@ -317,7 +321,7 @@ static void lcd_show_inverted(void) {
 }
 
 
-// do LCD item blinking in regular timer times
+// do LCD item blinking at regular timer times
 static void lcd_blink(void) {
     u8 on_off;
     lcd_blink_flag = 0;
@@ -402,7 +406,7 @@ static void lcd_loop(void) {
 
 // LCD segment addresses
 
-// bits from left-top down, then next column
+// bits from left-top down, then next column, 0-terminated
 const u8 lcd_seg_char1[] = {
     0xda, 0x1a, 0x5a, 0x9a, 0x9d, 0x5d, 0x1d,
     0xd9, 0x19, 0x59, 0x99, 0x9e, 0x5e, 0x1e,
@@ -618,7 +622,7 @@ static void lcd_num2char(u8 num) {
 }
 
 
-// write unsigned number to 3 chars (>=1000 as 'A')
+// write unsigned number to 3 chars (>=1000 as 'AB...')
 void lcd_char_num3(u16 num) {
     chr[0] = (u8)('0' + num / 100);
     lcd_num2char((u8)(num % 100));
