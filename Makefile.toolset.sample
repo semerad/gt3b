@@ -1,0 +1,5 @@
+
+# toolset directory
+TOOLSET	= c:/sw/CXSTM8_16K
+#TOOLSET = c:/sw/CXSTM8_32K
+

@@ -6,3 +6,4 @@
 *.lkf
 *.map
 *.sm8
+Makefile.toolset

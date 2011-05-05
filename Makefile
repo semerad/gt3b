@@ -14,9 +14,7 @@ VERBOSE	=
 ENDMEMORY = 0x5ff
 STACK	= 0x7ff
 
-TOOLSET	= c:/sw/CXSTM8_16K
-#TOOLSET = c:/sw/CXSTM8_32K
-WINEPREFIX = $(HOME)/winsw/stm8
+include Makefile.toolset
 
 include Makefile.stm8
 
