@@ -1,5 +1,5 @@
 /*
-    main include file
+    ppm include file
     Copyright (C) 2011 Pavel Semerad
 
     This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 */
 
 
-#ifndef _GT3B_INCLUDED
-#define _GT3B_INCLUDED
+#ifndef _PPM_INCLUDED
+#define _PPM_INCLUDED
 
 
 
@@ -26,10 +26,11 @@
 #include "task.h"
 
 
-// frequency of crystal in kHz
-//#define KHZ  ((u16)18432)
-// development board has another crystal
-#define KHZ  ((u16)16000)
+#define MAX_CHANNELS 8
+extern u8 channels;	// actual number of channels
+extern void ppm_set_channels(u8 n);
+extern void ppm_set_value(u8 channel, u16 microsec);
+extern void ppm_calc_sync(void);
 
 
 #endif

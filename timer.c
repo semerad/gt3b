@@ -37,8 +37,8 @@ void timer_init(void) {
 
 
 // count seconds from power on
-u16 time_sec;
-u8  time_5ms;
+volatile u16 time_sec;
+volatile u8  time_5ms;
 
 // interrupt every 5ms
 @interrupt void timer_interrupt(void) {

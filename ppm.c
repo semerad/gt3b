@@ -26,8 +26,9 @@
 */
 
 
-#include "gt3b.h"
 #include <string.h>
+#include "gt3b.h"
+#include "ppm.h"
 
 
 // TIM3 prescalers and multiply (1000x) values to get raw TIM3 values

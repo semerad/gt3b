@@ -1,5 +1,5 @@
 /*
-    main include file
+    timer include file
     Copyright (C) 2011 Pavel Semerad
 
     This program is free software: you can redistribute it and/or modify
@@ -17,19 +17,12 @@
 */
 
 
-#ifndef _GT3B_INCLUDED
-#define _GT3B_INCLUDED
+#ifndef _TIMER_INCLUDED
+#define _TIMER_INCLUDED
 
 
-
-#include "stm8.h"
-#include "task.h"
-
-
-// frequency of crystal in kHz
-//#define KHZ  ((u16)18432)
-// development board has another crystal
-#define KHZ  ((u16)16000)
+extern volatile u16 time_sec;
+extern volatile u8  time_5ms;
 
 
 #endif
