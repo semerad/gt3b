@@ -45,7 +45,6 @@ void _do_activate(TCB *task, u8 *stack, u16 stack_size,
     u8 *stack_ret = stack + stack_size - 2;
     *(u16 *)stack_ret = (u16)function;
     task->hwstack = stack_ret - 1;  // SP points below last value
-    task->link = 0;
     task->status = _AWAKE;
 }
 
@@ -53,18 +52,14 @@ void _do_activate(TCB *task, u8 *stack, u16 stack_size,
 // build - link in task
 void _do_build(TCB *task) {
     task->status = _ASLEEP;	// do not run this yet
-    task->link = &OPER;
+    task->link = OPER.link;
     OPER.link = task;
 }
 
 
-// pause, stop written in assembler to do actual task switching
+// pause current task and try to run another one
+void pause(void) {
 #asm
-	switch	.text
-
-	; pause current task and try to run another one
-	xdef	_pause
-_pause:
 	; set _AWAKE
 	ldw	X, _ptid
 	ld	A, #255
@@ -77,7 +72,7 @@ _pause_stop:
 __xpause:
 	ldw	X, (1, X)
 	ld	A, (X)
-	jra	__xpause	; skip _ASLEEP task
+	jreq	__xpause	; skip _ASLEEP task
 	; _AWAKE task found, restore HW stack pointer
 	ldw	Y, X
 	ldw	X, (3, X)
@@ -89,13 +84,15 @@ __xpause:
 	ld	(Y), A
 	; set ptid to this task
 	ldw	_ptid, Y
-	ret
+#endasm
+}
 
-	; stop current task and try to run another one
-	xdef	_stop
-_stop:
+
+// stop current task and try to run another one
+void stop(void) {
+#asm
 	ldw	X, _ptid
 	jra	_pause_stop
-
 #endasm
+}
 
