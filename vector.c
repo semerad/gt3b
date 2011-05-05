@@ -68,7 +68,7 @@ struct intr_vector const _vectab[] = {
 	INTR_DEFAULT,		/* 20 UART2 - Tx complete */
 	INTR_DEFAULT,		/* 21 UART2 - Receiver register DATA FULL */
 	INTR_DEFAULT,		/* 22 ADC1 - end of conversion */
-	INTR_VEC(lcd_interrupt),/* 23 TIM4 - update/overflow */
+	INTR_DEFAULT,		/* 23 TIM4 - update/overflow */
 	INTR_DEFAULT,		/* 24 Flash - EOP/WR_PG_DIS */
 	INTR_DEFAULT,		/* 25 */
 	INTR_DEFAULT,		/* 26 */

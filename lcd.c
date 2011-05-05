@@ -80,63 +80,36 @@
 
 
 
-// LCD task
-TASK(LCD, 128);
-
-
 /* low level LCD routines and initialisation */
 
-// bit which will be sent to LCD controller in timer interrupt
-static u16 lcd_tmr_bits;
-static u8  lcd_tmr_cnt;
-
-@interrupt void lcd_interrupt(void) {
-    BRES(TIM4_SR, 0);		// clear intr flag
-    if (--lcd_tmr_cnt & 0x01) {
-	// rising WR/ edge
-	WR1;
-	return;
-    }
-    if (lcd_tmr_cnt) {
-	// falling WR/ edge and new data
-	WR0;
-	if (lcd_tmr_bits & 0x8000) {
+// send cnt bits to LCD controller, only low bits of "bits" are used
+// use timer4 to get 600kHz clock for driving WR/ signal
+static void lcd_send_bits(u8 cnt, u16 bits) {
+    // shift bits to high-bits
+    bits <<= (u8)(16 - cnt);
+    // reset and start timer
+    TIM4_CNTR = 0;		// reset timer value
+    BSET(TIM4_CR1, 0);		// enable timer
+    WR0;
+    do {
+	if (bits & 0x8000) {
 	    DATA1;
 	}
 	else {
 	    DATA0;
 	}
-	lcd_tmr_bits <<= 1;	// to next bit
-	return;
-    }
-    // end of sending
-    BRES(TIM4_CR1, 0);		// disable timer
-    awake(LCD);			// wakeup LCD task
-}
-
-
-// send cnt bits to LCD controller, only low bits of "bits" are used
-// use timer4 to get 600kHz clock for driving WR/ signal
-static void lcd_send_bits(u8 cnt, u16 bits) {
-    // if last sending not yet done, wait for it stopping task
-    while (BCHK(TIM4_CR1, 0)) {
-	stop();
-    }
-    // initialise variables
-    lcd_tmr_bits = bits << (16 - cnt);
-    lcd_tmr_cnt = (u8)(cnt << 1); // 2 times more to generate WR0 and WR1
-    // reset and start timer
-    TIM4_CNTR = 0;		// reset timer value
-    BSET(TIM4_CR1, 0);		// enable timer
-    // write first bit
-    WR0;
-    if (lcd_tmr_bits & 0x8000) {
-	DATA1;
-    }
-    else {
-	DATA0;
-    }
-    lcd_tmr_bits <<= 1;	// to next bit
+	bits <<= 1;			// to next bit
+	while (!BCHK(TIM4_SR, 0)) ;	// wait for timer
+	BRES(TIM4_SR, 0);		// clear intr flag
+	WR1;
+	if (!--cnt)  break;
+	while (!BCHK(TIM4_SR, 0)) ;	// wait for timer
+	BRES(TIM4_SR, 0);		// clear intr flag
+	WR0;
+    } while (1);
+    while (!BCHK(TIM4_SR, 0)) ;		// wait for timer
+    BRES(TIM4_SR, 0);			// clear intr flag
+    BRES(TIM4_CR1, 0);			// disable timer
 }
 
 
@@ -148,6 +121,8 @@ static void lcd_command(u8 cmd) {
 }
 
 
+// LCD task and main loop
+TASK(LCD, 128);
 static void lcd_loop(void);
 
 // initialize LCD pins and LCD controller
@@ -167,13 +142,9 @@ void lcd_init(void) {
     // initialize timer 4 used to time WR/ signal
     BSET(CLK_PCKENR1, 4);     // enable clock to TIM4
     TIM4_CR1 = 0b00000100;    // no auto-reload, URS-overflow, disable
-    TIM4_IER = 1;             // enable overflow interrupt
+    TIM4_IER = 0;             // no interrupts
     TIM4_PSCR = 0;            // prescaler = 1
     TIM4_ARR = 30;            // it will be about 600kHz for WR/ signal
-
-    // initialize LCD task, will be used when sending following lcd_command-s
-    build(LCD);
-    activate(LCD, lcd_loop);
 
     // initialize HT1621B
     lcd_command(HT_BIAS_13 | (0b10 << HT_BIAS_SHIFT));  // BIAS 1/3, 4 COMs
@@ -183,6 +154,9 @@ void lcd_init(void) {
     lcd_command(HT_SYS_EN);   // OSC on
     lcd_command(HT_LCD_ON);   // BIAS on
 
+    // initialize LCD task, will be used when sending following lcd_command-s
+    build(LCD);
+    activate(LCD, lcd_loop);
 }
 
 
@@ -198,11 +172,6 @@ static u8 lcd_segments[MAX_SEGMENT];
 static volatile u16 lcd_modified_segments;
 static volatile u16 lcd_modified_segments2;
 
-// flags used for communicating between tasks to activate LCD update
-static volatile _Bool lcd_update_flag;
-static volatile _Bool lcd_clr_flag;
-static volatile _Bool lcd_set_flag;
-
 
 // set LCD segment to given comms, remember modified only when different
 // will be sent to LCD controller after update
@@ -214,7 +183,7 @@ static void lcd_seg_comms(u8 segment, u8 comms) {
 	lcd_modified_segments |= (u16)1 << segment;
     }
     else {
-	lcd_modified_segments2 |= (u16)1 << (segment - 16);
+	lcd_modified_segments2 |= (u16)1 << (u8)(segment - 16);
     }
 }
 
@@ -230,15 +199,13 @@ static void lcd_seg_update(void) {
 	    lcd_modified_segments &= ~bit;
 	}
 	else {
-	    bit = (u16)1 << (i - 16);
+	    bit = (u16)1 << (u8)(i - 16);
 	    if (!(lcd_modified_segments2 & bit))  continue;
 	    lcd_modified_segments2 &= ~bit;
 	}
 	CS0;
 	lcd_send_bits(13, (HT_WRITE << 10) | (i << 4) | lcd_segments[i]);
 	CS1;
-	// stop updating, when clear/set was requested
-	if (lcd_clr_flag || lcd_set_flag)  break;
     }
 }
 
@@ -248,12 +215,18 @@ static void lcd_seg_update(void) {
 
 /* routines for manipulating each segment individually and for blinking */
 
+// flags used for communicating between tasks to activate LCD update
+static volatile _Bool lcd_update_flag;
+static volatile _Bool lcd_clr_flag;
+static volatile _Bool lcd_set_flag;
+
 // low 4 bits contains actual segment values
 // high 8 bits contains segments, which will be blinking
 static u8 lcd_bitmap[MAX_SEGMENT];
 static volatile _Bool lcd_was_inverted;	// 1=there was some blink inversion
 volatile _Bool lcd_blink_flag;		// set in timer interrupt
 volatile u8 lcd_blink_cnt;		// blink counter updated in timer
+
 
 
 // set LCD segment "pos" ON or OFF
@@ -263,7 +236,7 @@ volatile u8 lcd_blink_cnt;		// blink counter updated in timer
 //   LCD controller only once)
 void lcd_segment(u8 pos, u8 on_off) {
     u8 segment = (u8)(pos & 0b00011111);
-    u8 com_bit = (u8)(1 << ((pos & 0b11000000) >> 6));
+    u8 com_bit = (u8)(1 << (u8)((pos & 0b11000000) >> 6));
     if (on_off) {
 	lcd_bitmap[segment] |= com_bit;
     }
@@ -281,7 +254,7 @@ void lcd_segment(u8 pos, u8 on_off) {
 // 2 - on always
 void lcd_segment_blink(u8 pos, u8 on_off) {
     u8 segment = (u8)(pos & 0b00011111);
-    u8 com_bit = (u8)(1 << ((pos & 0b11000000) >> 6));
+    u8 com_bit = (u8)(1 << (u8)((pos & 0b11000000) >> 6));
     u8 blnk_bit = (u8)(com_bit << 4);
     if (on_off) {
 	if (on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))  return;  // is OFF
