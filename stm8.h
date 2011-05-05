@@ -42,11 +42,11 @@ typedef unsigned long  u32;
 
 /* macros for setting bit to 0 or 1 */
 #define BSET(addr, pin) \
-    addr |= 1 << pin
+    addr |= (u8)(1 << pin)
 #define BRES(addr, pin) \
     addr &= (u8)~(1 << pin)
 #define BCHK(addr, pin) \
-    (addr & (1 << pin))
+    (addr & (u8)(1 << pin))
 
 
 /* macros for defining I/O pins */
