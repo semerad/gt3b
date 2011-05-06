@@ -91,8 +91,8 @@ static void lcd_send_bits(u8 cnt, u16 bits) {
     // shift bits to high-bits
     bits <<= (u8)(16 - cnt);
     WR0;
-    BRES(TIM4_SR, 0);			// clear intr flag (for sure)
     BSET(TIM4_CR1, 0);			// start timer
+    BRES(TIM4_SR, 0);			// clear intr flag (for sure and optimize hack)
     do {
 	if (bits & 0x8000) {
 	    DATA1;
@@ -147,7 +147,7 @@ void lcd_init(void) {
     TIM4_CR1 = 0b00001100;    // no auto-reload, one-pulse,URS-overflow, disable
     TIM4_IER = 0;             // no interrupts
     TIM4_PSCR = 0;            // prescaler = 1
-    TIM4_ARR = 26;            // it will be about 600kHz for WR/ signal
+    TIM4_ARR = 24;            // it will be about 600kHz for WR/ signal
     TIM4_CNTR = 0;	      // reset timer value
 
     // initialize HT1621B
@@ -161,6 +161,7 @@ void lcd_init(void) {
     // initialize LCD task, will be used when sending following lcd_command-s
     build(LCD);
     activate(LCD, lcd_loop);
+    sleep(LCD);		      // no work yet
 }
 
 
@@ -666,7 +667,7 @@ void lcd_menu(u8 menus) {
 void lcd_update(void) {
     lcd_update_flag = 1;
     awake(LCD);
-    stop();
+    pause();
 }
 
 
@@ -674,7 +675,7 @@ void lcd_update(void) {
 void lcd_clr(void) {
     lcd_clr_flag = 1;
     awake(LCD);
-    stop();
+    pause();
 }
 
 
@@ -682,6 +683,6 @@ void lcd_clr(void) {
 void lcd_set_full_on(void) {
     lcd_set_flag = 1;
     awake(LCD);
-    stop();
+    pause();
 }
 
