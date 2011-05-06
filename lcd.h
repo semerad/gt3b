@@ -127,6 +127,20 @@ extern volatile _Bool lcd_blink_something;
 
 
 
+// for backlight
+#define LCD_BCK0 BRES(PD_ODR, 2)
+#define LCD_BCK1 BSET(PD_ODR, 2)
+extern _Bool lcd_bck_on;
+extern u16   lcd_bck_count;
+
+extern void backlight_set_default(u16 seconds);
+extern void backlight_on_sec(u16 seconds);
+extern void backlight_on(void);
+extern void backlight_off(void);
+
+
+
+
 // LCD task
 E_TASK(LCD);
 

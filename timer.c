@@ -47,8 +47,19 @@ volatile u8  time_5ms;
 
     // increment time from start
     if (++time_5ms >= 200) {
+
+	// each 1s
 	time_5ms = 0;
 	time_sec++;
+
+	// lcd backlight
+	if (lcd_bck_on) {
+	    if (!--lcd_bck_count) {
+		LCD_BCK0;
+		lcd_bck_on = 0;
+	    }
+	}
+
     }
 
     // lcd blink timer

@@ -75,11 +75,13 @@ void main(void) {
 	u16 last_time = time_sec;
 	IO_OP(D, 0);
 
+	backlight_on_sec(60);
+
 	while (1) {
 	    while (last_time == time_sec)  pause();
 	    BSET(PD_ODR, 0);
 	    last_time = time_sec;
-	    buzzer_on(3, 2, 4);
+	    beep(4);
 	    lcd_segment(LS_SYM_MODELNO, LS_OFF);
 	    lcd_update();
 	    while (last_time == time_sec)  pause();

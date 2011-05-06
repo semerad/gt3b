@@ -73,8 +73,6 @@
 #define WR1 BSET(PF_ODR, 4)
 #define DATA0 BRES(PE_ODR, 5)
 #define DATA1 BSET(PE_ODR, 5)
-#define BCK0 BRES(PD_ODR, 2)
-#define BCK1 BSET(PD_ODR, 2)
 
 
 
@@ -140,7 +138,7 @@ void lcd_init(void) {
     CS1;
     WR1;
     DATA1;
-    BCK0;
+    LCD_BCK0;
 
     // initialize timer 4 used to time WR/ signal
     BSET(CLK_PCKENR1, 4);     // enable clock to TIM4
@@ -670,5 +668,42 @@ void lcd_set_full_on(void) {
     lcd_set_flag = 1;
     awake(LCD);
     pause();
+}
+
+
+
+
+
+// backlight handling
+
+_Bool lcd_bck_on;		// set when backlight ON
+u16   lcd_bck_count;		// counter in seconds
+u16   lcd_bck_seconds = 30;	// default number of backlight seconds
+
+
+// set default ON seconds
+void backlight_set_default(u16 seconds) {
+    lcd_bck_seconds = seconds;
+}
+
+
+// set ON for given seconds
+void backlight_on_sec(u16 seconds) {
+    LCD_BCK1;
+    lcd_bck_count = seconds;
+    lcd_bck_on = 1;
+}
+
+
+// set on for default seconds
+void backlight_on(void) {
+    backlight_on_sec(lcd_bck_seconds);
+}
+
+
+// set OFF
+void backlight_off(void) {
+    LCD_BCK0;
+    lcd_bck_on = 0;
 }
 
