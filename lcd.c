@@ -20,9 +20,9 @@
 
 /* LCD controler is HOLTEK HT1621B */
 
+#include <string.h>
 #include "gt3b.h"
 #include "lcd.h"
-#include <string.h>
 
 
 // HT1621B modes
@@ -80,17 +80,19 @@
 
 
 
-/* low level LCD routines and initialisation */
+/* low level LCD routines and initialization */
 
 // send cnt bits to LCD controller, only low bits of "bits" are used
 // use timer4 to get 600kHz clock for driving WR/ signal
+// timer is used in one-pulse mode and is started after each WR/ change,
+//   so there will always be minimal required length of pulse also
+//   when interrupted by some interrupt
 static void lcd_send_bits(u8 cnt, u16 bits) {
     // shift bits to high-bits
     bits <<= (u8)(16 - cnt);
-    // reset and start timer
-    TIM4_CNTR = 0;		// reset timer value
-    BSET(TIM4_CR1, 0);		// enable timer
     WR0;
+    BRES(TIM4_SR, 0);			// clear intr flag (for sure)
+    BSET(TIM4_CR1, 0);			// start timer
     do {
 	if (bits & 0x8000) {
 	    DATA1;
@@ -99,17 +101,18 @@ static void lcd_send_bits(u8 cnt, u16 bits) {
 	    DATA0;
 	}
 	bits <<= 1;			// to next bit
-	while (!BCHK(TIM4_SR, 0)) ;	// wait for timer
-	BRES(TIM4_SR, 0);		// clear intr flag
+	while (!BCHK(TIM4_SR, 0));	// wait for timer
 	WR1;
-	if (!--cnt)  break;
-	while (!BCHK(TIM4_SR, 0)) ;	// wait for timer
 	BRES(TIM4_SR, 0);		// clear intr flag
+	BSET(TIM4_CR1, 0);		// start timer
+	if (!--cnt)  break;
+	while (!BCHK(TIM4_SR, 0));	// wait for timer
 	WR0;
+	BRES(TIM4_SR, 0);		// clear intr flag
+	BSET(TIM4_CR1, 0);		// start timer
     } while (1);
-    while (!BCHK(TIM4_SR, 0)) ;		// wait for timer
+    while (!BCHK(TIM4_SR, 0));		// wait for timer
     BRES(TIM4_SR, 0);			// clear intr flag
-    BRES(TIM4_CR1, 0);			// disable timer
 }
 
 
@@ -141,10 +144,11 @@ void lcd_init(void) {
 
     // initialize timer 4 used to time WR/ signal
     BSET(CLK_PCKENR1, 4);     // enable clock to TIM4
-    TIM4_CR1 = 0b00000100;    // no auto-reload, URS-overflow, disable
+    TIM4_CR1 = 0b00001100;    // no auto-reload, one-pulse,URS-overflow, disable
     TIM4_IER = 0;             // no interrupts
     TIM4_PSCR = 0;            // prescaler = 1
-    TIM4_ARR = 30;            // it will be about 600kHz for WR/ signal
+    TIM4_ARR = 26;            // it will be about 600kHz for WR/ signal
+    TIM4_CNTR = 0;	      // reset timer value
 
     // initialize HT1621B
     lcd_command(HT_BIAS_13 | (0b10 << HT_BIAS_SHIFT));  // BIAS 1/3, 4 COMs
@@ -196,17 +200,16 @@ static void lcd_seg_update(void) {
 	if (i < 16) {
 	    bit = (u16)1 << i;
 	    if (!(lcd_modified_segments & bit))  continue;
-	    lcd_modified_segments &= ~bit;
 	}
 	else {
 	    bit = (u16)1 << (u8)(i - 16);
 	    if (!(lcd_modified_segments2 & bit))  continue;
-	    lcd_modified_segments2 &= ~bit;
 	}
 	CS0;
 	lcd_send_bits(13, (HT_WRITE << 10) | (i << 4) | lcd_segments[i]);
 	CS1;
     }
+    lcd_modified_segments = lcd_modified_segments2 = 0;
 }
 
 
@@ -224,7 +227,7 @@ static volatile _Bool lcd_set_flag;
 // high 8 bits contains segments, which will be blinking
 static u8 lcd_bitmap[MAX_SEGMENT];
 static volatile _Bool lcd_was_inverted;	// 1=there was some blink inversion
-volatile _Bool lcd_blink_flag;		// set in timer interrupt
+volatile _Bool lcd_blink_flag;		// set in timer interrupt in blink times
 volatile u8 lcd_blink_cnt;		// blink counter updated in timer
 
 
@@ -256,8 +259,7 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
     u8 segment = (u8)(pos & 0b00011111);
     u8 com_bit = (u8)(1 << (u8)((pos & 0b11000000) >> 6));
     u8 blnk_bit = (u8)(com_bit << 4);
-    if (on_off) {
-	if (on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))  return;  // is OFF
+    if (on_off && !(on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))) {
 	lcd_bitmap[segment] |= blnk_bit;
     }
     else {
@@ -287,7 +289,7 @@ static void lcd_show_inverted(void) {
     for (i = 0; i < MAX_SEGMENT; i++) {
 	c = lcd_bitmap[i];
 	if (!(c & 0xf0))  continue;	// nothing to invert
-	lcd_seg_comms(i, (u8)((c & 0xf) ^ ((c & 0xf0) >> 4)));
+	lcd_seg_comms(i, (u8)((u8)(c & 0xf) ^ (u8)((u8)(c & 0xf0) >> 4)));
 	lcd_was_inverted = 1;
     }
     if (lcd_was_inverted)  lcd_seg_update();
@@ -296,7 +298,6 @@ static void lcd_show_inverted(void) {
 
 // do LCD item blinking at regular timer times
 static void lcd_blink(void) {
-    u8 on_off;
     lcd_blink_flag = 0;
     if (lcd_blink_cnt < LCD_BLNK_CNT_BLANK) {
 	// do it only when something was inverted
