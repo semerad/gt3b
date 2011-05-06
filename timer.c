@@ -51,14 +51,16 @@ volatile u8  time_5ms;
     }
 
     // lcd blink timer
-    if (++lcd_blink_cnt >= LCD_BLNK_CNT_MAX) {
-	lcd_blink_cnt = 0;
-	lcd_blink_flag = 1;
-	awake(LCD);
-    }
-    else if (lcd_blink_cnt == LCD_BLNK_CNT_BLANK) {
-	lcd_blink_flag = 1;
-	awake(LCD);
+    if (lcd_blink_something) {
+	if (++lcd_blink_cnt >= LCD_BLNK_CNT_MAX) {
+	    lcd_blink_cnt = 0;
+	    lcd_blink_flag = 1;
+	    awake(LCD);
+	}
+	else if (lcd_blink_cnt == LCD_BLNK_CNT_BLANK) {
+	    lcd_blink_flag = 1;
+	    awake(LCD);
+	}
     }
 }
 

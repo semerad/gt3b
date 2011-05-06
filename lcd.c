@@ -227,9 +227,9 @@ static volatile _Bool lcd_set_flag;
 // low 4 bits contains actual segment values
 // high 8 bits contains segments, which will be blinking
 static u8 lcd_bitmap[MAX_SEGMENT];
-static volatile _Bool lcd_was_inverted;	// 1=there was some blink inversion
 volatile _Bool lcd_blink_flag;		// set in timer interrupt in blink times
 volatile u8 lcd_blink_cnt;		// blink counter updated in timer
+volatile _Bool lcd_blink_something;  // there are some blink segments
 
 
 
@@ -262,6 +262,10 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
     u8 blnk_bit = (u8)(com_bit << 4);
     if (on_off && !(on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))) {
 	lcd_bitmap[segment] |= blnk_bit;
+	// start blinking, also reset counter to 0
+	lcd_blink_cnt = 0;
+	lcd_blink_flag = 0;
+	lcd_blink_something = 1;
     }
     else {
 	lcd_bitmap[segment] &= (u8)~blnk_bit;
@@ -273,7 +277,6 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
 static void lcd_show_normal(void) {
     u8 i;
     lcd_update_flag = 0;
-    lcd_was_inverted = 0;
     lcd_blink_flag = 0;
     lcd_blink_cnt = 0;		// reset blink counter
     for (i = 0; i < MAX_SEGMENT; i++) {
@@ -286,14 +289,15 @@ static void lcd_show_normal(void) {
 // show blinked LCD bitmap
 static void lcd_show_inverted(void) {
     u8 i, c;
-    lcd_was_inverted = 0;
+    u8 inverted = 0;
     for (i = 0; i < MAX_SEGMENT; i++) {
 	c = lcd_bitmap[i];
 	if (!(c & 0xf0))  continue;	// nothing to invert
 	lcd_seg_comms(i, (u8)((u8)(c & 0xf) ^ (u8)((u8)(c & 0xf0) >> 4)));
-	lcd_was_inverted = 1;
+	inverted = 1;
     }
-    if (lcd_was_inverted)  lcd_seg_update();
+    if (inverted)  lcd_seg_update();
+    else lcd_blink_something = 0;	// nothing was blinked
 }
 
 
@@ -301,8 +305,7 @@ static void lcd_show_inverted(void) {
 static void lcd_blink(void) {
     lcd_blink_flag = 0;
     if (lcd_blink_cnt < LCD_BLNK_CNT_BLANK) {
-	// do it only when something was inverted
-	if (lcd_was_inverted)  lcd_show_normal();
+	lcd_show_normal();
     }
     else {
 	lcd_show_inverted();
@@ -330,7 +333,7 @@ static void lcd_clr_set(u16 data) {
     memset(lcd_bitmap, (u8)(data & 0x0f), MAX_SEGMENT);
     lcd_modified_segments = 0;
     lcd_modified_segments2 = 0;
-    lcd_was_inverted = 0;
+    lcd_blink_something = 0;
     CS0;
     // set lcd address to 0
     lcd_send_bits(9, HT_WRITE << 6);
