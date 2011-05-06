@@ -349,27 +349,10 @@ static void lcd_clr_set(u16 data) {
 static void lcd_loop(void) {
     u8 i;
     while (1) {
-	// process clear flag
-	if (lcd_clr_flag) {
-	    lcd_clr_set(0);
-	    continue;
-	}
-	// process set flag
-	if (lcd_set_flag) {
-	    lcd_clr_set(0xffff);
-	    continue;
-	}
-	// process update flag
-	if (lcd_update_flag) {
-	    lcd_show_normal();
-	    continue;
-	}
-	// process blink flag
-	if (lcd_blink_flag) {
-	    lcd_blink();
-	    continue;
-	}
-	// wait for next wakeup
+	if (lcd_clr_flag)		lcd_clr_set(0);
+	else if (lcd_set_flag)		lcd_clr_set(0xffff);
+	else if (lcd_update_flag)	lcd_show_normal();
+	else if (lcd_blink_flag)	lcd_blink();
 	stop();
     }
 }
