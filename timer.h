@@ -21,6 +21,7 @@
 #define _TIMER_INCLUDED
 
 
+// current time from power on, in seconds and 5ms steps
 extern volatile u16 time_sec;
 extern volatile u8  time_5ms;
 

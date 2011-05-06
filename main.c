@@ -19,7 +19,11 @@
 
 
 #include "gt3b.h"
+#include "timer.h"
 
+
+
+// init functions from other source files
 extern void ppm_init(void);
 extern void lcd_init(void);
 extern void input_init(void);
@@ -28,6 +32,8 @@ extern void timer_init(void);
 extern void task_init(void);
 
 
+
+// switch to clock from external crystal
 static void clock_init(void) {
     CLK_PCKENR1 = 0;	// disable clocks to peripherals
     CLK_PCKENR2 = 0;
@@ -45,18 +51,40 @@ static void clock_init(void) {
 }
 
 
+
+
+
+// main program
 void main(void) {
     clock_init();
     task_init();
-    ppm_init();
-    buzzer_init();
-    input_init();
+    //ppm_init();
+    //buzzer_init();
+    //input_init();
     timer_init();
 
     rim();
 
     lcd_init();  // with interrupts enabled, because of using timer 4
 
+
+
+    {
+	u16 last_time = time_sec;
+	IO_OP(D, 0);
+
+	while (1) {
+	    while (last_time == time_sec)  pause();
+	    BSET(PD_ODR, 0);
+	    last_time = time_sec;
+	    while (last_time == time_sec)  pause();
+	    BRES(PD_ODR, 0);
+	    last_time = time_sec;
+	}
+    }
+
+
+#ifdef PPM_TEST
     // test 8 channels, switch values each 5 seconds
     ppm_set_channels(8);
     {
@@ -79,5 +107,6 @@ void main(void) {
 	}
     }
     }
+#endif
 }
 

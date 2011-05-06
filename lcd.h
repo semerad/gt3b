@@ -21,7 +21,9 @@
 #define _LCD_INCLUDED
 
 
-// manipulating individual segments
+
+// manipulating individual segments, pos is one of 128 segments
+//   as special value (see below)
 #define LS_OFF	0
 #define LS_ON	1
 extern void lcd_segment(u8 pos, u8 on_off);
@@ -30,7 +32,7 @@ extern void lcd_segment(u8 pos, u8 on_off);
 #define LB_INV	2
 extern void lcd_segment_blink(u8 pos, u8 on_off);
 
-// arrays of segment positions for LCD items
+// arrays of segment positions for lcd_segment()
 // for chars and 7seg is order from top left to down, then next column
 // for menu is order from top left to right, then next line
 #define LCD_CHAR_COLS 5
@@ -62,6 +64,12 @@ extern const u8 lcd_seg_menu[];
 #define LS_MENU_ABS	0xc9
 
 
+
+
+// manipulating group of segment together by applying bitmaps
+extern void lcd_set(u8 id, u8 *bitmap);
+extern void lcd_set_blink(u8 id, u8 on_off);
+
 // IDs for lcd_set(), lcd_set_blink()
 #define LCHR1		0
 #define LCHR2		1
@@ -71,20 +79,23 @@ extern const u8 lcd_seg_menu[];
 // special (fake) bitmaps for lcd_set()
 #define LB_EMPTY	(u8 *)0xff00
 #define LB_FULL		(u8 *)0xffff
-extern void lcd_set(u8 id, u8 *bitmap);
-extern void lcd_set_blink(u8 id, u8 on_off);
+
+
 
 
 // high level functions to write chracters and numbers
 #define LCHAR_MIN ' '
 #define LCHAR_MAX 'Z'
 #define L7SEG_MAX 15
-extern void lcd_char(u8 id, u8 c);
-extern void lcd_chars(u8 *chars);
-extern void lcd_char_num3(u16 num);
-extern void lcd_char_num2(s8 num);
-extern void lcd_char_num2_lbl(s8 num, u8 *labels);
-extern void lcd_7seg(u8 number);
+extern void lcd_char(u8 id, u8 c);  // id the same as in lcd_set()
+extern void lcd_chars(u8 *chars);   // 3 chars
+extern void lcd_char_num3(u16 num); // num 0-... to 3 chars
+extern void lcd_char_num2(s8 num);  // num -99..99
+extern void lcd_char_num2_lbl(s8 num, u8 *labels);  // num -99..99 with labels for <0, =0, >0
+extern void lcd_7seg(u8 number);    // num 0-15 (>=10 as hexa numbers)
+extern void lcd_menu(u8 menus);     // OR-ed selected menus
+
+// values for lcd_menu()
 #define LM_MODEL	0x80
 #define LM_NAME		0x40
 #define LM_REV		0x20
@@ -93,13 +104,16 @@ extern void lcd_7seg(u8 number);
 #define LM_DR		0x04
 #define LM_EXP		0x02
 #define LM_ABS		0x01
-extern void lcd_menu(u8 menus);
+
+
 
 
 // update/clear/set
-extern void lcd_update(void);
+extern void lcd_update(void);  // this one actually write to display
 extern void lcd_clr(void);
 extern void lcd_set_full_on(void);
+
+
 
 
 // for lcd_blink_cnt, maximal value and value when changing to space
@@ -108,6 +122,8 @@ extern void lcd_set_full_on(void);
 #define LCD_BLNK_CNT_BLANK	120
 extern volatile _Bool lcd_blink_flag;
 extern volatile u8 lcd_blink_cnt;
+
+
 
 
 // LCD task

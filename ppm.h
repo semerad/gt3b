@@ -26,10 +26,20 @@
 #include "task.h"
 
 
+// maximum number of channels
 #define MAX_CHANNELS 8
-extern u8 channels;	// actual number of channels
+
+// actual number of channels
+extern u8 channels;
+
+// set actual number of channels, default is 3
 extern void ppm_set_channels(u8 n);
-extern void ppm_set_value(u8 channel, u16 microsec);
+
+// set channel value to microsec01 (in 0.1 microseconds)
+extern void ppm_set_value(u8 channel, u16 microsec01);
+
+// after setting each actual channel value, call this to calculate
+//   length of sync signal
 extern void ppm_calc_sync(void);
 
 
