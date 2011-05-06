@@ -19,9 +19,42 @@
 
 
 #include "gt3b.h"
+#include "buzzer.h"
 
 
 void buzzer_init(void) {
-    IO_OP(D, 4);  // buzzer pin
+    IO_OP(D, 4);	// buzzer pin
+    BUZZER0;		// stop buzzer
+}
+
+
+// buzzer counters and flags
+_Bool buzzer_running;	// 1 when running
+u8 buzzer_cnt_on;	// time to be ON
+u8 buzzer_cnt_off;	// time to be OFF
+u16 buzzer_count;	// length of beeping
+u8 buzzer_cnt;		// helper counter
+
+
+// more beeps: on time, off time and count of beeps
+void buzzer_on(u8 on_5ms, u8 off_5ms, u16 count) {
+    buzzer_cnt_on = buzzer_cnt = on_5ms;
+    buzzer_cnt_off = off_5ms;
+    buzzer_count = count;
+    BUZZER1;
+    buzzer_running = 1;
+}
+
+
+// stop buzzer
+void buzzer_off(void) {
+    BUZZER0;
+    buzzer_running = 0;
+}
+
+
+// one beep
+void beep(u8 len_5ms) {
+    buzzer_on(len_5ms, 0, 1);
 }
 

@@ -20,6 +20,7 @@
 
 #include "gt3b.h"
 #include "lcd.h"
+#include "buzzer.h"
 
 
 // initialise timer 2 used to count seconds
@@ -60,6 +61,28 @@ volatile u8  time_5ms;
 	else if (lcd_blink_cnt == LCD_BLNK_CNT_BLANK) {
 	    lcd_blink_flag = 1;
 	    awake(LCD);
+	}
+    }
+
+    // buzzer timer
+    if (buzzer_running) {
+	if (!--buzzer_cnt) {
+	    // counted down to 0
+	    if (BUZZER_CHK) {
+		// was state 1
+		BUZZER0;
+		if (--buzzer_count) {
+		    buzzer_cnt = buzzer_cnt_off;
+		}
+		else {
+		    buzzer_running = 0;
+		}
+	    }
+	    else {
+		// was state 0
+		BUZZER1;
+		buzzer_cnt = buzzer_cnt_on;
+	    }
 	}
     }
 }

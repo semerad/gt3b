@@ -20,6 +20,8 @@
 
 #include "gt3b.h"
 #include "timer.h"
+#include "lcd.h"
+#include "buzzer.h"
 
 
 
@@ -59,13 +61,13 @@ void main(void) {
     clock_init();
     task_init();
     //ppm_init();
-    //buzzer_init();
+    buzzer_init();
     //input_init();
     timer_init();
+    lcd_init();
 
     rim();
 
-    lcd_init();  // with interrupts enabled, because of using timer 4
 
 
 
@@ -77,9 +79,14 @@ void main(void) {
 	    while (last_time == time_sec)  pause();
 	    BSET(PD_ODR, 0);
 	    last_time = time_sec;
+	    buzzer_on(3, 2, 4);
+	    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+	    lcd_update();
 	    while (last_time == time_sec)  pause();
 	    BRES(PD_ODR, 0);
 	    last_time = time_sec;
+	    lcd_segment(LS_SYM_MODELNO, LS_ON);
+	    lcd_update();
 	}
     }
 
