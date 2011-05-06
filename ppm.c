@@ -48,7 +48,8 @@
 
 // initialize PPM pin and timer 3
 void ppm_init(void) {
-    IO_OP(D, 0);  // PPM output pin, TIM3_CH2
+    IO_OP(D, 0);	// PPM output pin, TIM3_CH2
+    BSET(PD_ODR, 0);	// set to 1
 
     // initialize timer3 used to generate PPM signal
     BSET(CLK_PCKENR1, 6);     // enable master clock to TIM3
