@@ -69,8 +69,43 @@ void main(void) {
     rim();
 
 
+    {
+	u16 wait_time;
+	static volatile u8 t, p1, p2, p3, p4;
 
+	backlight_on_sec(BACKLIGHT_MAX);
+	lcd_clear();
 
+	while (1) {
+	    t = 1;
+	    p1 = 0xdf;
+	    p2 = 1;
+	    p3 = 0;
+	    p4 = 0;
+
+	    if (t == 0)       lcd_clear();
+	    else if (t == 1)  lcd_segment(p1, p2);
+	    else if (t == 2)  lcd_segment_blink(p1, p2);
+	    else if (t == 3)  lcd_set(p1, (u8 *)(((u16)p2 << 8) | p3));
+	    else if (t == 4)  lcd_set_blink(p1, p2);
+	    else if (t == 5)  lcd_char(p1, p2);
+	    else if (t == 6)  lcd_char_num3(((u16)p1 << 8) | p2);
+	    else if (t == 7)  lcd_char_num2((s8)p1);
+	    else if (t == 8)  lcd_7seg(p1);
+	    else if (t == 9)  lcd_menu(p1);
+	    else if (t == 10) lcd_set_full_on();
+	    else if (t == 11) lcd_chars((u8 *)&p1);
+	    else if (t == 12) lcd_char_num2_lbl((s8)p1, (u8 *)&p2);
+	    beep(10);
+	    lcd_update();
+	    
+	    // wait 5s
+	    wait_time = time_sec + 5;
+	    while (time_sec < wait_time)  pause();
+	}
+    }
+
+#ifdef LCD_BASIC_TEST
     {
 	u16 last_time = time_sec;
 	IO_OP(D, 0);
@@ -92,7 +127,7 @@ void main(void) {
 	    lcd_update();
 	}
     }
-
+#endif
 
 #ifdef PPM_TEST
     // test 8 channels, switch values each 5 seconds

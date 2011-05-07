@@ -44,15 +44,14 @@ extern const u8 lcd_seg_char3[];
 extern const u8 lcd_seg_7seg[];
 extern const u8 lcd_seg_menu[];
 // lcd segments addresses for symbols
-// XXX last two can be swapped
 #define LS_SYM_LOWPWR	0xdf
 #define LS_SYM_CHANNEL	0xde
 #define LS_SYM_MODELNO	0xdd
 #define LS_SYM_PERCENT	0xc7
 #define LS_SYM_LEFT	0xcf
 #define LS_SYM_RIGHT	0xc8
-#define LS_SYM_DOT	0xc6
-#define LS_SYM_VOLTS	0xdc
+#define LS_SYM_DOT	0xdc
+#define LS_SYM_VOLTS	0xc6
 // lcd segment addresses for menu
 #define LS_MENU_MODEL	0xd0
 #define LS_MENU_NAME	0xcd
@@ -74,8 +73,8 @@ extern void lcd_set_blink(u8 id, u8 on_off);
 #define LCHR1		0
 #define LCHR2		1
 #define LCHR3		2
-#define L7SEG		4
-#define LMENU		5
+#define L7SEG		3
+#define LMENU		4
 // special (fake) bitmaps for lcd_set()
 #define LB_EMPTY	(u8 *)0xff00
 #define LB_FULL		(u8 *)0xffff
