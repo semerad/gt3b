@@ -27,9 +27,9 @@
 
 
 // frequency of crystal in kHz
-//#define KHZ  ((u16)18432)
+#define KHZ  ((u16)18432)
 // development board has another crystal
-#define KHZ  ((u16)16000)
+//#define KHZ  ((u16)16000)
 
 
 #endif
