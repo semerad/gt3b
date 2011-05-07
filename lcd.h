@@ -110,7 +110,7 @@ extern void lcd_menu(u8 menus);     // OR-ed selected menus
 
 // update/clear/set
 extern void lcd_update(void);  // this one actually write to display
-extern void lcd_clr(void);
+extern void lcd_clear(void);
 extern void lcd_set_full_on(void);
 
 
@@ -133,6 +133,7 @@ extern volatile _Bool lcd_blink_something;
 extern _Bool lcd_bck_on;
 extern u16   lcd_bck_count;
 
+#define BACKLIGHT_MAX  (u16)(0xffff)
 extern void backlight_set_default(u16 seconds);
 extern void backlight_on_sec(u16 seconds);
 extern void backlight_on(void);

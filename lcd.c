@@ -656,7 +656,7 @@ void lcd_update(void) {
 
 
 // clear entire LCD
-void lcd_clr(void) {
+void lcd_clear(void) {
     lcd_clr_flag = 1;
     awake(LCD);
     pause();
