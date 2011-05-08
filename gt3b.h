@@ -32,5 +32,11 @@
 //#define KHZ  ((u16)16000)
 
 
+// maximum number of channels 
+#ifndef MAX_CHANNELS
+#define MAX_CHANNELS 8
+#endif
+
+
 #endif
 

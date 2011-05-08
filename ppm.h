@@ -26,9 +26,6 @@
 #include "task.h"
 
 
-// maximum number of channels
-#define MAX_CHANNELS 8
-
 // actual number of channels
 extern u8 channels;
 
