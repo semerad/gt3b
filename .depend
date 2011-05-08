@@ -6,4 +6,5 @@ input.o: input.c  gt3b.h stm8.h  task.h
 buzzer.o: buzzer.c  gt3b.h stm8.h  task.h buzzer.h
 timer.o: timer.c  gt3b.h stm8.h  task.h lcd.h buzzer.h
 eeprom.o: eeprom.c  gt3b.h stm8.h  task.h eeprom.h
+config.o: config.c  gt3b.h stm8.h  task.h config.h
 vector.o: vector.c  gt3b.h stm8.h  task.h
