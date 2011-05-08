@@ -85,7 +85,6 @@ void config_model_read(u8 model) {
     eeprom_read_model(model);
     if (config_model.name[0] != CONFIG_MODEL_EMPTY)  return;
     config_model_set_default();
-    // XXX write to eeprom
 }
 
 
