@@ -32,6 +32,7 @@ extern void input_init(void);
 extern void buzzer_init(void);
 extern void timer_init(void);
 extern void task_init(void);
+extern void eeprom_init(void);
 
 
 
@@ -60,9 +61,10 @@ static void clock_init(void) {
 void main(void) {
     clock_init();
     task_init();
-    //ppm_init();
+    eeprom_init();
     buzzer_init();
     //input_init();
+    //ppm_init();
     timer_init();
     lcd_init();
 
