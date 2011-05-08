@@ -1,10 +1,12 @@
 task.o: task.c  task.h stm8.h 
-main.o: main.c  gt3b.h stm8.h  task.h timer.h lcd.h buzzer.h
+main.o: main.c  gt3b.h stm8.h  task.h timer.h lcd.h buzzer.h \
+ config.h eeprom.h
 ppm.o: ppm.c   gt3b.h stm8.h  task.h ppm.h
 lcd.o: lcd.c   gt3b.h stm8.h  task.h lcd.h
 input.o: input.c  gt3b.h stm8.h  task.h input.h
 buzzer.o: buzzer.c  gt3b.h stm8.h  task.h buzzer.h
 timer.o: timer.c  gt3b.h stm8.h  task.h lcd.h buzzer.h
-eeprom.o: eeprom.c  gt3b.h stm8.h  task.h eeprom.h
-config.o: config.c  gt3b.h stm8.h  task.h config.h
+eeprom.o: eeprom.c   gt3b.h stm8.h  task.h eeprom.h \
+ config.h
+config.o: config.c   gt3b.h stm8.h  task.h config.h
 vector.o: vector.c  gt3b.h stm8.h  task.h

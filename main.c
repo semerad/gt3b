@@ -22,6 +22,8 @@
 #include "timer.h"
 #include "lcd.h"
 #include "buzzer.h"
+#include "config.h"
+#include "eeprom.h"
 
 
 
@@ -59,6 +61,9 @@ static void clock_init(void) {
 
 // main program
 void main(void) {
+
+    // initialize modules
+
     clock_init();
     task_init();
     eeprom_init();
@@ -68,9 +73,16 @@ void main(void) {
     timer_init();
     lcd_init();
 
+    // enable interrupts
     rim();
 
+    // read config from eeprom
+    if (config_global_read()) {
+	// XXX call calibrate
+    }
 
+
+#ifdef LCD_TEST
     {
 	u16 wait_time;
 	static volatile u8 t, p1, p2, p3, p4;
@@ -106,6 +118,7 @@ void main(void) {
 	    while (time_sec < wait_time)  pause();
 	}
     }
+#endif
 
 #ifdef LCD_BASIC_TEST
     {

@@ -21,6 +21,28 @@
 #define _EEPROM_INCLUDED
 
 
+#include "config.h"
+
+
+// eeprom address and size
+#define EEPROM_START  0x4000
+#define EEPROM_SIZE   0x400
+
+
+// position of global config
+#define EEPROM_CONFIG_GLOBAL  (u8 *)EEPROM_START
+
+
+// position of models config and number of models
+#define EEPROM_CONFIG_MODEL  (u8 *)(EEPROM_CONFIG_GLOBAL + sizeof(config_global_s))
+
+
+extern void eeprom_read_global(void);
+extern void eeprom_read_model(u8 model);
+extern void eeprom_write_global(void);
+extern void eeprom_write_model(u8 model);
+extern void eeprom_empty_models(void);
+
 
 #endif
 
