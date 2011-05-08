@@ -19,6 +19,7 @@
 
 
 #include "gt3b.h"
+#include "input.h"
 
 
 void input_init(void) {
