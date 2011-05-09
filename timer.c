@@ -23,16 +23,16 @@
 #include "buzzer.h"
 
 
-// initialise timer 2 used to count seconds
-#define TIMER_5MS  (KHZ / 2 * 5 - 1)
+// initialize timer 2 used to count seconds
+#define TIMER_5MS  (KHZ / 2 * 5)
 void timer_init(void) {
     BSET(CLK_PCKENR1, 5);	// enable clock to TIM2
     TIM2_CNTRH = 0;		// start at 0
     TIM2_CNTRL = 0;
     TIM2_PSCR = 1;		// clock / 2
     TIM2_IER = 0b00000001;	// enable update interrupt
-    TIM2_ARRH = hi8(TIMER_5MS);	// count till 5ms time
-    TIM2_ARRL = lo8(TIMER_5MS);
+    TIM2_ARRH = hi8(TIMER_5MS - 1);	// count till 5ms time
+    TIM2_ARRL = lo8(TIMER_5MS - 1);
     TIM2_CR1 = 0b00000101;	// URS-overflow, enable
 }
 
