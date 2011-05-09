@@ -21,6 +21,50 @@
 #define _INPUT_INCLUDED
 
 
+// buttons IDs
+#define BTN_TRIM_LEFT	0x0001
+#define BTN_TRIM_RIGHT	0x0002
+#define BTN_TRIM_FWD	0x0004
+#define BTN_TRIM_BCK	0x0008
+#define BTN_TRIM_CH3_L	0x0010
+#define BTN_TRIM_CH3_R	0x0020
+#define BTN_TRIM_ALL	0x003f
+
+#define BTN_DR_L	0x0040
+#define BTN_DR_R	0x0080
+#define BTN_DR_ALL	0x00c0
+
+#define BTN_ENTER	0x0100
+#define BTN_BACK	0x0200
+#define BTN_END		0x0400
+#define BTN_CH3		0x0800
+
+#define BTN_ROT_L	0x1000
+#define BTN_ROT_R	0x2000
+#define BTN_ROT_L_FAST	0x4000
+#define BTN_ROT_R_FAST	0x8000
+
+#define BTN_ALL		0xffff
+
+
+// autorepeat/lon press times in 5ms steps
+#define BTN_AUTOREPEAT_DELAY	(250 / 5)
+#define BTN_AUTOREPEAT_RATE	(35 / 5)
+#define BTN_LONG_PRESS_DELAY	(1000 / 5)
+
+
+// variables representing pressed buttons
+extern u16 btn_press;
+extern u16 btn_press_long;  // >1s press
+
+
+// reset pressed button(s)
+// do it after used that button in code
+extern void button_reset(u16 btn);
+
+// set autorepeat
+extern void button_autorepeat(u8 btn);
+
 
 #endif
 
