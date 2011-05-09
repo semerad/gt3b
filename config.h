@@ -86,6 +86,10 @@ extern void config_model_set_default(void);
 extern void config_model_read(u8 model);
 extern u8 config_global_read(void);
 
+// write values to eeprom
+#define config_global_write  eeprom_write_global
+#define config_model_write   eeprom_write_model
+
 
 #endif
 
