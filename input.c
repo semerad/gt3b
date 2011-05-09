@@ -280,6 +280,7 @@ static void input_loop(void) {
 	if (BCHK(ADC_CSR, 7))
 	    read_ADC();
 	read_keys();
+	stop();
     }
 }
 
