@@ -97,8 +97,19 @@ void button_autorepeat(u8 btn) {
 
 
 // read key matrix (11 keys)
+#define button_row(odr, bit, c5, c6, c7) \
+    BRES(P ## odr ## _ODR, bit); \
+    if BCHK(PC_IDR, 5)  btn |= c5; \
+    if BCHK(PC_IDR, 6)  btn |= c6; \
+    if (c7 && BCHK(PC_IDR, 7))  btn |= c7; \
+    BSET(P ## odr ## _ODR, bit);
 static u16 read_key_matrix(void) {
-    return 0;
+    u16 btn = 0;
+    button_row(B, 4, BTN_TRIM_LEFT,  BTN_TRIM_CH3_L, BTN_END);
+    button_row(B, 5, BTN_TRIM_RIGHT, BTN_TRIM_CH3_R, BTN_BACK);
+    button_row(D, 3, BTN_TRIM_FWD,   BTN_DR_R,       0);
+    button_row(C, 4, BTN_TRIM_BCK,   BTN_DR_L,       BTN_ENTER);
+    return btn;
 }
 
 
