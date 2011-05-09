@@ -21,6 +21,7 @@
 #include "gt3b.h"
 #include "lcd.h"
 #include "buzzer.h"
+#include "input.h"
 
 
 // initialize timer 2 used to count seconds
@@ -96,5 +97,8 @@ volatile u8  time_5ms;
 	    }
 	}
     }
+
+    // wakeup INPUT task
+    awake(INPUT);
 }
 

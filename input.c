@@ -22,6 +22,11 @@
 #include "input.h"
 
 
+// INPUT task, called every 5ms
+TASK(INPUT, 128);
+static void input_loop(void);
+
+
 void input_init(void) {
     // ADC inputs
     IO_IF(B, 0);		// steering ADC
@@ -64,6 +69,10 @@ void input_init(void) {
     TIM1_CNTRH = lo8(30000);	// start value
     TIM1_CR2 = 0;
     TIM1_CR1 = 0x01;		// only counter enable
+
+    // init task
+    build(INPUT);
+    activate(INPUT, input_loop);
 }
 
 
@@ -79,14 +88,16 @@ static u8 buttons_autorepeat;	// autorepeat enable for TRIMs and D/R
 static u8 buttons_timer[12];	// autorepeat/long press buttons timers
 
 // variables representing pressed buttons
-u16 btn_press;
-u16 btn_press_long;  // >1s press
+u16 buttons;
+u16 buttons_long;  // >1s press
+// variables for ADC values (multiplied by 4)
+u16 adc_all[4];
 
 
 // reset pressed button
 void button_reset(u16 btn) {
-    btn_press &= ~btn;
-    btn_press_long &= ~btn;
+    buttons &= ~btn;
+    buttons_long &= ~btn;
 }
 
 
@@ -96,13 +107,16 @@ void button_autorepeat(u8 btn) {
 }
 
 
+
+
+
 // read key matrix (11 keys)
 #define button_row(odr, bit, c5, c6, c7) \
     BRES(P ## odr ## _ODR, bit); \
     if BCHK(PC_IDR, 5)  btn |= c5; \
     if BCHK(PC_IDR, 6)  btn |= c6; \
     if (c7 && BCHK(PC_IDR, 7))  btn |= c7; \
-    BSET(P ## odr ## _ODR, bit);
+    BSET(P ## odr ## _ODR, bit)
 static u16 read_key_matrix(void) {
     u16 btn = 0;
     button_row(B, 4, BTN_TRIM_LEFT,  BTN_TRIM_CH3_L, BTN_END);
@@ -113,10 +127,10 @@ static u16 read_key_matrix(void) {
 }
 
 
-// read all keys - called each 5ms
+// read all keys
 static void read_keys(void) {
     u16 buttons_state_last = buttons_state;
-    u16 btn_press_last = btn_press;
+    u16 btn_press_last = buttons;
     u16 bit;
     u8 i, lbs, bs;
 
@@ -126,7 +140,10 @@ static void read_keys(void) {
 
     // read actual keys status
     buttons1 = read_key_matrix();
-    // XXX add CH3 button
+
+    // add CH3 button
+    if (adc_ch3 < (50 << 2))  buttons1 |= BTN_CH3;
+
     // XXX add rotate encoder
 
     // combine last 3 readed buttons
@@ -143,7 +160,7 @@ static void read_keys(void) {
 		// last not pressed
 		if (bs) {
 		    // now pressed, set it pressed and set autorepeat delay
-		    btn_press |= bit;
+		    buttons |= bit;
 		    buttons_timer[i] = BTN_AUTOREPEAT_DELAY;
 		}
 		// do nothing for now not pressed
@@ -154,7 +171,7 @@ static void read_keys(void) {
 		    // now pressed
 		    if (--buttons_timer[i])  continue;  // not expired yet
 		    // timer expired, set it pressed and set autorepeat rate
-		    btn_press |= bit;
+		    buttons |= bit;
 		    buttons_timer[i] = BTN_AUTOREPEAT_RATE;
 		}
 		// do nothing for now not pressed
@@ -182,20 +199,87 @@ static void read_keys(void) {
 		// now pressed, check long press delay
 		if (--buttons_timer[i])  continue;  // not long enought yet
 		// set as pressed and long pressed
-		btn_press |= bit;
-		btn_press_long |= bit;
+		buttons |= bit;
+		buttons_long |= bit;
 	    }
 	    else {
 		// now not pressed, set as pressed when no long press was applied
 		if (!buttons_timer[i])  continue;  // was long before
-		btn_press |= bit;
+		buttons |= bit;
 	    }
 	}
     }
 
     // if some of the keys changed, wakeup DISPLAY task
-    if (btn_press_last != btn_press) {
+    if (btn_press_last != buttons) {
 	awake(DISPLAY);
+    }
+}
+
+
+
+
+
+// ADC buffers, last 4 values for each channel
+#define ADC_BUFFERS  4
+@near static u16 adc_buffer[ADC_BUFFERS][4];
+static u8  adc_buffer_pos;
+
+
+// define missing ADC buffer registers
+volatile u16 ADC_DB0R @0x53e0;
+volatile u16 ADC_DB1R @0x53e2;
+volatile u16 ADC_DB2R @0x53e4;
+volatile u16 ADC_DB3R @0x53e6;
+
+// read ADC values and compute sum of last 4 for each channel
+#define ADC_NEWVAL(id) \
+    buf[id] = ADC_DB ## id ## R; \
+    adc_all[id] = adc_buffer[0][id] + adc_buffer[1][id] \
+                  + adc_buffer[2][id] + adc_buffer[3][id];
+static void read_ADC(void) {
+    u16 *buf = adc_buffer[adc_buffer_pos];
+
+    ADC_NEWVAL(0);
+    ADC_NEWVAL(1);
+    ADC_NEWVAL(2);
+    ADC_NEWVAL(3);
+
+    adc_buffer_pos++;
+    adc_buffer_pos &= 0x03;
+
+    BRES(ADC_CSR, 7);		// remove EOC flag
+    BSET(ADC_CR1, 0);		// start new conversion
+}
+
+
+
+
+
+
+// input task, awaked every 5ms
+#define ADC_BUFINIT(id) \
+    adc_buffer[1][id] = adc_buffer[2][id] = adc_buffer[3][id] = \
+                        adc_buffer[0][id]; \
+    adc_all[id] = adc_buffer[0][id] << 2;
+static void input_loop(void) {
+
+    // read initial ADC values
+    BSET(ADC_CR1, 0);			// start conversion
+    while (!BCHK(ADC_CSR, 7))  pause();	// wait for end of conversion
+    read_ADC();
+
+    // put initial values to all buffers
+    ADC_BUFINIT(0);
+    ADC_BUFINIT(1);
+    ADC_BUFINIT(2);
+    ADC_BUFINIT(3);
+
+    while (1) {
+	// read ADC only when EOC flag (normally will be set)
+	if (BCHK(ADC_CSR, 7))
+	    read_ADC();
+	read_keys();
     }
 }
 

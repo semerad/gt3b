@@ -54,8 +54,14 @@
 
 
 // variables representing pressed buttons
-extern u16 btn_press;
-extern u16 btn_press_long;  // >1s press
+extern u16 buttons;
+extern u16 buttons_long;  // >1s press
+// variables for ADC values (multiplied by 4)
+extern u16 adc_all[4];
+#define adc_steering  adc_all[0]
+#define adc_throttle  adc_all[1]
+#define adc_ch3       adc_all[2]
+#define adc_battery   adc_all[3]
 
 
 // reset pressed button(s)
@@ -64,6 +70,11 @@ extern void button_reset(u16 btn);
 
 // set autorepeat
 extern void button_autorepeat(u8 btn);
+
+
+
+// INPUT task
+E_TASK(INPUT);
 
 
 #endif
