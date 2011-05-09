@@ -38,5 +38,9 @@
 #endif
 
 
+// task DISPLAY will alias for task OPER
+#define DISPLAY OPER
+
+
 #endif
 

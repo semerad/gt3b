@@ -68,5 +68,9 @@ extern void pause(void);
 extern void stop(void);
 
 
+// OPER task
+E_TASK(OPER);
+
+
 #endif
 
