@@ -118,7 +118,7 @@ extern void lcd_set_full_on(void);
 // for lcd_blink_cnt, maximal value and value when changing to space
 // in 5ms steps
 #define LCD_BLNK_CNT_MAX	160
-#define LCD_BLNK_CNT_BLANK	120
+#define LCD_BLNK_CNT_BLANK	100
 extern volatile _Bool lcd_blink_flag;
 extern volatile u8    lcd_blink_cnt;
 extern volatile _Bool lcd_blink_something;
