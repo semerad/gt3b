@@ -39,12 +39,9 @@
 #define BTN_END		0x0400
 #define BTN_CH3		0x0800
 
-#define BTN_ROT_L_SHORT	0x1000
-#define BTN_ROT_L_FAST	0x2000
-#define BTN_ROT_L	(BTN_ROT_L_SHORT | BTN_ROT_L_FAST)
-#define BTN_ROT_R_SHORT	0x4000
-#define BTN_ROT_R_FAST	0x8000
-#define BTN_ROT_R	(BTN_ROT_R_SHORT | BTN_ROT_R_FAST)
+#define BTN_ROT_L	0x1000
+#define BTN_ROT_R	0x2000
+#define BTN_ROT_ALL	0x3000
 
 #define BTN_ALL		0xffff
 
