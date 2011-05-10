@@ -56,12 +56,18 @@
 // variables representing pressed buttons
 extern u16 buttons;
 extern u16 buttons_long;  // >1s press
-// variables for ADC values (multiplied by 4)
-extern u16 adc_all[4];
-#define adc_steering  adc_all[0]
-#define adc_throttle  adc_all[1]
-#define adc_ch3       adc_all[2]
-#define adc_battery   adc_all[3]
+// variables for ADC values
+extern u16 adc_all_ovs[4];	// oversampled from 4 samples and 4 times more
+#define ADC_OVS_SHIFT 2
+#define adc_steering_ovs   adc_all_ovs[0]
+#define adc_throttle_ovs   adc_all_ovs[1]
+#define adc_ch3_ovs        adc_all_ovs[2]
+#define adc_battery_ovs    adc_all_ovs[3]
+extern u16 adc_all_last[4];	// last readed value
+#define adc_steering_last  adc_all_last[0]
+#define adc_throttle_last  adc_all_last[1]
+#define adc_ch3_last       adc_all_last[2]
+#define adc_battery_last   adc_all_last[3]
 
 
 // reset pressed button(s)

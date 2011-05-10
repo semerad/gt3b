@@ -90,8 +90,9 @@ static u8 buttons_timer[12];	// autorepeat/long press buttons timers
 // variables representing pressed buttons
 u16 buttons;
 u16 buttons_long;  // >1s press
-// variables for ADC values (multiplied by 4)
-u16 adc_all[4];
+// variables for ADC values
+u16 adc_all_ovs[4];
+u16 adc_all_last[4];
 
 
 // reset pressed button
@@ -142,7 +143,7 @@ static void read_keys(void) {
     buttons1 = read_key_matrix();
 
     // add CH3 button
-    if (adc_ch3 < (50 << 2))  buttons1 |= BTN_CH3;
+    if (adc_ch3_last < 50)  buttons1 |= BTN_CH3;
 
     // XXX add rotate encoder
 
@@ -234,8 +235,9 @@ volatile u16 ADC_DB3R @0x53e6;
 
 // read ADC values and compute sum of last 4 for each channel
 #define ADC_NEWVAL(id) \
-    buf[id] = ADC_DB ## id ## R; \
-    adc_all[id] = adc_buffer[0][id] + adc_buffer[1][id] \
+    adc_all_last[id] = ADC_DB ## id ## R; \
+    buf[id] = adc_all_last[id]; \
+    adc_all_ovs[id] = adc_buffer[0][id] + adc_buffer[1][id] \
                   + adc_buffer[2][id] + adc_buffer[3][id];
 static void read_ADC(void) {
     u16 *buf = adc_buffer[adc_buffer_pos];
@@ -261,7 +263,7 @@ static void read_ADC(void) {
 #define ADC_BUFINIT(id) \
     adc_buffer[1][id] = adc_buffer[2][id] = adc_buffer[3][id] = \
                         adc_buffer[0][id]; \
-    adc_all[id] = adc_buffer[0][id] << 2;
+    adc_all_ovs[id] = adc_buffer[0][id] << ADC_OVS_SHIFT;
 static void input_loop(void) {
 
     // read initial ADC values
