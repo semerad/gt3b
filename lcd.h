@@ -112,6 +112,7 @@ extern void lcd_menu(u8 menus);     // OR-ed selected menus
 // update/clear/set
 extern void lcd_update(void);  // this one actually write to display
 #define lcd_update_pause()  lcd_update(); pause()
+#define lcd_update_stop()   lcd_update(); stop()
 extern void lcd_clear(void);
 extern void lcd_set_full_on(void);
 
