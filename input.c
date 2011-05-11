@@ -235,6 +235,8 @@ static void read_keys(void) {
 	// set it back to default value
 	TIM1_CNTRH = hi8(ENCODER_VALUE);
 	TIM1_CNTRL = hi8(ENCODER_VALUE);
+	// init timer
+	encoder_timer = ENCODER_FAST_THRESHOLD;
     }
 
 
