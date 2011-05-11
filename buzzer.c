@@ -57,3 +57,11 @@ void beep(u8 len_5ms) {
     buzzer_on(len_5ms, 0, 1);
 }
 
+
+
+// key beep only when buzzer is not processing now
+void key_beep(void) {
+    if (buzzer_running)  return;
+    beep(1);
+}
+
