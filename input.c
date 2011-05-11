@@ -27,6 +27,9 @@ TASK(INPUT, 128);
 static void input_loop(void);
 
 
+#define ENCODER_VALUE  30000
+
+
 void input_init(void) {
     // ADC inputs
     IO_IF(B, 0);		// steering ADC
@@ -65,8 +68,8 @@ void input_init(void) {
     TIM1_CCMR2 = 0x01;		// CC2 is input
     TIM1_ARRH = hi8(60000);	// max value
     TIM1_ARRL = lo8(60000);	// max value
-    TIM1_CNTRH = hi8(30000);	// start value
-    TIM1_CNTRH = lo8(30000);	// start value
+    TIM1_CNTRH = hi8(ENCODER_VALUE);	// start value
+    TIM1_CNTRH = lo8(ENCODER_VALUE);	// start value
     TIM1_CR2 = 0;
     TIM1_CR1 = 0x01;		// only counter enable
 
@@ -86,6 +89,8 @@ static u16 buttons1, buttons2, buttons3;  // last 3 reads
 static u16 buttons_state;	// actual combined last buttons state
 static u8 buttons_autorepeat;	// autorepeat enable for TRIMs and D/R
 static u8 buttons_timer[12];	// autorepeat/long press buttons timers
+static u8 encoder_timer;	// for rotate encoder slow/fast
+static u8 ENCODER_FAST_THRESHOLD = 10;	// XXX change to #define
 
 // variables representing pressed buttons
 u16 buttons;
@@ -131,9 +136,10 @@ static u16 read_key_matrix(void) {
 // read all keys
 static void read_keys(void) {
     u16 buttons_state_last = buttons_state;
-    u16 btn_press_last = buttons;
+    u16 buttons_last = buttons;
     u16 bit;
     u8 i, lbs, bs;
+    u16 enc;
 
     // rotate last buttons
     buttons3 = buttons2;
@@ -144,8 +150,6 @@ static void read_keys(void) {
 
     // add CH3 button
     if (adc_ch3_last < 50)  buttons1 |= BTN_CH3;
-
-    // XXX add rotate encoder
 
     // combine last 3 readed buttons
     buttons_state |= buttons1 & buttons2 & buttons3;
@@ -211,10 +215,33 @@ static void read_keys(void) {
 	}
     }
 
+
+    // add rotate encoder
+    if (encoder_timer)  encoder_timer--;
+    enc = (TIM1_CNTRH << 8) | TIM1_CNTRL;
+    if (enc != ENCODER_VALUE) {
+	// encoder changed
+	if (enc > ENCODER_VALUE) {
+	    // left
+	    buttons |= BTN_ROT_L;
+	    if (encoder_timer)  buttons_long != BTN_ROT_L;
+	}
+	else {
+	    // right
+	    buttons |= BTN_ROT_R;
+	    if (encoder_timer)  buttons_long != BTN_ROT_R;
+	}
+	// set it back to default value
+	TIM1_CNTRH = hi8(ENCODER_VALUE);
+	TIM1_CNTRL = hi8(ENCODER_VALUE);
+    }
+
+
     // if some of the keys changed, wakeup DISPLAY task
-    if (btn_press_last != buttons) {
+    if (buttons_last != buttons) {
 	awake(DISPLAY);
     }
+
 }
 
 
