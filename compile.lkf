@@ -1,0 +1,21 @@
++seg .const -b 0x8080 -m 0x7f80 -n .const -it
++seg .text -a .const -n .text
++seg .eeprom -b 0x4000 -m 0x400 -n .eeprom
++seg .bsct -b 0x0 -m 0x100 -n .bsct
++seg .ubsct -a .bsct -n .ubsct
++seg .bit -a .ubsct -n .bit -id
++seg .share -a .bit -n .share -is
++seg .data -b 0x100 -m 0x5ff+1-0x100 -n .data
++seg .bss -a .data -n .bss
+crtsi0.sm8
+task.o main.o ppm.o lcd.o input.o buzzer.o timer.o eeprom.o config.o
+
+libis0.sm8
+libm0.sm8
++seg .const -b 0x8000 -k
+vector.o
++def __endzp=@.ubsct
++def __memory=@.bss
++def __stack=0x7ff
++def __startmem=@.bss
++def __endmem=0x5ff

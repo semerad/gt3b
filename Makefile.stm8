@@ -101,3 +101,13 @@ ifeq (.depend, $(wildcard .depend))
 include .depend
 endif
 
+
+
+compile.bat: Makefile Makefile.stm8
+	make clean
+	make | grep /c | tee $@
+	sed  -i -e 's|^\(wine \)\?[^ ]*/||' -e "s|-i$(TOOLSET)[^ ]*||" -e "s|-l$(TOOLSET)[^ ]*||" $@
+	cp -p $(PROGRAM).lkf compile.lkf
+	sed -i -e "s|$(PROGRAM)\.lkf|compile.lkf|" $@
+	sed -i -e 's|\(.*\)|\1|' $@
+
