@@ -65,10 +65,10 @@ static void main_screen(void) {
 }
 
 
-// menu pause - checks low battery
-static void menu_pause(void) {
+// menu stop - checks low battery
+static void menu_stop(void) {
     static _Bool battery_low_on;
-    pause();
+    stop();
     if (battery_low_on == menu_battery_low)  return;
     if (menu_battery_low) {
 	// battery low firstly
@@ -91,7 +91,7 @@ static void menu_loop(void) {
     main_screen();
     while (1) {
 
-	menu_pause();
+	menu_stop();
     }
 }
 
