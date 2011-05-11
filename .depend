@@ -6,11 +6,12 @@ lcd.o: lcd.c   lcd.h gt3b.h stm8.h  task.h
 input.o: input.c  input.h gt3b.h stm8.h  task.h menu.h
 buzzer.o: buzzer.c  buzzer.h gt3b.h stm8.h  task.h
 timer.o: timer.c  timer.h gt3b.h stm8.h  task.h lcd.h buzzer.h \
- input.h
+ input.h menu.h
 eeprom.o: eeprom.c   eeprom.h config.h gt3b.h stm8.h  \
  task.h
 config.o: config.c   config.h gt3b.h stm8.h  task.h \
  eeprom.h
 calc.o: calc.c  calc.h gt3b.h stm8.h  task.h menu.h ppm.h
-menu.o: menu.c  menu.h gt3b.h stm8.h  task.h config.h calc.h
+menu.o: menu.c  menu.h gt3b.h stm8.h  task.h config.h calc.h \
+ timer.h
 vector.o: vector.c  gt3b.h stm8.h  task.h

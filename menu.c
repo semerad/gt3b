@@ -21,6 +21,7 @@
 #include "menu.h"
 #include "config.h"
 #include "calc.h"
+#include "timer.h"
 
 
 

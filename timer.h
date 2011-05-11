@@ -29,5 +29,9 @@ extern volatile u16 time_sec;
 extern volatile u8  time_5ms;
 
 
+// delay in task MENU
+extern void delay_menu(u8 len_5ms);
+
+
 #endif
 

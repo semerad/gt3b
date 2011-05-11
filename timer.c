@@ -22,6 +22,7 @@
 #include "lcd.h"
 #include "buzzer.h"
 #include "input.h"
+#include "menu.h"
 
 
 // initialize timer 2 used to count seconds
@@ -41,6 +42,8 @@ void timer_init(void) {
 // count seconds from power on
 volatile u16 time_sec;
 volatile u8  time_5ms;
+static u8 menu_delay;		// timer for delay in MENU task
+
 
 // interrupt every 5ms
 @interrupt void timer_interrupt(void) {
@@ -100,5 +103,17 @@ volatile u8  time_5ms;
 
     // wakeup INPUT task
     awake(INPUT);
+
+    // task MENU delay
+    if (menu_delay && !--menu_delay)
+	awake(MENU);
+}
+
+
+// delay in task MENU
+void delay_menu(u8 len_5ms) {
+    menu_delay = len_5ms;
+    stop();
+    menu_delay = 0;	// MENU task can be awaked from input also, so set no delay for sure
 }
 
