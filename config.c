@@ -37,43 +37,47 @@ static u8 check_val(u16 *pv, u16 lo, u16 hi, u16 def) {
 }
 
 // set global configuration to defaults
-#define G config_global
 u8 config_global_set_default(void) {
     u8 cc = 0;	// calibrate changed
 
-    G.magic_global	= CONFIG_GLOBAL_MAGIC;
-    G.magic_model	= CONFIG_MODEL_MAGIC;
-    G.backlight_time	= 30;
-    G.model		= 0;
+    cg.magic_global	= CONFIG_GLOBAL_MAGIC;
+    cg.magic_model	= CONFIG_MODEL_MAGIC;
+    cg.backlight_time	= 30;
+    cg.model		= 0;
     // set calibrate values only when they are out of limits
-    cc |= check_val(&G.calib_steering[0], 0, CALIB_ST_LOW_MID, 0);
-    cc |= check_val(&G.calib_steering[1], CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);
-    cc |= check_val(&G.calib_steering[2], CALIB_ST_MID_HIGH, 1023, 1023);
-    cc |= check_val(&G.calib_throttle[0], 0, CALIB_TH_LOW_MID, 0);
-    cc |= check_val(&G.calib_throttle[1], CALIB_TH_LOW_MID, CALIB_TH_MID_HIGH, 600);
-    cc |= check_val(&G.calib_throttle[2], CALIB_TH_MID_HIGH, 1023, 1023);
+    cc |= check_val(&cg.calib_steering[0], 0, CALIB_ST_LOW_MID, 0);
+    cc |= check_val(&cg.calib_steering[1], CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);
+    cc |= check_val(&cg.calib_steering[2], CALIB_ST_MID_HIGH, 1023, 1023);
+    cc |= check_val(&cg.calib_throttle[0], 0, CALIB_TH_LOW_MID, 0);
+    cc |= check_val(&cg.calib_throttle[1], CALIB_TH_LOW_MID, CALIB_TH_MID_HIGH, 600);
+    cc |= check_val(&cg.calib_throttle[2], CALIB_TH_MID_HIGH, 1023, 1023);
     return cc;
 }
 
 
 
 
+// set default name to given pointer
+static void default_model_name(u8 model, u8 *name) {
+    *name++ = 'M';
+    *name++ = (u8)(model / 10 + '0');
+    *name   = (u8)(model % 10 + '0');
+}
+
+
 // set model configuration to default
-#define M config_model
 void config_model_set_default(void) {
-    M.channels		= 3;
-    M.name[0]		= 'M';
-    M.name[1]		= (u8)(G.model / 10 + '0');
-    M.name[2]		= (u8)(G.model % 10 + '0');
-    M.reverse		= 0;
-    memset(&M.trim, 0, MAX_CHANNELS);
-    memset(&M.endpoint, 100, MAX_CHANNELS * 2);
-    M.expo_steering	= 0;
-    M.expo_throttle	= 0;
-    M.expo_brake	= 0;
-    M.dualrate[0]	= 100;
-    M.dualrate[1]	= 100;
-    M.abs_type		= 0;
+    cm.channels		= 3;
+    default_model_name(cg.model, cm.name);
+    cm.reverse		= 0;
+    memset(&cm.trim, 0, MAX_CHANNELS);
+    memset(&cm.endpoint, 100, MAX_CHANNELS * 2);
+    cm.expo_steering	= 0;
+    cm.expo_throttle	= 0;
+    cm.expo_brake	= 0;
+    cm.dualrate[0]	= 100;
+    cm.dualrate[1]	= 100;
+    cm.abs_type		= 0;
 }
 
 
@@ -86,6 +90,17 @@ void config_model_read(void) {
     config_model_set_default();
 }
 
+
+// return model name for given model number
+u8 *config_model_name(u8 model) {
+    @near static u8 fake_name[3];
+    u8 *addr = EEPROM_CONFIG_MODEL + 1 + sizeof(config_model_s) * model;
+    if (*addr == CONFIG_MODEL_EMPTY) {
+	default_model_name(model, fake_name);
+	addr = fake_name;
+    }
+    return addr;
+}
 
 
 
