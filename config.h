@@ -95,8 +95,8 @@ extern u8 config_global_read(void);
 extern u8 *config_model_name(u8 model);
 
 // write values to eeprom
-#define config_global_write   eeprom_write_global
-#define config_model_write()  eeprom_write_model(config_global.model)
+#define config_global_save   eeprom_write_global
+#define config_model_save()  eeprom_write_model(config_global.model)
 
 
 #endif
