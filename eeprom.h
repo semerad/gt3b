@@ -33,7 +33,7 @@
 #define EEPROM_CONFIG_GLOBAL  (u8 *)EEPROM_START
 
 
-// position of models config and number of models
+// position of models config
 #define EEPROM_CONFIG_MODEL  (u8 *)(EEPROM_CONFIG_GLOBAL + sizeof(config_global_s))
 
 

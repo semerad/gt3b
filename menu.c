@@ -23,6 +23,9 @@
 #include "calc.h"
 #include "timer.h"
 #include "ppm.h"
+#include "lcd.h"
+#include "buzzer.h"
+#include "input.h"
 
 
 
@@ -40,10 +43,23 @@ static void calibrate(void) {
 }
 
 
+// key test menu
+static void key_test(void) {
+    
+}
+
+
+// show model number, extra function to handle more than 10 models
+static void show_model_number(u8 model) {
+    lcd_7seg(cg.model);
+}
+
 
 // show main screen (model number and name)
 static void main_screen(void) {
-
+    lcd_clear();
+    show_model_number(cg.model);
+    lcd_chars(cm.name);
 }
 
 
@@ -70,7 +86,7 @@ void menu_init(void) {
 
     // read model config from eeprom
     config_model_read();
-    ppm_set_channels(config_model.channels);
+    ppm_set_channels(cm.channels);
 
     // and main loop
     menu_loop();

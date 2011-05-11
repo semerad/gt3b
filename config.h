@@ -40,6 +40,7 @@ typedef struct {
 } config_global_s;
 
 extern config_global_s config_global;
+#define cg config_global
 
 
 // threshold limits for steering/throttle
@@ -69,8 +70,13 @@ typedef struct {
 } config_model_s;
 
 extern config_model_s config_model;
+#define cm config_model
 
-#define CONFIG_MODEL_MAX  ((1024 - sizeof(config_global_s)) / sizeof(config_model_s))
+
+#include "eeprom.h"
+
+#define CONFIG_MODEL_MAX  ((EEPROM_SIZE - sizeof(config_global_s)) / \
+			    sizeof(config_model_s))
 
 // when name[0] is 0xff, that model memory was empty
 #define CONFIG_MODEL_EMPTY  0xff
