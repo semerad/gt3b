@@ -650,7 +650,6 @@ void lcd_menu(u8 menus) {
 void lcd_update(void) {
     lcd_update_flag = 1;
     awake(LCD);
-    pause();
 }
 
 
