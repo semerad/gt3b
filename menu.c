@@ -65,6 +65,25 @@ static void main_screen(void) {
 }
 
 
+// menu pause - checks low battery
+static void menu_pause(void) {
+    static _Bool battery_low_on;
+    pause();
+    if (battery_low_on == menu_battery_low)  return;
+    if (menu_battery_low) {
+	// battery low firstly
+	battery_low_on = 1;
+	lcd_segment(LS_SYM_LOWPWR, LS_ON);
+	lcd_segment_blink(LS_SYM_LOWPWR, LB_SPC);
+	buzzer_on(40, 160, BUZZER_MAX);
+    }
+    else {
+	// battery low now OK
+	battery_low_on = 0;
+	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+	buzzer_off();
+    }
+}
 
 
 // main menu loop, shows main screen and menus
@@ -72,7 +91,7 @@ static void menu_loop(void) {
     main_screen();
     while (1) {
 
-	pause();
+	menu_pause();
     }
 }
 
