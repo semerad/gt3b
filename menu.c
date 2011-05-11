@@ -39,9 +39,100 @@ _Bool menu_battery_low;
 
 // calibrate menu
 static void calibrate(void) {
+    u8 channel = 1;
+    u16 last_val = 0xffff;
+    u16 val;
+    u8 seg;
+
     menu_takes_adc = 1;
 
+    // cleanup screen and disabble possible low bat warning
+    buzzer_off();
+    menu_battery_low = 0;	// it will bet automatically again
+    lcd_clear();
+
+    button_reset(BTN_ALL);
+
+    // show intro text
+    lcd_chars("CAL");
+    lcd_update();
+    delay_menu(200);
+
+    // show channel number and not-yet calibrated values
+    lcd_7seg(channel);
+    lcd_menu(LM_MODEL | LM_NAME | LM_REV | LM_TRIM | LM_DR | LM_EXP);
+    lcd_set_blink(LMENU, LB_SPC);
+
+    while (1) {
+	// check keys
+	if (buttons & BTN_BACK)  break;
+	if (buttons & (BTN_END | BTN_ROT_ALL)) {
+	    // change channel number
+	    if (buttons & BTN_ROT_L) {
+		// down
+		if (!--channel)  channel = 4;
+	    }
+	    else {
+		// up
+		if (++channel > 4)  channel = 1;
+	    }
+	    lcd_7seg(channel);
+	    key_beep();
+	}
+	else if (buttons & BTN_ENTER) {
+	    // save calibrate value for channels 1 and 2
+	    if (channel == 1) {
+		val = adc_steering_ovs >> ADC_OVS_SHIFT;
+		if (val < CALIB_ST_LOW_MID) {
+		    cg.calib_steering[0] = val;
+		    seg = LS_MENU_MODEL;
+		}
+		else if (val <= CALIB_ST_MID_HIGH) {
+		    cg.calib_steering[1] = val;
+		    seg = LS_MENU_NAME;
+		}
+		else {
+		    cg.calib_steering[2] = val;
+		    seg = LS_MENU_REV;
+		}
+		lcd_segment(seg, LS_OFF);
+		key_beep();
+	    }
+	    else if (channel == 2) {
+		val = adc_throttle_ovs >> ADC_OVS_SHIFT;
+		if (val < CALIB_TH_LOW_MID) {
+		    cg.calib_throttle[0] = val;
+		    seg = LS_MENU_TRIM;
+		}
+		else if (val <= CALIB_TH_MID_HIGH) {
+		    cg.calib_throttle[1] = val;
+		    seg = LS_MENU_DR;
+		}
+		else {
+		    cg.calib_throttle[2] = val;
+		    seg = LS_MENU_EXP;
+		}
+		lcd_segment(seg, LS_OFF);  // set corresponding LCD off
+		key_beep();
+	    }
+	}
+
+	// show ADC value if other than last val
+	if (channel == 4)  val = adc_battery_filt;
+	else  val = adc_all_ovs[channel] >> ADC_OVS_SHIFT;
+	if (val != last_val) {
+	    last_val = val;
+	    lcd_char_num3(val);
+	    lcd_update();
+	}
+
+	button_reset(BTN_ALL);
+	stop();
+    }
+
     menu_takes_adc = 0;
+    beep(60);
+    config_global_save();
 }
 
 
