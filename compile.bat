@@ -8,6 +8,8 @@ cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac buzzer.c
 cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac timer.c
 cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac eeprom.c
 cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac config.c
+cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac calc.c
+cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac menu.c
 cxstm8 +warn +proto +mods0 +debug -i.  -l  -pxp -ac vector.c
 clnk  -o gt3b.sm8 -mgt3b.map compile.lkf
 cvdwarf gt3b.sm8
