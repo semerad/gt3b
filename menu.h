@@ -17,10 +17,11 @@
 */
 
 
-#ifndef _CALC_INCLUDED
-#define _CALC_INCLUDED
+#ifndef _MENU_INCLUDED
+#define _MENU_INCLUDED
 
 
+#include "gt3b.h"
 
 
 #endif

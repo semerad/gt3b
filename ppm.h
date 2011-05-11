@@ -22,8 +22,8 @@
 
 
 
-#include "stm8.h"
-#include "task.h"
+#include "gt3b.h"
+
 
 
 // actual number of channels

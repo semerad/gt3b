@@ -19,7 +19,6 @@
 
 
 #include <string.h>
-#include "gt3b.h"
 #include "config.h"
 #include "eeprom.h"
 

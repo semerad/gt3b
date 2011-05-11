@@ -18,7 +18,6 @@
 
 
 
-#include "gt3b.h"
 #include "input.h"
 
 

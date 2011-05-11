@@ -27,7 +27,6 @@
 
 
 #include <string.h>
-#include "gt3b.h"
 #include "ppm.h"
 
 

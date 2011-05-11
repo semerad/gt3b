@@ -21,6 +21,9 @@
 #define _BUZZER_INCLUDED
 
 
+#include "gt3b.h"
+
+
 // setting on/off
 #define BUZZER0  BRES(PD_ODR, 4)
 #define BUZZER1  BSET(PD_ODR, 4)

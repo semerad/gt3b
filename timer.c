@@ -18,7 +18,7 @@
 
 
 
-#include "gt3b.h"
+#include "timer.h"
 #include "lcd.h"
 #include "buzzer.h"
 #include "input.h"

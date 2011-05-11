@@ -21,6 +21,9 @@
 #define _INPUT_INCLUDED
 
 
+#include "gt3b.h"
+
+
 // buttons IDs
 #define BTN_TRIM_LEFT	0x0001
 #define BTN_TRIM_RIGHT	0x0002

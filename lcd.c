@@ -21,7 +21,6 @@
 /* LCD controler is HOLTEK HT1621B */
 
 #include <string.h>
-#include "gt3b.h"
 #include "lcd.h"
 
 
