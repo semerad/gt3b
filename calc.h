@@ -24,6 +24,9 @@
 #include "gt3b.h"
 
 
+// CALC task
+E_TASK(CALC);
+
 
 #endif
 

@@ -1,6 +1,7 @@
 task.o: task.c  task.h stm8.h 
 main.o: main.c  gt3b.h stm8.h  task.h
-ppm.o: ppm.c   ppm.h gt3b.h stm8.h  task.h
+ppm.o: ppm.c   ppm.h gt3b.h stm8.h  task.h menu.h \
+ calc.h
 lcd.o: lcd.c   lcd.h gt3b.h stm8.h  task.h
 input.o: input.c  input.h gt3b.h stm8.h  task.h menu.h
 buzzer.o: buzzer.c  buzzer.h gt3b.h stm8.h  task.h

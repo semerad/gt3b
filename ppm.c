@@ -28,9 +28,11 @@
 
 #include <string.h>
 #include "ppm.h"
+#include "menu.h"
+#include "calc.h"
 
 
-// TIM3 prescalers and multiply (1000x) values to get raw TIM3 values
+// TIM3 prescalers and multiply (1000x more) values to get raw TIM3 values
 //   also SPACE values for 300us space signal
 // about 3.5ms max for servo pulse
 #define PPM_PSC_SERVO 0x00
@@ -43,6 +45,16 @@
 
 // length of whole frame
 #define PPM_FRAME_LENGTH  22500
+
+
+// channel variables
+u8 channels = 3;		// number of channels
+static u8 channels2;		// number of channels * 2 (for compare in ppm_interrupt, it is quicker this way)
+static u8 ppm_channel2;		// next PPM channel to send (0 is SYNC), step 2
+static _Bool ppm_enabled;	// set to 1 when first ppm values was computed
+// PPM values computed for direct seting to TIM3 registers
+// 0 is SYNC pulse length and then channels 1-...
+static u8 ppm_values[2*(MAX_CHANNELS + 1)];  // as bytes for ppm_interrupt
 
 
 // initialize PPM pin and timer 3
@@ -62,20 +74,10 @@ void ppm_init(void) {
     TIM3_CCR2L = hi8(PPM_300US_SYNC);
     TIM3_ARRH = hi8(PPM_MUL_SYNC * 20);
     TIM3_ARRL = lo8(PPM_MUL_SYNC * 20);
+
+    // internal variables init
+    channels2 = (u8)(channels << 1);
 }
-
-
-// channel variables
-u8 channels = 3;	// number of channels
-u8 channels2 = 6;	// numger of channels * 2 (for compare in ppm_interrupt)
-u8 ppm_channel2;	// next PPM channel to send (0 is SYNC), step 2
-_Bool ppm_enabled;	// set to 1 when first ppm values was computed
-_Bool ppm_update_values;  // flag set when new PPM values was computed
-// PPM values computed for direct set to TIM3 registers
-// 0 is SYNC pulse length and then channels 1-...
-u8 ppm_values[2*(MAX_CHANNELS + 1)];  // as bytes for ppm_interrupt
-// new PPM values, copied to ppm_values at start of PPM frame
-u16 ppm_values_new[MAX_CHANNELS + 1]; // as words for easy assign
 
 
 /*
@@ -87,7 +89,16 @@ u16 ppm_values_new[MAX_CHANNELS + 1]; // as words for easy assign
     BRES(TIM3_SR1, 0);	// erase interrupt flag
 
     if (ppm_channel2) {
-	// servo channel
+	if (ppm_channel2 == 2) {
+	    // will be setting channel1 servo, so we are now generating
+	    // SYNC signal in HW
+	    // wakeup CALC task to compute new PPM values
+	    // values for ARR registers will be updated after calculate done
+	    // (and when we are still generating SYNC pulse)
+	    if (!menu_takes_adc)
+		awake(CALC);
+	}
+	// set servo channel
 	TIM3_PSCR = PPM_PSC_SERVO;
 	TIM3_CCR2H = hi8(PPM_300US_SERVO);
 	TIM3_CCR2L = lo8(PPM_300US_SERVO);
@@ -101,12 +112,7 @@ u16 ppm_values_new[MAX_CHANNELS + 1]; // as words for easy assign
 	return;
     }
 
-    // SYNC signal
-    if (ppm_update_values) {
-	// new values computed, copy them
-	memcpy(ppm_values, ppm_values_new, 2*(MAX_CHANNELS + 1));
-	ppm_update_values = 0;
-    }
+    // set SYNC signal
     TIM3_PSCR = PPM_PSC_SYNC;
     TIM3_CCR2H = hi8(PPM_300US_SYNC);
     TIM3_CCR2L = lo8(PPM_300US_SYNC);
@@ -130,7 +136,19 @@ void ppm_set_value(u8 channel, u16 microsec01) {
     ppm_microsecs01 += microsec01;
     // ARR must be set to computed value - 1, that is why we are substracting
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
-    ppm_values_new[channel] = (u16)(((u32)microsec01 * PPM_MUL_SERVO - 5000) / 10000);
+    *(u16 *)(&ppm_values[(u8)(channel << 1)]) =
+	(u16)(((u32)microsec01 * PPM_MUL_SERVO - 5000) / 10000);
+    // for first channel, when we are still in HW SYNC generate, update
+    //   new ARR values to get it applied now
+    if (channel == 1) {
+	sim();
+	if (ppm_channel2 == 4) {
+	    // next will channel2, so we have channel1 in ARR now
+	    TIM3_ARRH = ppm_values[2];
+	    TIM3_ARRL = ppm_values[3];
+	}
+	rim();
+    }
 }
 
 
@@ -140,8 +158,9 @@ void ppm_set_value(u8 channel, u16 microsec01) {
 void ppm_calc_sync(void) {
     // ARR must be set to computed value - 1, that is why we are substracting
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
-    ppm_values_new[0] = (u16)(((10 * (u32)PPM_FRAME_LENGTH - ppm_microsecs01) * PPM_MUL_SYNC - 5000) / 10000);
-    ppm_update_values = 1;
+    *(u16 *)(&ppm_values[0]) =
+	(u16)(((10 * (u32)PPM_FRAME_LENGTH - ppm_microsecs01) * PPM_MUL_SYNC
+	       - 5000) / 10000);
     ppm_microsecs01 = 0;
     // for first ppm values, enable timer
     if (ppm_enabled)  return;

@@ -30,6 +30,7 @@ extern void buzzer_init(void);
 extern void timer_init(void);
 extern void task_init(void);
 extern void eeprom_init(void);
+extern void calc_init(void);
 extern void menu_init(void);
 
 
@@ -66,6 +67,7 @@ void main(void) {
     ppm_init();
     timer_init();
     lcd_init();
+    calc_init();
 
     // enable interrupts
     rim();

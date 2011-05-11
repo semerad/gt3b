@@ -23,3 +23,25 @@
 #include "ppm.h"
 
 
+
+// CALC task
+TASK(CALC, 256);
+static void calc_loop(void);
+
+
+// initialize CALC task
+void calc_init(void) {
+    build(CALC);
+    activate(CALC, calc_loop);
+    sleep(CALC);	// nothing to do yet
+}
+
+
+
+
+// calculate new PPM values from ADC and internal variables
+// called for each PPM cycle
+static void calc_loop(void) {
+
+}
+

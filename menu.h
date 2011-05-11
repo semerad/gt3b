@@ -29,6 +29,9 @@
 #define MENU OPER
 
 
+// menu tasks will be handling ADC now (for calibrate)
+extern _Bool menu_takes_adc;
+
 
 #endif
 

@@ -25,12 +25,16 @@
 
 
 
+_Bool menu_takes_adc;
+
 
 
 
 // calibrate menu
 static void calibrate(void) {
+    menu_takes_adc = 1;
 
+    menu_takes_adc = 0;
 }
 
 
