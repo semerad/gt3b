@@ -83,12 +83,12 @@ extern void config_model_set_default(void);
 
 
 // read values from eeprom and set defaults when needed
-extern void config_model_read(u8 model);
+extern void config_model_read(void);
 extern u8 config_global_read(void);
 
 // write values to eeprom
-#define config_global_write  eeprom_write_global
-#define config_model_write   eeprom_write_model
+#define config_global_write   eeprom_write_global
+#define config_model_write()  eeprom_write_model(config_global.model)
 
 
 #endif

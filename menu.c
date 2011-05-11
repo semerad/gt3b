@@ -22,6 +22,7 @@
 #include "config.h"
 #include "calc.h"
 #include "timer.h"
+#include "ppm.h"
 
 
 
@@ -63,9 +64,13 @@ static void menu_loop(void) {
 void menu_init(void) {
     // variables
     
-    // read global and model config from eeprom
+    // read global config from eeprom
     if (config_global_read())
 	calibrate();
+
+    // read model config from eeprom
+    config_model_read();
+    ppm_set_channels(config_model.channels);
 
     // and main loop
     menu_loop();
