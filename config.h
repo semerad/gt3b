@@ -33,10 +33,11 @@
 typedef struct {
     u16 magic_global;
     u16 magic_model;
+    u8  model;			// selected model
     u16 calib_steering[3];
     u16 calib_throttle[3];
     u16 backlight_time;
-    u8  model;			// selected model
+    u16 battery_low;
 } config_global_s;
 
 extern config_global_s config_global;

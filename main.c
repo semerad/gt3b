@@ -63,11 +63,11 @@ void main(void) {
     task_init();
     eeprom_init();
     buzzer_init();
-    input_init();
     ppm_init();
     timer_init();
     lcd_init();
     calc_init();
+    input_init();
 
     // enable interrupts
     rim();

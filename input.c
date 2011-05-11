@@ -20,6 +20,7 @@
 
 #include "input.h"
 #include "menu.h"
+#include "config.h"
 
 
 
@@ -97,8 +98,8 @@ static u8 ENCODER_FAST_THRESHOLD = 10;	// XXX change to #define
 u16 buttons;
 u16 buttons_long;  // >1s press
 // variables for ADC values
-u16 adc_all_ovs[4];
-u16 adc_all_last[4];
+u16 adc_all_ovs[3], adc_battery_filt, adc_battery;
+u16 adc_all_last[3], adc_battery_last;
 
 
 // reset pressed button
@@ -253,7 +254,7 @@ static void read_keys(void) {
 
 // ADC buffers, last 4 values for each channel
 #define ADC_BUFFERS  4
-@near static u16 adc_buffer[ADC_BUFFERS][4];
+@near static u16 adc_buffer[ADC_BUFFERS][3];
 static u8  adc_buffer_pos;
 
 
@@ -268,20 +269,44 @@ volatile u16 ADC_DB3R @0x53e6;
     adc_all_last[id] = ADC_DB ## id ## R; \
     buf[id] = adc_all_last[id]; \
     adc_all_ovs[id] = adc_buffer[0][id] + adc_buffer[1][id] \
-                  + adc_buffer[2][id] + adc_buffer[3][id];
+                      + adc_buffer[2][id] + adc_buffer[3][id];
 static void read_ADC(void) {
     u16 *buf = adc_buffer[adc_buffer_pos];
 
     ADC_NEWVAL(0);
     ADC_NEWVAL(1);
     ADC_NEWVAL(2);
-    ADC_NEWVAL(3);
+    adc_battery_last = ADC_DB3R;
 
     adc_buffer_pos++;
     adc_buffer_pos &= 0x03;
 
     BRES(ADC_CSR, 7);		// remove EOC flag
     BSET(ADC_CR1, 0);		// start new conversion
+
+    // average battery voltage and check battery low
+    // ignore very low, which means that it is supplied from SWIM connector
+    adc_battery_filt = (u16)((u32)adc_battery_filt * 63 / 64)
+		       + adc_battery_last;
+    adc_battery = adc_battery_filt >> ADC_BATTERY_SHIFT;
+    // wakeup task only when something changed
+    if (adc_battery > 50 && adc_battery < cg.battery_low) {
+	// bat low
+	if (!menu_battery_low) {
+	    menu_battery_low = 1;
+	    awake(MENU);
+	}
+    }
+    else {
+	// bat OK
+	if (menu_battery_low) {
+	    menu_battery_low = 0;
+	    awake(MENU);
+	}
+    }
+    // wakeup task when showing battery
+    if (menu_wants_battery)
+	awake(MENU);
 }
 
 
@@ -305,7 +330,8 @@ static void input_loop(void) {
     ADC_BUFINIT(0);
     ADC_BUFINIT(1);
     ADC_BUFINIT(2);
-    ADC_BUFINIT(3);
+    adc_battery = adc_battery_last;
+    adc_battery_filt = adc_battery << ADC_BATTERY_SHIFT;
 
     while (1) {
 	// read ADC only when EOC flag (normally will be set)

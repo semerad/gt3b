@@ -42,8 +42,9 @@ u8 config_global_set_default(void) {
 
     cg.magic_global	= CONFIG_GLOBAL_MAGIC;
     cg.magic_model	= CONFIG_MODEL_MAGIC;
-    cg.backlight_time	= 30;
     cg.model		= 0;
+    cg.backlight_time	= 30;
+    cg.battery_low	= 616;
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering[0], 0, CALIB_ST_LOW_MID, 0);
     cc |= check_val(&cg.calib_steering[1], CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);

@@ -31,6 +31,10 @@
 
 // menu tasks will be handling ADC now (for calibrate)
 extern _Bool menu_takes_adc;
+// or wants to show battery voltage
+extern _Bool menu_wants_battery;
+// flag low battery voltage
+extern _Bool menu_battery_low;
 
 
 #endif

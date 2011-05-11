@@ -31,6 +31,8 @@
 
 
 _Bool menu_takes_adc;
+_Bool menu_wants_battery;
+_Bool menu_battery_low;
 
 
 
@@ -67,8 +69,8 @@ static void main_screen(void) {
 
 // main menu loop, shows main screen and menus
 static void menu_loop(void) {
+    main_screen();
     while (1) {
-	main_screen();
 
 	pause();
     }
