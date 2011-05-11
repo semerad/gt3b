@@ -304,7 +304,7 @@ static void read_ADC(void) {
 	    awake(MENU);
 	}
     }
-    // wakeup task when showing battery
+    // wakeup task when showing battery or at calibrate
     if (menu_wants_battery || menu_takes_adc)
 	awake(MENU);
 }
