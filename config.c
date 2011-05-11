@@ -91,6 +91,7 @@ void config_model_read(u8 model) {
 
 // read global config from eeprom, if MAGICs changed, set to defaults
 // returns 1 if calibration values was set to defaults
+// also reads model config
 u8 config_global_read(void) {
     u8 calib_changed = 0;
 

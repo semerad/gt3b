@@ -19,6 +19,8 @@
 
 
 #include "input.h"
+#include "menu.h"
+
 
 
 // INPUT task, called every 5ms
@@ -236,9 +238,9 @@ static void read_keys(void) {
     }
 
 
-    // if some of the keys changed, wakeup DISPLAY task
+    // if some of the keys changed, wakeup MENU task
     if (buttons_last != buttons) {
-	awake(DISPLAY);
+	awake(MENU);
     }
 
 }

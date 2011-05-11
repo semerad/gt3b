@@ -19,5 +19,7 @@
 
 
 #include "calc.h"
+#include "menu.h"
+#include "ppm.h"
 
 

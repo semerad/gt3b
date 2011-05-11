@@ -19,5 +19,50 @@
 
 
 #include "menu.h"
+#include "config.h"
+#include "calc.h"
 
+
+
+
+
+
+
+// calibrate menu
+static void calibrate(void) {
+
+}
+
+
+
+// show main screen (model number and name)
+static void main_screen(void) {
+
+}
+
+
+
+
+// main menu loop, shows main screen and menus
+static void menu_loop(void) {
+    while (1) {
+	main_screen();
+
+	pause();
+    }
+}
+
+
+
+// initialize variables
+void menu_init(void) {
+    // variables
+    
+    // read global and model config from eeprom
+    if (config_global_read())
+	calibrate();
+
+    // and main loop
+    menu_loop();
+}
 

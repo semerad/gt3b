@@ -24,5 +24,11 @@
 #include "gt3b.h"
 
 
+
+// task MENU will be alias for task OPER
+#define MENU OPER
+
+
+
 #endif
 

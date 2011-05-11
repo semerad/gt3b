@@ -19,15 +19,10 @@
 
 
 #include "gt3b.h"
-#include "timer.h"
-#include "lcd.h"
-#include "buzzer.h"
-#include "config.h"
-#include "eeprom.h"
 
 
 
-// init functions from other source files
+// init functions from other source files (libraries)
 extern void ppm_init(void);
 extern void lcd_init(void);
 extern void input_init(void);
@@ -35,6 +30,7 @@ extern void buzzer_init(void);
 extern void timer_init(void);
 extern void task_init(void);
 extern void eeprom_init(void);
+extern void menu_init(void);
 
 
 
@@ -57,8 +53,6 @@ static void clock_init(void) {
 
 
 
-
-
 // main program
 void main(void) {
 
@@ -68,18 +62,20 @@ void main(void) {
     task_init();
     eeprom_init();
     buzzer_init();
-    //input_init();
-    //ppm_init();
+    input_init();
+    ppm_init();
     timer_init();
     lcd_init();
 
     // enable interrupts
     rim();
 
-    // read config from eeprom
-    if (config_global_read()) {
-	// XXX call calibrate
-    }
+    // init menus and do processing
+    menu_init();
+
+
+
+
 
 
 #ifdef LCD_TEST

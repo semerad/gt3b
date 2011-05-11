@@ -1,9 +1,8 @@
 task.o: task.c  task.h stm8.h 
-main.o: main.c  gt3b.h stm8.h  task.h timer.h lcd.h buzzer.h \
- config.h eeprom.h
+main.o: main.c  gt3b.h stm8.h  task.h
 ppm.o: ppm.c   ppm.h gt3b.h stm8.h  task.h
 lcd.o: lcd.c   lcd.h gt3b.h stm8.h  task.h
-input.o: input.c  input.h gt3b.h stm8.h  task.h
+input.o: input.c  input.h gt3b.h stm8.h  task.h menu.h
 buzzer.o: buzzer.c  buzzer.h gt3b.h stm8.h  task.h
 timer.o: timer.c  timer.h gt3b.h stm8.h  task.h lcd.h buzzer.h \
  input.h
@@ -11,6 +10,6 @@ eeprom.o: eeprom.c   eeprom.h config.h gt3b.h stm8.h  \
  task.h
 config.o: config.c   config.h gt3b.h stm8.h  task.h \
  eeprom.h
-calc.o: calc.c  calc.h gt3b.h stm8.h  task.h
-menu.o: menu.c  menu.h gt3b.h stm8.h  task.h
+calc.o: calc.c  calc.h gt3b.h stm8.h  task.h menu.h ppm.h
+menu.o: menu.c  menu.h gt3b.h stm8.h  task.h config.h calc.h
 vector.o: vector.c  gt3b.h stm8.h  task.h
