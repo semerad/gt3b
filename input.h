@@ -80,6 +80,8 @@ extern u16 adc_battery_last;
 // do it after used that button in code
 extern void button_reset(u16 btn);
 #define btnr(mask)  button_reset(mask)
+#define btnra()     button_reset(BTN_ALL)
+
 
 // set autorepeat
 extern void button_autorepeat(u8 btn);

@@ -51,7 +51,7 @@ static void calibrate(void) {
     menu_battery_low = 0;	// it will be set automatically again
     lcd_clear();
 
-    btnr(BTN_ALL);
+    btnra();
 
     // show intro text
     lcd_chars("CAL");
@@ -126,7 +126,7 @@ static void calibrate(void) {
 	    lcd_update();
 	}
 
-	btnr(BTN_ALL);
+	btnra();
 	stop();
     }
 
@@ -157,7 +157,7 @@ static void key_test(void) {
     menu_battery_low = 0;	// it will be set automatically again
     lcd_clear();
 
-    btnr(BTN_ALL);
+    btnra();
 
     // show intro text
     lcd_chars("KEY");
