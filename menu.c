@@ -46,12 +46,12 @@ static void calibrate(void) {
 
     menu_takes_adc = 1;
 
-    // cleanup screen and disabble possible low bat warning
+    // cleanup screen and disable possible low bat warning
     buzzer_off();
-    menu_battery_low = 0;	// it will bet automatically again
+    menu_battery_low = 0;	// it will be set automatically again
     lcd_clear();
 
-    button_reset(BTN_ALL);
+    btnr(BTN_ALL);
 
     // show intro text
     lcd_chars("CAL");
@@ -65,10 +65,10 @@ static void calibrate(void) {
 
     while (1) {
 	// check keys
-	if (buttons & BTN_BACK)  break;
-	if (buttons & (BTN_END | BTN_ROT_ALL)) {
+	if (btn(BTN_BACK))  break;
+	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    // change channel number
-	    if (buttons & BTN_ROT_L) {
+	    if (btn(BTN_ROT_L)) {
 		// down
 		if (!--channel)  channel = 4;
 	    }
@@ -79,7 +79,7 @@ static void calibrate(void) {
 	    lcd_7seg(channel);
 	    key_beep();
 	}
-	else if (buttons & BTN_ENTER) {
+	else if (btn(BTN_ENTER)) {
 	    // save calibrate value for channels 1 and 2
 	    if (channel == 1) {
 		val = adc_steering_ovs >> ADC_OVS_SHIFT;
@@ -126,7 +126,7 @@ static void calibrate(void) {
 	    lcd_update();
 	}
 
-	button_reset(BTN_ALL);
+	btnr(BTN_ALL);
 	stop();
     }
 

@@ -58,6 +58,8 @@
 // variables representing pressed buttons
 extern u16 buttons;
 extern u16 buttons_long;  // >1s press
+#define btn(mask)  (buttons & (mask))
+#define btnl(mask)  (buttons_long & (mask))
 // variables for ADC values
 extern u16 adc_all_ovs[3];	// oversampled from 4 samples and 4 times more
 #define ADC_OVS_SHIFT 2
@@ -77,6 +79,7 @@ extern u16 adc_battery_last;
 // reset pressed button(s)
 // do it after used that button in code
 extern void button_reset(u16 btn);
+#define btnr(mask)  button_reset(mask)
 
 // set autorepeat
 extern void button_autorepeat(u8 btn);
