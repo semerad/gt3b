@@ -137,8 +137,48 @@ static void calibrate(void) {
 
 
 // key test menu
+static u8 *key_ids[] = {
+    "T1L", "T1R",
+    "T2F", "T2B",
+    "T3-", "T3+",
+    "DR-", "DR+",
+    "ENT",
+    "BCK",
+    "END",
+    "CH3",
+    "ROL", "ROR"
+};
 static void key_test(void) {
+    u8 i;
+    u16 bit;
     
+    // cleanup screen and disable possible low bat warning
+    buzzer_off();
+    menu_battery_low = 0;	// it will be set automatically again
+    lcd_clear();
+
+    btnr(BTN_ALL);
+
+    // show intro text
+    lcd_chars("KEY");
+    lcd_update_stop();
+
+    while (1) {
+	if (btnl(BTN_BACK))  break;
+
+	for (i = 0, bit = 1; i < 14; i++, bit <<= 1) {
+	    if (btn(bit)) {
+		lcd_chars(key_ids[i]);
+		if (btnl(bit))  lcd_7seg(1);
+		else lcd_set(L7SEG, LB_EMPTY);
+		key_beep();
+		lcd_update();
+		break;
+	    }
+	}
+	stop();
+    }
+    key_beep();
 }
 
 
