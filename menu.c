@@ -364,21 +364,20 @@ static void select_menu(void) {
 	    else if (menu == LM_DR)	menu_dualrate();
 	    else if (menu == LM_EXP)	menu_expo();
 	    else 			menu_abs();
-	    main_screen(0);
+	    main_screen(0);	// show model number and name
 	}
 
 	// rotate keys
-	if (btn(BTN_ROT_R)) {
+	if (btn(BTN_ROT_ALL)) {
 	    key_beep();
-	    menu >>= 1;
-	    if (!menu)  menu = LM_MODEL;
-	    lcd_menu(menu);
-	    lcd_update();
-	}
-	if (btn(BTN_ROT_L)) {
-	    key_beep();
-	    menu <<= 1;
-	    if (!menu)  menu = LM_ABS;
+	    if (btn(BTN_ROT_R)) {
+		menu >>= 1;
+		if (!menu)  menu = LM_MODEL;
+	    }
+	    else {
+		menu <<= 1;
+		if (!menu)  menu = LM_ABS;
+	    }
 	    lcd_menu(menu);
 	    lcd_update();
 	}
@@ -422,7 +421,7 @@ static void menu_loop(void) {
 	// rotate encoder - change model name/battery/...
 	if (btn(BTN_ROT_ALL)) {
 	    key_beep();
-	    item = (u8)(1 - item);
+	    item = (u8)(1 - item);	// only name/battery now
 	    main_screen(item);
 	}
 
