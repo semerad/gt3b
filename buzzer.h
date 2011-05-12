@@ -36,7 +36,6 @@
 extern void buzzer_on(u8 on_5ms, u8 off_5ms, u16 count);
 extern void buzzer_off(void);
 extern void beep(u8 len_5ms);
-#define key_beep()  beep(1)
 
 
 

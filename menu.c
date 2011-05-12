@@ -38,6 +38,9 @@ _Bool menu_battery_low;
 
 
 
+// key beep if enabled in config
+#define key_beep()  if (cg.key_beep)  beep(1)
+
 
 
 

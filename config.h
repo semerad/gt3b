@@ -40,8 +40,9 @@ typedef struct {
     u16 calib_throttle_mid;
     u16 calib_throttle_bck;
     u16 backlight_time;
-    u16 battery_low;
-    u8  autorepeat;
+    u16 battery_low;		// low battery threshold
+    u8  autorepeat;		// at what TRIM+DR is autorepeat on
+    u8	key_beep:1;
 } config_global_s;
 
 extern config_global_s config_global;

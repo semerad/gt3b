@@ -47,6 +47,7 @@ u8 config_global_set_default(void) {
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
     cg.autorepeat	= BTN_DR_ALL;
+    cg.key_beep		= 1;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
