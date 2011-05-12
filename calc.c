@@ -76,7 +76,7 @@ static void calc_loop(void) {
 
 
     // channel 3
-    ppm_set_value(3, 15000);
+    ppm_set_value(3, btns(BTN_CH3) ? 20000 : 10000);
 
 
     // sync signal
