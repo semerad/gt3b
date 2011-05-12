@@ -56,9 +56,11 @@
 
 
 // variables representing pressed buttons
-extern u16 buttons;
-extern u16 buttons_long;  // >1s press
+extern u16 buttons_state;	// actual state of buttons
+extern u16 buttons;		// pressed buttons
+extern u16 buttons_long;	// >1s presses buttons
 #define btn(mask)  (buttons & (mask))
+#define btns(mask)  (buttons_state & (mask))
 #define btnl(mask)  (buttons_long & (mask))
 // variables for ADC values
 extern u16 adc_all_ovs[3];	// oversampled from 4 samples and 4 times more
