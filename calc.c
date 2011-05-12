@@ -45,35 +45,32 @@ void calc_init(void) {
 // called for each PPM cycle
 static void calc_loop(void) {
     s16 val;
+    s32 val2;
 
     // steering
+    val2 = (s32)(adc_steering_ovs - (cg.calib_steering[1] << ADC_OVS_SHIFT))
+	   * (5000 / 4);
     if (adc_steering_ovs < (cg.calib_steering[1] << ADC_OVS_SHIFT)) {
 	// left turn
-	val = (s16)((s32)(adc_steering_ovs -
-	                  (cg.calib_steering[1] << ADC_OVS_SHIFT))
-	      * (5000 / 4) / (cg.calib_steering[1] - cg.calib_steering[0]));
+	val = (s16)(val2 / (cg.calib_steering[1] - cg.calib_steering[0]));
     }
     else {
 	// right turn
-	val = (s16)((s32)(adc_steering_ovs -
-	                  (cg.calib_steering[1] << ADC_OVS_SHIFT))
-	      * (5000 / 4) / (cg.calib_steering[2] - cg.calib_steering[1]));
+	val = (s16)(val2 / (cg.calib_steering[2] - cg.calib_steering[1]));
     }
     ppm_set_value(1, (u16)(15000 + val));
 
 
     // throttle
+    val2 = (s32)(adc_throttle_ovs - (cg.calib_throttle[1] << ADC_OVS_SHIFT))
+	   * (5000 / 4);
     if (adc_throttle_ovs < (cg.calib_throttle[1] << ADC_OVS_SHIFT)) {
 	// forward
-	val = (s16)((s32)(adc_throttle_ovs -
-	                  (cg.calib_throttle[1] << ADC_OVS_SHIFT))
-	      * (5000 / 4) / (cg.calib_throttle[1] - cg.calib_throttle[0]));
+	val = (s16)(val2 / (cg.calib_throttle[1] - cg.calib_throttle[0]));
     }
     else {
 	// back
-	val = (s16)((s32)(adc_throttle_ovs -
-	                  (cg.calib_throttle[1] << ADC_OVS_SHIFT))
-	      * (5000 / 4) / (cg.calib_throttle[2] - cg.calib_throttle[1]));
+	val = (s16)(val2 / (cg.calib_throttle[2] - cg.calib_throttle[1]));
     }
     ppm_set_value(2, (u16)(15000 + val));
 
