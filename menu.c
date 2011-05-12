@@ -234,7 +234,34 @@ static void main_screen(u8 item) {
 
 // choose from menu items
 static void select_menu(void) {
+    u8 menu = LM_MODEL;
+    lcd_menu(menu);
+    while (1) {
+	// Back key
+	if (btn(BTN_BACK))  break;
 
+	// Enter key
+	if (btn(BTN_ENTER)) {
+	    key_beep();
+	    // XXX enter submenu
+	}
+
+	// rotate keys
+	if (btn(BTN_ROT_R)) {
+	    key_beep();
+	    menu >>= 1;
+	    if (!menu)  menu = LM_MODEL;
+	    lcd_menu(menu);
+	}
+	if (btn(BTN_ROT_L)) {
+	    key_beep();
+	    menu <<= 1;
+	    if (!menu)  menu = LM_ABS;
+	    lcd_menu(menu);
+	}
+    }
+    key_beep();
+    lcd_menu(0);
 }
 
 
