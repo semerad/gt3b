@@ -39,7 +39,9 @@ _Bool menu_battery_low;
 
 
 // key beep if enabled in config
-#define key_beep()  if (cg.key_beep)  beep(1)
+static void key_beep(void) {
+    if (cg.key_beep)  beep(1);
+}
 
 
 
@@ -314,7 +316,50 @@ static void menu_model(void) {
 }
 
 static void menu_name(void) {
+    u8 pos = LCHR1;
+    u8 letter = cm.name[0];
 
+    lcd_set_blink(LCHR1, LB_SPC);
+    lcd_update();
+    btnra();
+    menu_stop();
+
+    while (1) {
+	if (btn(BTN_ENTER))  break;
+	if (btn(BTN_END)) {
+	    // to next char
+	    lcd_set_blink(pos, LB_OFF);
+	    if (++pos > LCHR3)  pos = LCHR1;
+	    lcd_set_blink(pos, LB_SPC);
+	    lcd_update();
+	    letter = cm.name[pos];
+	}
+	else if (btn(BTN_ROT_ALL)) {
+	    // change letter
+	    if (btn(BTN_ROT_L)) {
+		// lower
+		if (letter == '0')      letter = 'Z';
+		else if (letter == 'A')	letter = '9';
+		else                    letter--;
+	    }
+	    else {
+		// upper
+		if (letter == '9')      letter = 'A';
+		else if (letter == 'Z')	letter = '0';
+		else                    letter++;
+	    }
+	    cm.name[pos] = letter;
+	    lcd_char(pos, letter);
+	    lcd_set_blink(pos, LB_SPC);
+	    lcd_update();
+	}
+
+	btnra();
+	menu_stop();
+    }
+
+    key_beep();
+    config_model_save();
 }
 
 static void menu_reverse(void) {
@@ -369,7 +414,7 @@ static void select_menu(void) {
 	}
 
 	// rotate keys
-	if (btn(BTN_ROT_ALL)) {
+	else if (btn(BTN_ROT_ALL)) {
 	    key_beep();
 	    if (btn(BTN_ROT_R)) {
 		menu >>= 1;
@@ -420,7 +465,7 @@ static void menu_loop(void) {
 	// channel 3 button
 
 	// rotate encoder - change model name/battery/...
-	if (btn(BTN_ROT_ALL)) {
+	else if (btn(BTN_ROT_ALL)) {
 	    key_beep();
 	    item = (u8)(1 - item);	// only name/battery now
 	    main_screen(item);
