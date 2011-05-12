@@ -315,6 +315,7 @@ void menu_init(void) {
     // read global config from eeprom
     if (config_global_read())
 	calibrate();
+    button_autorepeat(cg.autorepeat);
 
     // read model config from eeprom
     config_model_read();

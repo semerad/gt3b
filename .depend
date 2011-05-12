@@ -11,7 +11,7 @@ timer.o: timer.c  timer.h gt3b.h stm8.h  task.h lcd.h buzzer.h \
 eeprom.o: eeprom.c   eeprom.h config.h gt3b.h stm8.h  \
  task.h
 config.o: config.c   config.h gt3b.h stm8.h  task.h \
- eeprom.h
+ eeprom.h input.h
 calc.o: calc.c  calc.h gt3b.h stm8.h  task.h menu.h ppm.h \
  config.h eeprom.h input.h
 menu.o: menu.c  menu.h gt3b.h stm8.h  task.h config.h eeprom.h \

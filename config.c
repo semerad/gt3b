@@ -21,6 +21,7 @@
 #include <string.h>
 #include "config.h"
 #include "eeprom.h"
+#include "input.h"
 
 
 // actual configuration
@@ -45,6 +46,8 @@ u8 config_global_set_default(void) {
     cg.model		= 0;
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
+    cg.autorepeat	= BTN_DR_ALL;
+
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
     cc |= check_val(&cg.calib_steering_mid, CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);

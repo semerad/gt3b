@@ -41,6 +41,7 @@ typedef struct {
     u16 calib_throttle_bck;
     u16 backlight_time;
     u16 battery_low;
+    u8  autorepeat;
 } config_global_s;
 
 extern config_global_s config_global;
