@@ -49,7 +49,7 @@
 #define BTN_ALL		0xffff
 
 
-// autorepeat/lon press times in 5ms steps
+// autorepeat/long press times in 5ms steps
 #define BTN_AUTOREPEAT_DELAY	(250 / 5)
 #define BTN_AUTOREPEAT_RATE	(35 / 5)
 #define BTN_LONG_PRESS_DELAY	(1000 / 5)
@@ -57,20 +57,20 @@
 
 // variables representing pressed buttons
 extern u16 buttons_state;	// actual state of buttons
-extern u16 buttons;		// pressed buttons
+extern u16 buttons;		// pressed buttons (must be cleared by SW)
 extern u16 buttons_long;	// >1s presses buttons
 #define btn(mask)  (buttons & (mask))
 #define btns(mask)  (buttons_state & (mask))
 #define btnl(mask)  (buttons_long & (mask))
 // variables for ADC values
-extern u16 adc_all_ovs[3];	// oversampled from 4 samples and 4 times more
+extern u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
 #define ADC_OVS_SHIFT 2
 #define adc_steering_ovs   adc_all_ovs[0]
 #define adc_throttle_ovs   adc_all_ovs[1]
 #define adc_ch3_ovs        adc_all_ovs[2]
-extern u16 adc_battery_filt;		// battery will be filtered 64 times
+extern u16 adc_battery_filt;	// battery will be filtered 64 times
 #define ADC_BATTERY_SHIFT  6
-extern u16 adc_battery;			// adc_battery_filt >> ADC_BATTERY_SHIFT
+extern u16 adc_battery;		// adc_battery_filt >> ADC_BATTERY_SHIFT
 extern u16 adc_all_last[3];	// last readed value
 #define adc_steering_last  adc_all_last[0]
 #define adc_throttle_last  adc_all_last[1]

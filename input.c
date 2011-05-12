@@ -29,8 +29,6 @@ TASK(INPUT, 128);
 static void input_loop(void);
 
 
-#define ENCODER_VALUE  30000
-
 
 void input_init(void) {
     // ADC inputs
@@ -68,10 +66,11 @@ void input_init(void) {
     TIM1_SMCR = 0x03;		// encoder mode 3, count on both edges
     TIM1_CCMR1 = 0x01;		// CC1 is input
     TIM1_CCMR2 = 0x01;		// CC2 is input
-    TIM1_ARRH = hi8(60000);	// max value
-    TIM1_ARRL = lo8(60000);	// max value
-    TIM1_CNTRH = hi8(ENCODER_VALUE);	// start value
-    TIM1_CNTRH = lo8(ENCODER_VALUE);	// start value
+    TIM1_ARRH = 0;		// max value
+    TIM1_ARRL = 0xff;		// max value
+    TIM1_CNTRH = 0;		// start value
+    TIM1_CNTRH = 0;		// start value
+    TIM1_IER = 0;		// no interrupts
     TIM1_CR2 = 0;
     TIM1_CR1 = 0x01;		// only counter enable
 
@@ -92,7 +91,7 @@ u16 buttons_state;		// actual combined last buttons state
 static u8 buttons_autorepeat;	// autorepeat enable for TRIMs and D/R
 static u8 buttons_timer[12];	// autorepeat/long press buttons timers
 static u8 encoder_timer;	// for rotate encoder slow/fast
-static u8 ENCODER_FAST_THRESHOLD = 10;	// XXX change to #define
+static u8 ENCODER_FAST_THRESHOLD = 10;	// XXX change to #define after find of correct value
 
 // variables representing pressed buttons
 u16 buttons;
@@ -141,7 +140,6 @@ static void read_keys(void) {
     u16 buttons_last = buttons;
     u16 bit;
     u8 i, lbs, bs;
-    u16 enc;
 
     // rotate last buttons
     buttons3 = buttons2;
@@ -220,10 +218,9 @@ static void read_keys(void) {
 
     // add rotate encoder
     if (encoder_timer)  encoder_timer--;
-    enc = (TIM1_CNTRH << 8) | TIM1_CNTRL;
-    if (enc != ENCODER_VALUE) {
+    if (TIM1_CNTRL) {
 	// encoder changed
-	if (enc > ENCODER_VALUE) {
+	if ((s16)TIM1_CNTRL >= 0) {
 	    // left
 	    buttons |= BTN_ROT_L;
 	    if (encoder_timer)  buttons_long != BTN_ROT_L;
@@ -234,15 +231,14 @@ static void read_keys(void) {
 	    if (encoder_timer)  buttons_long != BTN_ROT_R;
 	}
 	// set it back to default value
-	TIM1_CNTRH = hi8(ENCODER_VALUE);
-	TIM1_CNTRL = hi8(ENCODER_VALUE);
+	TIM1_CNTRL = 0;
 	// init timer
 	encoder_timer = ENCODER_FAST_THRESHOLD;
     }
 
 
     // if some of the keys changed, wakeup MENU task
-    if (buttons_last != buttons) {
+    if (buttons_last != buttons || buttons_state_last != buttons_state) {
 	awake(MENU);
     }
 
