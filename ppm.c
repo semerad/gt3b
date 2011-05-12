@@ -48,7 +48,7 @@
 
 
 // channel variables
-u8 channels = 3;		// number of channels
+u8 channels;			// number of channels
 static u8 channels2;		// number of channels * 2 (for compare in ppm_interrupt, it is quicker this way)
 static u8 ppm_channel2;		// next PPM channel to send (0 is SYNC), step 2
 static _Bool ppm_enabled;	// set to 1 when first ppm values was computed
@@ -57,10 +57,27 @@ static _Bool ppm_enabled;	// set to 1 when first ppm values was computed
 static u8 ppm_values[2*(MAX_CHANNELS + 1)];  // as bytes for ppm_interrupt
 
 
+// set number of channels
+void ppm_set_channels(u8 n) {
+    // disable PPM generation till new values will not be set
+    ppm_enabled = 0;
+    BRES(TIM3_CR1, 0);	// disable timer
+    BSET(PD_ODR, 0);	// set PPM pin to 1
+
+    // start with generating 20ms SYNC signal
+    TIM3_CCR2H = hi8(PPM_300US_SYNC);
+    TIM3_CCR2L = hi8(PPM_300US_SYNC);
+    TIM3_ARRH = hi8(PPM_MUL_SYNC * 20);
+    TIM3_ARRL = lo8(PPM_MUL_SYNC * 20);
+
+    channels = n;
+    channels2 = (u8)(n << 1);  // also 2* value for compare in ppm_interrupt
+}
+
+
 // initialize PPM pin and timer 3
 void ppm_init(void) {
     IO_OP(D, 0);	// PPM output pin, TIM3_CH2
-    BSET(PD_ODR, 0);	// set to 1
 
     // initialize timer3 used to generate PPM signal
     BSET(CLK_PCKENR1, 6);     // enable master clock to TIM3
@@ -69,14 +86,7 @@ void ppm_init(void) {
     TIM3_PSCR = PPM_PSC_SYNC;
     TIM3_IER = 1;             // update interrupt enable
     TIM3_CR1 = 0b10000000;    // auto-reload, URS-all, counter-disable
-    // start with generating 20ms SYNC signal
-    TIM3_CCR2H = hi8(PPM_300US_SYNC);
-    TIM3_CCR2L = hi8(PPM_300US_SYNC);
-    TIM3_ARRH = hi8(PPM_MUL_SYNC * 20);
-    TIM3_ARRL = lo8(PPM_MUL_SYNC * 20);
-
-    // internal variables init
-    channels2 = (u8)(channels << 1);
+    ppm_set_channels(3);
 }
 
 
@@ -119,13 +129,6 @@ void ppm_init(void) {
     TIM3_ARRH = ppm_values[0];
     TIM3_ARRL = ppm_values[1];
     ppm_channel2 = 2;  // to first channel (step 2 bytes)
-}
-
-
-// set number of channels
-void ppm_set_channels(u8 n) {
-    channels = n;
-    channels2 = (u8)(n << 1);  // also 2* value for compare in ppm_interrupt
 }
 
 
