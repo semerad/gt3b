@@ -84,15 +84,15 @@ static void calibrate(void) {
 	    if (channel == 1) {
 		val = adc_steering_ovs >> ADC_OVS_SHIFT;
 		if (val < CALIB_ST_LOW_MID) {
-		    cg.calib_steering[0] = val;
+		    cg.calib_steering_left = val;
 		    seg = LS_MENU_MODEL;
 		}
 		else if (val <= CALIB_ST_MID_HIGH) {
-		    cg.calib_steering[1] = val;
+		    cg.calib_steering_mid = val;
 		    seg = LS_MENU_NAME;
 		}
 		else {
-		    cg.calib_steering[2] = val;
+		    cg.calib_steering_right = val;
 		    seg = LS_MENU_REV;
 		}
 		lcd_segment(seg, LS_OFF);
@@ -101,15 +101,15 @@ static void calibrate(void) {
 	    else if (channel == 2) {
 		val = adc_throttle_ovs >> ADC_OVS_SHIFT;
 		if (val < CALIB_TH_LOW_MID) {
-		    cg.calib_throttle[0] = val;
+		    cg.calib_throttle_fwd = val;
 		    seg = LS_MENU_TRIM;
 		}
 		else if (val <= CALIB_TH_MID_HIGH) {
-		    cg.calib_throttle[1] = val;
+		    cg.calib_throttle_mid = val;
 		    seg = LS_MENU_DR;
 		}
 		else {
-		    cg.calib_throttle[2] = val;
+		    cg.calib_throttle_bck = val;
 		    seg = LS_MENU_EXP;
 		}
 		lcd_segment(seg, LS_OFF);  // set corresponding LCD off

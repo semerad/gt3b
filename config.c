@@ -46,12 +46,12 @@ u8 config_global_set_default(void) {
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
     // set calibrate values only when they are out of limits
-    cc |= check_val(&cg.calib_steering[0], 0, CALIB_ST_LOW_MID, 0);
-    cc |= check_val(&cg.calib_steering[1], CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);
-    cc |= check_val(&cg.calib_steering[2], CALIB_ST_MID_HIGH, 1023, 1023);
-    cc |= check_val(&cg.calib_throttle[0], 0, CALIB_TH_LOW_MID, 0);
-    cc |= check_val(&cg.calib_throttle[1], CALIB_TH_LOW_MID, CALIB_TH_MID_HIGH, 600);
-    cc |= check_val(&cg.calib_throttle[2], CALIB_TH_MID_HIGH, 1023, 1023);
+    cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
+    cc |= check_val(&cg.calib_steering_mid, CALIB_ST_LOW_MID, CALIB_ST_MID_HIGH, 512);
+    cc |= check_val(&cg.calib_steering_right, CALIB_ST_MID_HIGH, 1023, 1023);
+    cc |= check_val(&cg.calib_throttle_fwd, 0, CALIB_TH_LOW_MID, 0);
+    cc |= check_val(&cg.calib_throttle_mid, CALIB_TH_LOW_MID, CALIB_TH_MID_HIGH, 600);
+    cc |= check_val(&cg.calib_throttle_bck, CALIB_TH_MID_HIGH, 1023, 1023);
     return cc;
 }
 
@@ -74,8 +74,8 @@ void config_model_set_default(void) {
     memset(&cm.trim, 0, MAX_CHANNELS);
     memset(&cm.endpoint, 100, MAX_CHANNELS * 2);
     cm.expo_steering	= 0;
-    cm.expo_throttle	= 0;
-    cm.expo_brake	= 0;
+    cm.expo_forward	= 0;
+    cm.expo_back	= 0;
     cm.dualrate[0]	= 100;
     cm.dualrate[1]	= 100;
     cm.abs_type		= 0;

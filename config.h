@@ -29,13 +29,16 @@
 // global config
 
 #define CONFIG_GLOBAL_MAGIC  0xff01
-
 typedef struct {
     u16 magic_global;
     u16 magic_model;
     u8  model;			// selected model
-    u16 calib_steering[3];
-    u16 calib_throttle[3];
+    u16 calib_steering_left;
+    u16 calib_steering_mid;
+    u16 calib_steering_right;
+    u16 calib_throttle_fwd;
+    u16 calib_throttle_mid;
+    u16 calib_throttle_bck;
     u16 backlight_time;
     u16 battery_low;
 } config_global_s;
@@ -56,7 +59,6 @@ extern config_global_s config_global;
 // model config
 
 #define CONFIG_MODEL_MAGIC  0xff01
-
 typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
@@ -64,8 +66,8 @@ typedef struct {
     u8 trim[MAX_CHANNELS];
     u8 endpoint[MAX_CHANNELS][2];
     u8 expo_steering;
-    u8 expo_throttle;
-    u8 expo_brake;
+    u8 expo_forward;
+    u8 expo_back;
     u8 dualrate[2];		// for steering and throttle
     u8 abs_type;
 } config_model_s;
@@ -95,8 +97,8 @@ extern u8 config_global_read(void);
 extern u8 *config_model_name(u8 model);
 
 // write values to eeprom
-#define config_global_save   eeprom_write_global
-#define config_model_save()  eeprom_write_model(config_global.model)
+#define config_global_save()  eeprom_write_global()
+#define config_model_save()   eeprom_write_model(config_global.model)
 
 
 #endif
