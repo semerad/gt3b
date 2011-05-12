@@ -39,6 +39,8 @@ _Bool menu_battery_low;
 
 
 
+
+
 // calibrate menu
 static void calibrate(void) {
     u8 channel = 1;
@@ -61,6 +63,7 @@ static void calibrate(void) {
     delay_menu(200);
 
     // show channel number and not-yet calibrated values
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg(channel);
     lcd_menu(LM_MODEL | LM_NAME | LM_REV | LM_TRIM | LM_DR | LM_EXP);
     lcd_set_blink(LMENU, LB_SPC);
@@ -194,6 +197,10 @@ static void key_test(void) {
 }
 
 
+
+
+
+
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
     lcd_7seg((u8)(cg.model % 10));
@@ -235,10 +242,14 @@ static void menu_stop(void) {
 }
 
 
+
+
+
 // show main screen (model number and name/battery/...)
 static void main_screen(u8 item) {
-    // model number, use arrows for > 10
     lcd_segment(LS_SYM_MODELNO, LS_ON);
+    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
     show_model_number(cg.model);
 
     // chars is item dependent
@@ -258,10 +269,82 @@ static void main_screen(u8 item) {
 }
 
 
+
+
+// selected submenus
+static void menu_model(void) {
+    u8 model = cg.model;
+    lcd_set_blink(L7SEG, LB_SPC);
+    lcd_update();
+    btnra();
+    menu_stop();
+
+    while (1) {
+	if (btn(BTN_ENTER))  break;
+	if (btn(BTN_ROT_ALL)) {
+	    key_beep();
+	    if (btn(BTN_ROT_L)) {
+		if (model)  model--;
+		else        model = CONFIG_MODEL_MAX;
+	    }
+	    else {
+		if (++model >= CONFIG_MODEL_MAX)  model = 0;
+	    }
+	    show_model_number(model);
+	    lcd_chars(config_model_name(model));
+	    lcd_update();
+	}
+
+	btnra();
+	menu_stop();
+    }
+
+    key_beep();
+    // if new model choosed, save it
+    if (model != cg.model) {
+	cg.model = model;
+	config_global_save();
+	config_model_read();
+	ppm_set_channels(cm.channels);
+    }
+}
+
+static void menu_name(void) {
+
+}
+
+static void menu_reverse(void) {
+
+}
+
+static void menu_endpoint(void) {
+
+}
+
+static void menu_trim(void) {
+
+}
+
+static void menu_dualrate(void) {
+
+}
+
+static void menu_expo(void) {
+
+}
+
+static void menu_abs(void) {
+
+}
+
+
+
+
 // choose from menu items
 static void select_menu(void) {
     u8 menu = LM_MODEL;
     lcd_menu(menu);
+    main_screen(0);		// show model number and name
 
     while (1) {
 	// Back key
@@ -270,7 +353,15 @@ static void select_menu(void) {
 	// Enter key
 	if (btn(BTN_ENTER)) {
 	    key_beep();
-	    // XXX enter submenu
+	    if (menu == LM_MODEL)	menu_model();
+	    else if (menu == LM_NAME)	menu_name();
+	    else if (menu == LM_REV)	menu_reverse();
+	    else if (menu == LM_EPO)	menu_endpoint();
+	    else if (menu == LM_TRIM)	menu_trim();
+	    else if (menu == LM_DR)	menu_dualrate();
+	    else if (menu == LM_EXP)	menu_expo();
+	    else 			menu_abs();
+	    main_screen(0);
 	}
 
 	// rotate keys
@@ -279,16 +370,17 @@ static void select_menu(void) {
 	    menu >>= 1;
 	    if (!menu)  menu = LM_MODEL;
 	    lcd_menu(menu);
+	    lcd_update();
 	}
 	if (btn(BTN_ROT_L)) {
 	    key_beep();
 	    menu <<= 1;
 	    if (!menu)  menu = LM_ABS;
 	    lcd_menu(menu);
+	    lcd_update();
 	}
 
 	btnra();
-	lcd_update();
 	menu_stop();
     }
 
@@ -304,6 +396,7 @@ static void menu_loop(void) {
     lcd_clear();
     main_screen(item);
     btnra();
+    menu_stop();
 
     while (1) {
 	// Enter key
@@ -326,7 +419,7 @@ static void menu_loop(void) {
 	// rotate encoder - change model name/battery/...
 	if (btn(BTN_ROT_ALL)) {
 	    key_beep();
-	    item = 1 - item;
+	    item = (u8)(1 - item);
 	    main_screen(item);
 	}
 
