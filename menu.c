@@ -294,6 +294,7 @@ static void menu_model(void) {
 		if (++model >= CONFIG_MODEL_MAX)  model = 0;
 	    }
 	    show_model_number(model);
+	    lcd_set_blink(L7SEG, LB_SPC);
 	    lcd_chars(config_model_name(model));
 	    lcd_update();
 	}
