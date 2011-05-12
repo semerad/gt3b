@@ -330,7 +330,7 @@ static void input_loop(void) {
     adc_battery_filt = adc_battery << ADC_BATTERY_SHIFT;
 
     while (1) {
-	// read ADC only when EOC flag (normally will be set)
+	// read ADC only when EOC flag (only for first it will not be ready)
 	if (BCHK(ADC_CSR, 7))
 	    read_ADC();
 	read_keys();

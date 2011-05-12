@@ -30,8 +30,10 @@
 
 
 
+// flags for wakeup after each ADC measure
 _Bool menu_takes_adc;
 _Bool menu_wants_battery;
+// battery low flag
 _Bool menu_battery_low;
 
 
@@ -67,6 +69,7 @@ static void calibrate(void) {
 	// check keys
 	if (btn(BTN_BACK))  break;
 	if (btn(BTN_END | BTN_ROT_ALL)) {
+	    key_beep();
 	    // change channel number
 	    if (btn(BTN_ROT_L)) {
 		// down
@@ -77,11 +80,12 @@ static void calibrate(void) {
 		if (++channel > 4)  channel = 1;
 	    }
 	    lcd_7seg(channel);
-	    key_beep();
+	    lcd_update();
 	}
 	else if (btn(BTN_ENTER)) {
 	    // save calibrate value for channels 1 and 2
 	    if (channel == 1) {
+		key_beep();
 		val = adc_steering_ovs >> ADC_OVS_SHIFT;
 		if (val < CALIB_ST_LOW_MID) {
 		    cg.calib_steering_left = val;
@@ -96,9 +100,10 @@ static void calibrate(void) {
 		    seg = LS_MENU_REV;
 		}
 		lcd_segment(seg, LS_OFF);
-		key_beep();
+		lcd_update();
 	    }
 	    else if (channel == 2) {
+		key_beep();
 		val = adc_throttle_ovs >> ADC_OVS_SHIFT;
 		if (val < CALIB_TH_LOW_MID) {
 		    cg.calib_throttle_fwd = val;
@@ -113,7 +118,7 @@ static void calibrate(void) {
 		    seg = LS_MENU_EXP;
 		}
 		lcd_segment(seg, LS_OFF);  // set corresponding LCD off
-		key_beep();
+		lcd_update();
 	    }
 	}
 
@@ -157,27 +162,32 @@ static void key_test(void) {
     // cleanup screen and disable possible low bat warning
     buzzer_off();
     menu_battery_low = 0;	// it will be set automatically again
+
+    // do full screen blink
+    lcd_set_full_on();
+    delay_menu(200);
     lcd_clear();
 
     btnra();
 
     // show intro text
     lcd_chars("KEY");
-    lcd_update_stop();
+    lcd_update_stop();		// wait for key
 
     while (1) {
 	if (btnl(BTN_BACK))  break;
 
 	for (i = 0, bit = 1; i < 14; i++, bit <<= 1) {
 	    if (btn(bit)) {
+		key_beep();
 		lcd_chars(key_ids[i]);
 		if (btnl(bit))  lcd_7seg(1);
 		else lcd_set(L7SEG, LB_EMPTY);
-		key_beep();
 		lcd_update();
 		break;
 	    }
 	}
+	btnra();
 	stop();
     }
     key_beep();
@@ -186,7 +196,18 @@ static void key_test(void) {
 
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
-    lcd_7seg(cg.model);
+    lcd_7seg((u8)(cg.model % 10));
+    if (model >= 40) {
+	// too much, set blinking arrows
+	lcd_segment(LS_SYM_RIGHT, LS_ON);
+	lcd_segment(LS_SYM_LEFT,  LS_ON);
+	lcd_segment_blink(LS_SYM_RIGHT, LB_SPC);
+	lcd_segment_blink(LS_SYM_LEFT,  LB_SPC);
+    }
+    else {
+	lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
+	lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
+    }
 }
 
 
@@ -194,22 +215,23 @@ static void show_model_number(u8 model) {
 static void menu_stop(void) {
     static _Bool battery_low_on;
     stop();
-    if (battery_low_on == menu_battery_low)  return;
+    if (battery_low_on == menu_battery_low)  return;  // no change
+
+    // battery low status changed
     if (menu_battery_low) {
 	// battery low firstly
 	battery_low_on = 1;
 	lcd_segment(LS_SYM_LOWPWR, LS_ON);
 	lcd_segment_blink(LS_SYM_LOWPWR, LB_SPC);
-	lcd_update();
 	buzzer_on(40, 160, BUZZER_MAX);
     }
     else {
 	// battery low now OK
 	battery_low_on = 0;
 	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-	lcd_update();
 	buzzer_off();
     }
+    lcd_update();
 }
 
 
@@ -217,10 +239,9 @@ static void menu_stop(void) {
 static void main_screen(u8 item) {
     // model number, use arrows for > 10
     lcd_segment(LS_SYM_MODELNO, LS_ON);
-    show_model_number((u8)(cg.model % 10));
-    lcd_segment(LS_SYM_RIGHT, (u8)((u8)(cg.model / 10) & 1));
-    lcd_segment(LS_SYM_LEFT, (u8)((u8)(cg.model / 20) & 1));
-    // to chars it is item dependent
+    show_model_number(cg.model);
+
+    // chars is item dependent
     if (item == 0) {
 	// model name
 	lcd_segment(LS_SYM_DOT, LS_OFF);
@@ -241,6 +262,7 @@ static void main_screen(u8 item) {
 static void select_menu(void) {
     u8 menu = LM_MODEL;
     lcd_menu(menu);
+
     while (1) {
 	// Back key
 	if (btn(BTN_BACK))  break;
@@ -269,18 +291,20 @@ static void select_menu(void) {
 	lcd_update();
 	menu_stop();
     }
+
     key_beep();
     lcd_menu(0);
 }
 
 
-// main menu loop, shows main screen and menus
+// main menu loop, shows main screen and handle keys
 static void menu_loop(void) {
     u8 item = 0;
 
     lcd_clear();
     main_screen(item);
     btnra();
+
     while (1) {
 	// Enter key
 	if (btn(BTN_ENTER)) {
@@ -300,6 +324,11 @@ static void menu_loop(void) {
 	// channel 3 button
 
 	// rotate encoder - change model name/battery/...
+	if (btn(BTN_ROT_ALL)) {
+	    key_beep();
+	    item = 1 - item;
+	    main_screen(item);
+	}
 
 	btnra();
 	menu_stop();
@@ -308,17 +337,20 @@ static void menu_loop(void) {
 
 
 
-// initialize variables
+// read config from eeprom, initialize and call menu loop
 void menu_init(void) {
     // variables
 
-    // read global config from eeprom
+    // read global config from eeprom, if calibrate values changed,
+    //   call calibrate
     if (config_global_read())
 	calibrate();
+    // apply global settings
     button_autorepeat(cg.autorepeat);
 
     // read model config from eeprom
     config_model_read();
+    // apply model settings
     ppm_set_channels(cm.channels);
 
     // and main loop
