@@ -188,14 +188,6 @@ static void show_model_number(u8 model) {
 }
 
 
-// show main screen (model number and name)
-static void main_screen(void) {
-    lcd_clear();
-    show_model_number(cg.model);
-    lcd_chars(cm.name);
-}
-
-
 // menu stop - checks low battery
 static void menu_stop(void) {
     static _Bool battery_low_on;
@@ -217,10 +209,59 @@ static void menu_stop(void) {
 }
 
 
+// show main screen (model number and name/battery/...)
+static void main_screen(u8 item) {
+    // model number, use arrows for > 10
+    lcd_segment(LS_SYM_MODELNO, LS_ON);
+    show_model_number((u8)(cg.model % 10));
+    lcd_segment(LS_SYM_RIGHT, (u8)((u8)(cg.model / 10) & 1));
+    lcd_segment(LS_SYM_LEFT, (u8)((u8)(cg.model / 20) & 1));
+    // to chars it is item dependent
+    if (item == 0) {
+	// model name
+	lcd_segment(LS_SYM_DOT, LS_OFF);
+	lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	lcd_chars(cm.name);
+    }
+    else if (item == 1) {
+	// battery voltage
+	lcd_segment(LS_SYM_DOT, LS_OFF);
+	lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	lcd_chars("XXX");
+    }
+}
+
+
+// choose from menu items
+static void select_menu(void) {
+
+}
+
+
 // main menu loop, shows main screen and menus
 static void menu_loop(void) {
-    main_screen();
+    u8 showed_item = 0;
+
+    lcd_clear();
+    main_screen(showed_item);
+    btnra();
     while (1) {
+	// Enter key
+	if (btn(BTN_ENTER)) {
+	    key_beep();
+	    if (adc_steering_ovs > CALIB_ST_MID_HIGH)  calibrate();
+	    else if (adc_steering_ovs < CALIB_ST_LOW_MID)  key_test();
+	    else  select_menu();
+	    main_screen(showed_item);
+	}
+
+	// trims
+
+	// dualrate
+
+	// channel 3 button
+
+	// rotate encoder
 
 	menu_stop();
     }
