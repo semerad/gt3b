@@ -21,6 +21,8 @@
 #include "calc.h"
 #include "menu.h"
 #include "ppm.h"
+#include "config.h"
+#include "input.h"
 
 
 
@@ -42,6 +44,45 @@ void calc_init(void) {
 // calculate new PPM values from ADC and internal variables
 // called for each PPM cycle
 static void calc_loop(void) {
+    s16 val;
 
+    // steering
+    if (adc_steering_ovs < (cg.calib_steering[1] << ADC_OVS_SHIFT)) {
+	// left turn
+	val = (s16)((s32)(adc_steering_ovs -
+	                  (cg.calib_steering[1] << ADC_OVS_SHIFT))
+	      * (5000 / 4) / (cg.calib_steering[1] - cg.calib_steering[0]));
+    }
+    else {
+	// right turn
+	val = (s16)((s32)(adc_steering_ovs -
+	                  (cg.calib_steering[1] << ADC_OVS_SHIFT))
+	      * (5000 / 4) / (cg.calib_steering[2] - cg.calib_steering[1]));
+    }
+    ppm_set_value(1, (u16)(15000 + val));
+
+
+    // throttle
+    if (adc_throttle_ovs < (cg.calib_throttle[1] << ADC_OVS_SHIFT)) {
+	// forward
+	val = (s16)((s32)(adc_throttle_ovs -
+	                  (cg.calib_throttle[1] << ADC_OVS_SHIFT))
+	      * (5000 / 4) / (cg.calib_throttle[1] - cg.calib_throttle[0]));
+    }
+    else {
+	// back
+	val = (s16)((s32)(adc_throttle_ovs -
+	                  (cg.calib_throttle[1] << ADC_OVS_SHIFT))
+	      * (5000 / 4) / (cg.calib_throttle[2] - cg.calib_throttle[1]));
+    }
+    ppm_set_value(2, (u16)(15000 + val));
+
+
+    // channel 3
+    ppm_set_value(3, 15000);
+
+
+    // sync signal
+    ppm_calc_sync();
 }
 
