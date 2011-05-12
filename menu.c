@@ -132,6 +132,8 @@ static void calibrate(void) {
 
     menu_takes_adc = 0;
     beep(60);
+    lcd_menu(0);
+    lcd_update();
     config_global_save();
 }
 
@@ -274,19 +276,21 @@ static void select_menu(void) {
 
 // main menu loop, shows main screen and menus
 static void menu_loop(void) {
-    u8 showed_item = 0;
+    u8 item = 0;
 
     lcd_clear();
-    main_screen(showed_item);
+    main_screen(item);
     btnra();
     while (1) {
 	// Enter key
 	if (btn(BTN_ENTER)) {
 	    key_beep();
-	    if (adc_steering_ovs > CALIB_ST_MID_HIGH)  calibrate();
-	    else if (adc_steering_ovs < CALIB_ST_LOW_MID)  key_test();
+	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
+		calibrate();
+	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
+		key_test();
 	    else  select_menu();
-	    main_screen(showed_item);
+	    main_screen(item);
 	}
 
 	// trims
@@ -297,6 +301,7 @@ static void menu_loop(void) {
 
 	// rotate encoder - change model name/battery/...
 
+	btnra();
 	menu_stop();
     }
 }
@@ -306,7 +311,7 @@ static void menu_loop(void) {
 // initialize variables
 void menu_init(void) {
     // variables
-    
+
     // read global config from eeprom
     if (config_global_read())
 	calibrate();
