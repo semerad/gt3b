@@ -198,12 +198,14 @@ static void menu_stop(void) {
 	battery_low_on = 1;
 	lcd_segment(LS_SYM_LOWPWR, LS_ON);
 	lcd_segment_blink(LS_SYM_LOWPWR, LB_SPC);
+	lcd_update();
 	buzzer_on(40, 160, BUZZER_MAX);
     }
     else {
 	// battery low now OK
 	battery_low_on = 0;
 	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+	lcd_update();
 	buzzer_off();
     }
 }
@@ -229,6 +231,7 @@ static void main_screen(u8 item) {
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	lcd_chars("XXX");
     }
+    lcd_update();
 }
 
 
@@ -259,6 +262,10 @@ static void select_menu(void) {
 	    if (!menu)  menu = LM_ABS;
 	    lcd_menu(menu);
 	}
+
+	btnra();
+	lcd_update();
+	menu_stop();
     }
     key_beep();
     lcd_menu(0);
@@ -288,7 +295,7 @@ static void menu_loop(void) {
 
 	// channel 3 button
 
-	// rotate encoder
+	// rotate encoder - change model name/battery/...
 
 	menu_stop();
     }
