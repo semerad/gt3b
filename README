@@ -1,0 +1,65 @@
+
+This is alternative firmware for model radio FlySky FS-TH9X and clones.
+
+
+It is programmed with using possibilities of hardware, using timers,
+interrupts and cooperative multitasking (this is because it is much
+simplier to program it then).
+
+
+There are 2 interrupts:
+
+ppm_interrupt
+    - timer3 update interrupt
+    - sets values for next servo channel to timer
+    - wakeups task CALC during SYNC signal
+timer_interrupt
+    - timer2 overflow
+    - every 5ms
+    - increments time from start
+    - count LCD blink time and wakeups task LCD
+    - handles buzzer
+    - wakeups task INPUT
+    - handles task MENU delay and wakeups this task
+
+
+There are 4 tasks:
+
+LCD
+    - is doing actual write to LCD controller
+    - is waked up by lcd_update(), lcd_clear()
+    - is waked up from timer to do automatic blinking
+INPUT
+    - is doing reading of ADC values and key matrix
+    - is waked up from timer every 5ms
+CALC
+    - is computing values for each servo and sync signal
+    - is waked up from ppm interrupt doring sync signal generation
+MENU
+    - is main program handling keys, menus, lcd
+    - is waked up from timer when menu_delay expired
+    - is waked up from INPUT task when
+	- buttons state changed
+	- MENU task wanted ADC values (for calibrate) or battery voltage
+	- status of battery low changed
+
+
+Files:
+
+stm8.h		- macros for STM8 handling
+gt3b.h		- global common values
+
+vector.c	- table of interrupt vectors
+task.c		- cooperative multitasking
+buzzer.c	- buzzer
+eeprom.c	- eeprom read/write
+timer.c		- timer 5ms
+input.c		- INPUT task, reading ADC and keys
+lcd.c		- LCD task, writing to LCD controller, blinking
+ppm.c		- generating of PPM signal
+config.c	- global and model configuration
+main.c		- initialize all and call MENU task
+
+menu.c		- MENU task, handling keys, menus, lcd
+calc.c		- CALC task, calculate PPM values
+
