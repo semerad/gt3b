@@ -121,9 +121,9 @@ void button_autorepeat(u8 btn) {
 // read key matrix (11 keys)
 #define button_row(odr, bit, c5, c6, c7) \
     BRES(P ## odr ## _ODR, bit); \
-    if BCHK(PC_IDR, 5)  btn |= c5; \
-    if BCHK(PC_IDR, 6)  btn |= c6; \
-    if (c7 && BCHK(PC_IDR, 7))  btn |= c7; \
+    if (!BCHK(PC_IDR, 5))        btn |= c5; \
+    if (!BCHK(PC_IDR, 6))        btn |= c6; \
+    if (c7 && !BCHK(PC_IDR, 7))  btn |= c7; \
     BSET(P ## odr ## _ODR, bit)
 static u16 read_key_matrix(void) {
     u16 btn = 0;
@@ -275,17 +275,16 @@ static void read_ADC(void) {
     ADC_NEWVAL(2);
     adc_battery_last = ADC_DB3R;
 
-    adc_buffer_pos++;
-    adc_buffer_pos &= 0x03;
+    if (++adc_buffer_pos > 2)  adc_buffer_pos = 0;
 
     BRES(ADC_CSR, 7);		// remove EOC flag
     BSET(ADC_CR1, 0);		// start new conversion
 
     // average battery voltage and check battery low
     // ignore very low, which means that it is supplied from SWIM connector
-    adc_battery_filt = (u16)((u32)adc_battery_filt * 63 / 64)
+    adc_battery_filt = (u16)(((u32)adc_battery_filt * 63 + ADC_BAT_RND) / 64)
 		       + adc_battery_last;
-    adc_battery = adc_battery_filt >> ADC_BATTERY_SHIFT;
+    adc_battery = (adc_battery_filt + ADC_BAT_RND) >> ADC_BAT_SHIFT;
     // wakeup task only when something changed
     if (adc_battery > 50 && adc_battery < cg.battery_low) {
 	// bat low
@@ -328,7 +327,7 @@ static void input_loop(void) {
     ADC_BUFINIT(1);
     ADC_BUFINIT(2);
     adc_battery = adc_battery_last;
-    adc_battery_filt = adc_battery << ADC_BATTERY_SHIFT;
+    adc_battery_filt = adc_battery << ADC_BAT_SHIFT;
 
     // task CALC must be awaked to compute values before PPM will take on
     awake(CALC);

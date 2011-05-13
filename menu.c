@@ -94,7 +94,7 @@ static void calibrate(void) {
 	    // save calibrate value for channels 1 and 2
 	    if (channel == 1) {
 		key_beep();
-		val = adc_steering_ovs >> ADC_OVS_SHIFT;
+		val = (adc_steering_ovs + ADC_OVS_RND) >> ADC_OVS_SHIFT;
 		if (val < CALIB_ST_LOW_MID) {
 		    cg.calib_steering_left = val;
 		    seg = LS_MENU_MODEL;
@@ -112,7 +112,7 @@ static void calibrate(void) {
 	    }
 	    else if (channel == 2) {
 		key_beep();
-		val = adc_throttle_ovs >> ADC_OVS_SHIFT;
+		val = (adc_throttle_ovs + ADC_OVS_RND) >> ADC_OVS_SHIFT;
 		if (val < CALIB_TH_LOW_MID) {
 		    cg.calib_throttle_fwd = val;
 		    seg = LS_MENU_TRIM;
@@ -132,7 +132,7 @@ static void calibrate(void) {
 
 	// show ADC value if other than last val
 	if (channel == 4)  val = adc_battery_filt;
-	else  val = adc_all_ovs[channel] >> ADC_OVS_SHIFT;
+	else  val = (adc_all_ovs[channel] + ADC_OVS_RND) >> ADC_OVS_SHIFT;
 	if (val != last_val) {
 	    last_val = val;
 	    lcd_char_num3(val);
