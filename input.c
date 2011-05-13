@@ -26,9 +26,17 @@
 
 
 
+// autorepeat/long press times in 5ms steps
+#define BTN_AUTOREPEAT_DELAY	(500 / 5)
+#define BTN_AUTOREPEAT_RATE	(70 / 5)
+#define BTN_LONG_PRESS_DELAY	(1000 / 5)
+#define ENCODER_FAST_THRESHOLD  10
+
+
 // INPUT task, called every 5ms
 TASK(INPUT, 128);
 static void input_loop(void);
+
 
 
 
@@ -65,13 +73,13 @@ void input_init(void) {
     IO_IF(C, 1);		// pin TIM1_CH1
     IO_IF(C, 2);		// pin TIM1_CH2
     BSET(CLK_PCKENR1, 7);	// enable master clock to TMR1
-    TIM1_SMCR = 0x03;		// encoder mode 3, count on both edges
+    TIM1_SMCR = 0x01;		// encoder mode 1, count on TI2 edges
     TIM1_CCMR1 = 0x01;		// CC1 is input
     TIM1_CCMR2 = 0x01;		// CC2 is input
     TIM1_ARRH = 0;		// max value
     TIM1_ARRL = 0xff;		// max value
     TIM1_CNTRH = 0;		// start value
-    TIM1_CNTRH = 0;		// start value
+    TIM1_CNTRL = 0;		// start value
     TIM1_IER = 0;		// no interrupts
     TIM1_CR2 = 0;
     TIM1_CR1 = 0x01;		// only counter enable
@@ -93,7 +101,6 @@ u16 buttons_state;		// actual combined last buttons state
 static u8 buttons_autorepeat;	// autorepeat enable for TRIMs and D/R
 static u8 buttons_timer[12];	// autorepeat/long press buttons timers
 static u8 encoder_timer;	// for rotate encoder slow/fast
-static u8 ENCODER_FAST_THRESHOLD = 10;	// XXX change to #define after find of correct value
 
 // variables representing pressed buttons
 u16 buttons;
@@ -209,7 +216,8 @@ static void read_keys(void) {
 		// last was pressed
 		if (bs) {
 		    // now pressed, check long press delay
-		    if (--buttons_timer[i])  continue;  // not long enought yet
+		    // if already long or not long enought, skip
+		    if (!buttons_timer[i] || --buttons_timer[i])  continue;
 		    // set as pressed and long pressed
 		    buttons |= bit;
 		    buttons_long |= bit;
@@ -229,20 +237,21 @@ static void read_keys(void) {
     if (encoder_timer)  encoder_timer--;
     if (TIM1_CNTRL) {
 	// encoder changed
-	if ((s16)TIM1_CNTRL >= 0) {
+	if ((s8)TIM1_CNTRL >= 0) {
 	    // left
 	    buttons |= BTN_ROT_L;
-	    if (encoder_timer)  buttons_long != BTN_ROT_L;
+	    if (encoder_timer)  buttons_long |= BTN_ROT_L;
 	}
 	else {
 	    // right
 	    buttons |= BTN_ROT_R;
-	    if (encoder_timer)  buttons_long != BTN_ROT_R;
+	    if (encoder_timer)  buttons_long |= BTN_ROT_R;
 	}
 	// set it back to default value
 	TIM1_CNTRL = 0;
 	// init timer
 	encoder_timer = ENCODER_FAST_THRESHOLD;
+	backlight_on();
     }
 
 
@@ -283,7 +292,8 @@ static void read_ADC(void) {
     ADC_NEWVAL(2);
     adc_battery_last = ADC_DB3R;
 
-    if (++adc_buffer_pos > 2)  adc_buffer_pos = 0;
+    adc_buffer_pos++;
+    adc_buffer_pos &= 3;
 
     BRES(ADC_CSR, 7);		// remove EOC flag
     BSET(ADC_CR1, 0);		// start new conversion

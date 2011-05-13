@@ -49,12 +49,6 @@
 #define BTN_ALL		0xffff
 
 
-// autorepeat/long press times in 5ms steps
-#define BTN_AUTOREPEAT_DELAY	(250 / 5)
-#define BTN_AUTOREPEAT_RATE	(35 / 5)
-#define BTN_LONG_PRESS_DELAY	(1000 / 5)
-
-
 // variables representing pressed buttons
 extern u16 buttons_state;	// actual state of buttons
 extern u16 buttons;		// pressed buttons (must be cleared by SW)
