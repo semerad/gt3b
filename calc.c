@@ -41,41 +41,46 @@ void calc_init(void) {
 
 
 
+// limit adc value to -5000..5000 (standard servo signal * 10)
+static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr, u16 dead) {
+    s16 val;
+    if (adc_ovs < calm) {
+	// left part
+	if (adc_ovs < call) adc_ovs = call;		// limit to calib left
+	val = (s16)adc_ovs - (s16)(calm - dead);
+	if (val >= 0)  return 0;			// in dead zone
+	return (s16)((s32)val * 5000 / ((calm - dead) - call));
+    }
+    else {
+	// right part
+	if (adc_ovs > calr) adc_ovs = calr;		// limit to calib right
+	val = (s16)adc_ovs - (s16)(calm + dead);
+	if (val <= 0)  return 0;			// in dead zone
+	return (s16)((s32)val * 5000 / (calr - (calm + dead)));
+    }
+}
 // calculate new PPM values from ADC and internal variables
 // called for each PPM cycle
 static void calc_loop(void) {
     s16 val;
-    s32 val2;
 
     while (1) {
 
 	// steering
-	val2 = (s32)((s16)adc_steering_ovs -
-		    (s16)(cg.calib_steering_mid << ADC_OVS_SHIFT))
-	    * (5000 / 4);  // /4=oversampling
-	if (adc_steering_ovs < (cg.calib_steering_mid << ADC_OVS_SHIFT)) {
-	    // left turn
-	    val = (s16)(val2 / (cg.calib_steering_mid - cg.calib_steering_left));
-	}
-	else {
-	    // right turn
-	    val = (s16)(val2 / (cg.calib_steering_right - cg.calib_steering_mid));
-	}
+	val = channel_calib(adc_steering_ovs,
+			    cg.calib_steering_left << ADC_OVS_SHIFT,
+			    cg.calib_steering_mid << ADC_OVS_SHIFT,
+			    cg.calib_steering_right << ADC_OVS_SHIFT,
+			    cg.steering_dead_zone << ADC_OVS_SHIFT);
 	ppm_set_value(1, (u16)(15000 + val));
 
 
 	// throttle
-	val2 = (s32)((s16)adc_throttle_ovs -
-		    (s16)(cg.calib_throttle_mid << ADC_OVS_SHIFT))
-	    * (5000 / 4);  // /4=oversampling
-	if (adc_throttle_ovs < (cg.calib_throttle_mid << ADC_OVS_SHIFT)) {
-	    // forward
-	    val = (s16)(val2 / (cg.calib_throttle_mid - cg.calib_throttle_fwd));
-	}
-	else {
-	    // back
-	    val = (s16)(val2 / (cg.calib_throttle_bck - cg.calib_throttle_mid));
-	}
+	val = channel_calib(adc_throttle_ovs,
+			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
+			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
+			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
+			    cg.throttle_dead_zone << ADC_OVS_SHIFT);
 	ppm_set_value(2, (u16)(15000 + val));
 
 
