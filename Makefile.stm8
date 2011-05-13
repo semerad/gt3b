@@ -19,6 +19,10 @@ CFLAGS	= +warn +proto +mods$(SMODE)0 $(DEBUG) -i. -i$(INCDIR) -l $(VERBOSE) -pxp
 AFLAGS	= -xx -xp -l $(VERBOSE) -c -i. -i$(INCDIR)
 LDFLAGS	= -l$(LIBDIR)
 
+ifdef CHANNELS
+CFLAGS	+= -dMAX_CHANNELS=$(CHANNELS)
+MFLAGS	= CHANNELS=$(CHANNELS)
+endif
 
 # used programs
 
@@ -105,7 +109,7 @@ endif
 
 compile.bat: Makefile Makefile.stm8
 	make clean
-	make | grep /c | tee $@
+	make $(MFLAGS) | grep /c | tee $@
 	sed  -i -e 's|^\(wine \)\?[^ ]*/||' -e "s|-i$(TOOLSET)[^ ]*||" -e "s|-l$(TOOLSET)[^ ]*||" $@
 	cp -p $(PROGRAM).lkf compile.lkf
 	sed -i -e "s|$(PROGRAM)\.lkf|compile.lkf|" $@

@@ -34,7 +34,7 @@
 
 // maximum number of channels 
 #ifndef MAX_CHANNELS
-#define MAX_CHANNELS 8
+#define MAX_CHANNELS 3
 #endif
 
 
