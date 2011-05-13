@@ -205,6 +205,13 @@ static void key_test(void) {
 
 
 
+// load model config from eeprom and set model settings
+static void load_model(void) {
+    config_model_read();
+
+    ppm_set_channels(cm.channels);
+}
+
 
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
@@ -310,8 +317,7 @@ static void menu_model(void) {
     if (model != cg.model) {
 	cg.model = model;
 	config_global_save();
-	config_model_read();
-	ppm_set_channels(cm.channels);
+	load_model();
     }
 }
 
@@ -490,9 +496,7 @@ void menu_init(void) {
     button_autorepeat(cg.autorepeat);
 
     // read model config from eeprom
-    config_model_read();
-    // apply model settings
-    ppm_set_channels(cm.channels);
+    load_model();
 
     // and main loop
     menu_loop();
