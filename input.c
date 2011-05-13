@@ -106,8 +106,9 @@ static u8 encoder_timer;	// for rotate encoder slow/fast
 u16 buttons;
 u16 buttons_long;  // >1s press
 // variables for ADC values
-u16 adc_all_ovs[3], adc_battery_filt, adc_battery;
 u16 adc_all_last[3], adc_battery_last;
+u16 adc_all_ovs[3], adc_battery;
+u32 adc_battery_filt;
 
 
 // reset pressed button
@@ -300,9 +301,10 @@ static void read_ADC(void) {
 
     // average battery voltage and check battery low
     // ignore very low, which means that it is supplied from SWIM connector
-    adc_battery_filt = (u16)(((u32)adc_battery_filt * 63 + 32) / 64)
+    adc_battery_filt = adc_battery_filt * (ADC_BAT_FILT - 1); // splitted - compiler hack
+    adc_battery_filt = (adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT
 		       + adc_battery_last;
-    adc_battery = (adc_battery_filt + ADC_BAT_RND) >> ADC_BAT_SHIFT;
+    adc_battery = (u16)((adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT);
     // wakeup task only when something changed
     if (adc_battery > 50 && adc_battery < cg.battery_low) {
 	// bat low
@@ -345,7 +347,7 @@ static void input_loop(void) {
     ADC_BUFINIT(1);
     ADC_BUFINIT(2);
     adc_battery = adc_battery_last;
-    adc_battery_filt = adc_battery << ADC_BAT_SHIFT;
+    adc_battery_filt = (u32)adc_battery * ADC_BAT_FILT;
 
     // task CALC must be awaked to compute values before PPM will take on
     awake(CALC);

@@ -63,9 +63,8 @@ extern u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
 #define adc_steering_ovs   adc_all_ovs[0]
 #define adc_throttle_ovs   adc_all_ovs[1]
 #define adc_ch3_ovs        adc_all_ovs[2]
-extern u16 adc_battery_filt;	// battery will be filtered 64 times
-#define ADC_BAT_SHIFT  6
-#define ADC_BAT_RND    32
+extern u32 adc_battery_filt;	// battery will be filtered more times
+#define ADC_BAT_FILT  256
 extern u16 adc_battery;		// adc_battery_filt >> ADC_BATTERY_SHIFT
 extern u16 adc_all_last[3];	// last readed value
 #define adc_steering_last  adc_all_last[0]
