@@ -34,7 +34,8 @@ INPUT
     - is waked up from timer every 5ms
 CALC
     - is computing values for each servo and sync signal
-    - is waked up from ppm interrupt doring sync signal generation
+    - is waked up from ppm interrupt during sync signal generation
+    - also nedded to wakeup after changing number of PPM channels in MENU
 MENU
     - is main program handling keys, menus, lcd
     - is waked up from timer when menu_delay expired

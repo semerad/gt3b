@@ -21,6 +21,7 @@
 #include "input.h"
 #include "menu.h"
 #include "config.h"
+#include "calc.h"
 
 
 
@@ -328,6 +329,9 @@ static void input_loop(void) {
     ADC_BUFINIT(2);
     adc_battery = adc_battery_last;
     adc_battery_filt = adc_battery << ADC_BATTERY_SHIFT;
+
+    // task CALC must be awaked to compute values before PPM will take on
+    awake(CALC);
 
     while (1) {
 	// read ADC only when EOC flag (only for first it will not be ready)

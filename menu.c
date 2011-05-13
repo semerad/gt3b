@@ -318,6 +318,7 @@ static void menu_model(void) {
 	cg.model = model;
 	config_global_save();
 	load_model();
+	awake(CALC);	// must be awaked to do first PPM calc
     }
 }
 
