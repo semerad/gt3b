@@ -22,6 +22,7 @@
 #include "menu.h"
 #include "config.h"
 #include "calc.h"
+#include "lcd.h"
 
 
 
@@ -158,6 +159,8 @@ static void read_keys(void) {
 
     // do autorepeat/long_press only when some keys were pressed
     if (buttons_state_last || buttons_state) {
+	// key pressed or released, activate backlight
+	backlight_on();
 
 	// handle autorepeat for first 8 keys (TRIMs and D/R)
 	if (buttons_autorepeat) {

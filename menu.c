@@ -58,6 +58,8 @@ static void calibrate(void) {
     // cleanup screen and disable possible low bat warning
     buzzer_off();
     menu_battery_low = 0;	// it will be set automatically again
+    backlight_set_default(BACKLIGHT_MAX);
+    backlight_on();
     lcd_clear();
 
     btnra();
@@ -148,6 +150,8 @@ static void calibrate(void) {
     lcd_menu(0);
     lcd_update();
     config_global_save();
+    backlight_set_default(cg.backlight_time);
+    backlight_on();
 }
 
 
@@ -492,6 +496,8 @@ void menu_init(void) {
 	calibrate();
     // apply global settings
     button_autorepeat(cg.autorepeat);
+    backlight_set_default(cg.backlight_time);
+    backlight_on();
 
     // read model config from eeprom
     load_model();

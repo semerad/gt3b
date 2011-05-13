@@ -4,7 +4,7 @@ ppm.o: ppm.c   ppm.h gt3b.h stm8.h  task.h menu.h \
  calc.h
 lcd.o: lcd.c   lcd.h gt3b.h stm8.h  task.h
 input.o: input.c  input.h gt3b.h stm8.h  task.h menu.h \
- config.h eeprom.h calc.h
+ config.h eeprom.h calc.h lcd.h
 buzzer.o: buzzer.c  buzzer.h gt3b.h stm8.h  task.h
 timer.o: timer.c  timer.h gt3b.h stm8.h  task.h lcd.h buzzer.h \
  input.h menu.h
