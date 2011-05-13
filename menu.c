@@ -291,7 +291,9 @@ static void main_screen(u8 item) {
 
 // selected submenus
 static void menu_model(void) {
-    u8 model = cg.model;
+    s8 model = (s8)cg.model;
+    u8 amount;
+
     lcd_set_blink(L7SEG, LB_SPC);
 
     while (1) {
@@ -300,12 +302,16 @@ static void menu_model(void) {
 
 	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
+	    amount = 1;
 	    if (btn(BTN_ROT_L)) {
-		if (model)  model--;
-		else        model = CONFIG_MODEL_MAX - 1;
+		if (btnl(BTN_ROT_L))  amount = 2;
+		model -= amount;
+		if (model < 0)  model += CONFIG_MODEL_MAX;
 	    }
 	    else {
-		if (++model >= CONFIG_MODEL_MAX)  model = 0;
+		if (btnl(BTN_ROT_R))  amount = 2;
+		model += amount;
+		if (model >= CONFIG_MODEL_MAX)  model -= CONFIG_MODEL_MAX;
 	    }
 	    show_model_number(model);
 	    lcd_set_blink(L7SEG, LB_SPC);
@@ -316,8 +322,8 @@ static void menu_model(void) {
 
     key_beep();
     // if new model choosed, save it
-    if (model != cg.model) {
-	cg.model = model;
+    if ((u8)model != cg.model) {
+	cg.model = (u8)model;
 	config_global_save();
 	load_model();
 	awake(CALC);	// must be awaked to do first PPM calc
