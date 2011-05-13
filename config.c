@@ -122,7 +122,10 @@ u8 config_global_read(void) {
 	eeprom_empty_models();
     }
     else if (config_global.magic_model != CONFIG_MODEL_MAGIC) {
-	// model config changed, empty it
+	// set new model magic
+	config_global.magic_model = CONFIG_MODEL_MAGIC;
+	config_global_save();
+	// model config changed, empty all models
 	eeprom_empty_models();
     }
 
