@@ -79,7 +79,7 @@ static void calibrate(void) {
 	// check keys
 	if (btn(BTN_BACK))  break;
 	if (btn(BTN_END | BTN_ROT_ALL)) {
-	    key_beep();
+	    if (btn(BTN_BACK))  key_beep();
 	    // change channel number
 	    if (btn(BTN_ROT_L)) {
 		// down
@@ -133,8 +133,8 @@ static void calibrate(void) {
 	}
 
 	// show ADC value if other than last val
-	if (channel == 4)  val = adc_battery_filt;
-	else  val = (adc_all_ovs[channel] + ADC_OVS_RND) >> ADC_OVS_SHIFT;
+	if (channel == 4)  val = adc_battery;
+	else  val = (adc_all_ovs[channel-1] + ADC_OVS_RND) >> ADC_OVS_SHIFT;
 	if (val != last_val) {
 	    last_val = val;
 	    lcd_char_num3(val);
@@ -219,7 +219,7 @@ static void load_model(void) {
 
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
-    lcd_7seg((u8)(cg.model % 10));
+    lcd_7seg((u8)(model % 10));
     if (model >= 40) {
 	// too much, set blinking arrows
 	lcd_segment(LS_SYM_RIGHT, LS_ON);
@@ -279,8 +279,8 @@ static void main_screen(u8 item) {
     }
     else if (item == MS_BATTERY) {
 	// battery voltage
-	lcd_segment(LS_SYM_DOT, LS_OFF);
-	lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	lcd_segment(LS_SYM_DOT, LS_ON);
+	lcd_segment(LS_SYM_VOLTS, LS_ON);
 	lcd_chars("XXX");
     }
     lcd_update();
@@ -300,10 +300,9 @@ static void menu_model(void) {
 
 	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
-	    key_beep();
 	    if (btn(BTN_ROT_L)) {
 		if (model)  model--;
-		else        model = CONFIG_MODEL_MAX;
+		else        model = CONFIG_MODEL_MAX - 1;
 	    }
 	    else {
 		if (++model >= CONFIG_MODEL_MAX)  model = 0;
@@ -346,7 +345,6 @@ static void menu_name(void) {
 	    letter = cm.name[pos];
 	}
 	else if (btn(BTN_ROT_ALL)) {
-	    key_beep();
 	    // change letter
 	    if (btn(BTN_ROT_L)) {
 		// lower
@@ -428,7 +426,6 @@ static void select_menu(void) {
 
 	// rotate keys
 	else if (btn(BTN_ROT_ALL)) {
-	    key_beep();
 	    if (btn(BTN_ROT_R)) {
 		menu >>= 1;
 		if (!menu)  menu = LM_MODEL;
@@ -477,7 +474,6 @@ static void menu_loop(void) {
 
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {
-	    key_beep();
 	    item = (u8)(1 - item);	// only name/battery now
 	    main_screen(item);
 	}
