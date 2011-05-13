@@ -156,64 +156,69 @@ static void read_keys(void) {
     buttons_state |= buttons1 & buttons2 & buttons3;
     buttons_state &= buttons1 | buttons2 | buttons3;
 
-    // handle autorepeat for first 8 keys (TRIMs and D/R)
-    if (buttons_autorepeat) {
-	for (i = 0, bit = 1; i < 8; i++, bit <<= 1) {
-	    if (!(bit & buttons_autorepeat))  continue;  // not autorepeated
+    // do autorepeat/long_press only when some keys were pressed
+    if (buttons_state_last || buttons_state) {
+
+	// handle autorepeat for first 8 keys (TRIMs and D/R)
+	if (buttons_autorepeat) {
+	    for (i = 0, bit = 1; i < 8; i++, bit <<= 1) {
+		if (!(bit & buttons_autorepeat))  continue;  // not autorepeated
+		lbs = (u8)(buttons_state_last & bit ? 1 : 0);
+		bs = (u8)(buttons_state & bit ? 1 : 0);
+		if (!lbs) {
+		    // last not pressed
+		    if (bs) {
+			// now pressed, set it pressed and set autorepeat delay
+			buttons |= bit;
+			buttons_timer[i] = BTN_AUTOREPEAT_DELAY;
+		    }
+		    // do nothing for now not pressed
+		}
+		else {
+		    // last was pressed
+		    if (bs) {
+			// now pressed
+			if (--buttons_timer[i])  continue;  // not expired yet
+			// timer expired, set it pressed and set autorepeat rate
+			buttons |= bit;
+			buttons_timer[i] = BTN_AUTOREPEAT_RATE;
+		    }
+		    // do nothing for now not pressed
+		}
+	    }
+	}
+
+	// handle long presses for first 12 keys
+	// exclude keys with autorepeat ON
+	for (i = 0, bit = 1; i < 12; i++, bit <<= 1) {
+	    if (bit & buttons_autorepeat)  continue;  // handled in autorepeat
 	    lbs = (u8)(buttons_state_last & bit ? 1 : 0);
 	    bs = (u8)(buttons_state & bit ? 1 : 0);
 	    if (!lbs) {
 		// last not pressed
 		if (bs) {
-		    // now pressed, set it pressed and set autorepeat delay
-		    buttons |= bit;
-		    buttons_timer[i] = BTN_AUTOREPEAT_DELAY;
+		    // now pressed, set long press delay
+		    buttons_timer[i] = BTN_LONG_PRESS_DELAY;
 		}
 		// do nothing for now not pressed
 	    }
 	    else {
 		// last was pressed
 		if (bs) {
-		    // now pressed
-		    if (--buttons_timer[i])  continue;  // not expired yet
-		    // timer expired, set it pressed and set autorepeat rate
+		    // now pressed, check long press delay
+		    if (--buttons_timer[i])  continue;  // not long enought yet
+		    // set as pressed and long pressed
 		    buttons |= bit;
-		    buttons_timer[i] = BTN_AUTOREPEAT_RATE;
+		    buttons_long |= bit;
 		}
-		// do nothing for now not pressed
+		else {
+		    // now not pressed, set as pressed when no long press was applied
+		    if (!buttons_timer[i])  continue;  // was long before
+		    buttons |= bit;
+		}
 	    }
 	}
-    }
 
-    // handle long presses for first 12 keys
-    // exclude keys with autorepeat ON
-    for (i = 0, bit = 1; i < 12; i++, bit <<= 1) {
-	if (bit & buttons_autorepeat)  continue;  // handled in autorepeat
-	lbs = (u8)(buttons_state_last & bit ? 1 : 0);
-	bs = (u8)(buttons_state & bit ? 1 : 0);
-	if (!lbs) {
-	    // last not pressed
-	    if (bs) {
-		// now pressed, set long press delay
-		buttons_timer[i] = BTN_LONG_PRESS_DELAY;
-	    }
-	    // do nothing for now not pressed
-	}
-	else {
-	    // last was pressed
-	    if (bs) {
-		// now pressed, check long press delay
-		if (--buttons_timer[i])  continue;  // not long enought yet
-		// set as pressed and long pressed
-		buttons |= bit;
-		buttons_long |= bit;
-	    }
-	    else {
-		// now not pressed, set as pressed when no long press was applied
-		if (!buttons_timer[i])  continue;  // was long before
-		buttons |= bit;
-	    }
-	}
     }
 
 
@@ -282,7 +287,7 @@ static void read_ADC(void) {
 
     // average battery voltage and check battery low
     // ignore very low, which means that it is supplied from SWIM connector
-    adc_battery_filt = (u16)(((u32)adc_battery_filt * 63 + ADC_BAT_RND) / 64)
+    adc_battery_filt = (u16)(((u32)adc_battery_filt * 63 + 32) / 64)
 		       + adc_battery_last;
     adc_battery = (adc_battery_filt + ADC_BAT_RND) >> ADC_BAT_SHIFT;
     // wakeup task only when something changed
