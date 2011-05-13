@@ -260,9 +260,11 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
     if (on_off && !(on_off == LB_SPC && !(lcd_bitmap[segment] & com_bit))) {
 	lcd_bitmap[segment] |= blnk_bit;
 	// start blinking, also reset counter to 0
-	lcd_blink_cnt = 0;
-	lcd_blink_flag = 0;
-	lcd_blink_something = 1;
+	if (!lcd_blink_something) {
+	    lcd_blink_cnt = 0;
+	    lcd_blink_flag = 0;
+	    lcd_blink_something = 1;
+	}
     }
     else {
 	lcd_bitmap[segment] &= (u8)~blnk_bit;
@@ -273,9 +275,6 @@ void lcd_segment_blink(u8 pos, u8 on_off) {
 // show normal (non-blinked) LCD bitmap
 static void lcd_show_normal(void) {
     u8 i;
-    lcd_update_flag = 0;
-    lcd_blink_flag = 0;
-    lcd_blink_cnt = 0;		// reset blink counter
     for (i = 0; i < MAX_SEGMENT; i++) {
 	lcd_seg_comms(i, (u8)(lcd_bitmap[i] & 0xf));
     }
@@ -284,28 +283,37 @@ static void lcd_show_normal(void) {
 
 
 // show blinked LCD bitmap
-static void lcd_show_inverted(void) {
+static void lcd_show_inverted(u8 update) {
     u8 i, c;
     u8 inverted = 0;
     for (i = 0; i < MAX_SEGMENT; i++) {
 	c = lcd_bitmap[i];
-	if (!(c & 0xf0))  continue;	// nothing to invert
+	if (!(c & 0xf0)) {
+	    // nothing to invert, but if update, send non-inverted
+	    if (update)
+		lcd_seg_comms(i, (u8)(c & 0xf));
+	    continue;
+	}
 	lcd_seg_comms(i, (u8)((u8)(c & 0xf) ^ (u8)((u8)(c & 0xf0) >> 4)));
 	inverted = 1;
     }
     if (inverted)  lcd_seg_update();
-    else lcd_blink_something = 0;	// nothing was blinked
+    else {
+	lcd_blink_something = 0;	// nothing was blinked
+	if (update)  lcd_seg_update();	// but if update requested, do it
+    }
 }
 
 
 // do LCD item blinking at regular timer times
-static void lcd_blink(void) {
+static void lcd_blink(u8 update) {
     lcd_blink_flag = 0;
+    if (update)  lcd_update_flag = 0;
     if (lcd_blink_cnt < LCD_BLNK_CNT_BLANK) {
 	lcd_show_normal();
     }
     else {
-	lcd_show_inverted();
+	lcd_show_inverted(update);
     }
 }
 
@@ -351,8 +359,8 @@ static void lcd_loop(void) {
     while (1) {
 	if (lcd_clr_flag)		lcd_clr_set(0);
 	else if (lcd_set_flag)		lcd_clr_set(0xffff);
-	else if (lcd_update_flag)	lcd_show_normal();
-	else if (lcd_blink_flag)	lcd_blink();
+	else if (lcd_update_flag)	lcd_blink(1);
+	else if (lcd_blink_flag)	lcd_blink(0);
 	stop();
     }
 }
