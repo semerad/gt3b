@@ -258,6 +258,8 @@ static void menu_stop(void) {
 
 
 // show main screen (model number and name/battery/...)
+#define MS_NAME		0
+#define MS_BATTERY	1
 static void main_screen(u8 item) {
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     lcd_segment(LS_SYM_CHANNEL, LS_OFF);
@@ -265,13 +267,13 @@ static void main_screen(u8 item) {
     show_model_number(cg.model);
 
     // chars is item dependent
-    if (item == 0) {
+    if (item == MS_NAME) {
 	// model name
 	lcd_segment(LS_SYM_DOT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	lcd_chars(cm.name);
     }
-    else if (item == 1) {
+    else if (item == MS_BATTERY) {
 	// battery voltage
 	lcd_segment(LS_SYM_DOT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
@@ -287,12 +289,12 @@ static void main_screen(u8 item) {
 static void menu_model(void) {
     u8 model = cg.model;
     lcd_set_blink(L7SEG, LB_SPC);
-    lcd_update();
-    btnra();
-    menu_stop();
 
     while (1) {
-	if (btn(BTN_ENTER))  break;
+	btnra();
+	menu_stop();
+
+	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
 	    key_beep();
 	    if (btn(BTN_ROT_L)) {
@@ -307,9 +309,6 @@ static void menu_model(void) {
 	    lcd_chars(config_model_name(model));
 	    lcd_update();
 	}
-
-	btnra();
-	menu_stop();
     }
 
     key_beep();
@@ -327,13 +326,14 @@ static void menu_name(void) {
     u8 letter = cm.name[0];
 
     lcd_set_blink(LCHR1, LB_SPC);
-    lcd_update();
-    btnra();
-    menu_stop();
 
     while (1) {
-	if (btn(BTN_ENTER))  break;
+	btnra();
+	menu_stop();
+
+	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_END)) {
+	    key_beep();
 	    // to next char
 	    lcd_set_blink(pos, LB_OFF);
 	    if (++pos > LCHR3)  pos = LCHR1;
@@ -342,6 +342,7 @@ static void menu_name(void) {
 	    letter = cm.name[pos];
 	}
 	else if (btn(BTN_ROT_ALL)) {
+	    key_beep();
 	    // change letter
 	    if (btn(BTN_ROT_L)) {
 		// lower
@@ -360,9 +361,6 @@ static void menu_name(void) {
 	    lcd_set_blink(pos, LB_SPC);
 	    lcd_update();
 	}
-
-	btnra();
-	menu_stop();
     }
 
     key_beep();
@@ -400,9 +398,12 @@ static void menu_abs(void) {
 static void select_menu(void) {
     u8 menu = LM_MODEL;
     lcd_menu(menu);
-    main_screen(0);		// show model number and name
+    main_screen(MS_NAME);	// show model number and name
 
     while (1) {
+	btnra();
+	menu_stop();
+
 	// Back key
 	if (btn(BTN_BACK))  break;
 
@@ -417,7 +418,8 @@ static void select_menu(void) {
 	    else if (menu == LM_DR)	menu_dualrate();
 	    else if (menu == LM_EXP)	menu_expo();
 	    else 			menu_abs();
-	    main_screen(0);	// show model number and name
+	    main_screen(MS_NAME);	// show model number and name
+	    if (btn(BTN_BACK))  break;	// and exit when BACK
 	}
 
 	// rotate keys
@@ -434,9 +436,6 @@ static void select_menu(void) {
 	    lcd_menu(menu);
 	    lcd_update();
 	}
-
-	btnra();
-	menu_stop();
     }
 
     key_beep();
@@ -446,14 +445,15 @@ static void select_menu(void) {
 
 // main menu loop, shows main screen and handle keys
 static void menu_loop(void) {
-    u8 item = 0;
+    u8 item = MS_NAME;
 
     lcd_clear();
     main_screen(item);
-    btnra();
-    menu_stop();
 
     while (1) {
+	btnra();
+	menu_stop();
+
 	// Enter key
 	if (btn(BTN_ENTER)) {
 	    key_beep();
@@ -477,9 +477,6 @@ static void menu_loop(void) {
 	    item = (u8)(1 - item);	// only name/battery now
 	    main_screen(item);
 	}
-
-	btnra();
-	menu_stop();
     }
 }
 
