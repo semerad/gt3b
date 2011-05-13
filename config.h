@@ -28,7 +28,7 @@
 
 // global config
 
-#define CONFIG_GLOBAL_MAGIC  0xff01
+#define CONFIG_GLOBAL_MAGIC  0xfe01
 typedef struct {
     u16 magic_global;
     u16 magic_model;
@@ -39,6 +39,8 @@ typedef struct {
     u16 calib_throttle_fwd;
     u16 calib_throttle_mid;
     u16 calib_throttle_bck;
+    u8  steering_dead_zone;
+    u8  throttle_dead_zone;
     u16 backlight_time;
     u16 battery_low;		// low battery threshold
     u8  autorepeat;		// at what TRIM+DR is autorepeat on
