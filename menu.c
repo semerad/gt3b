@@ -77,7 +77,7 @@ static void calibrate(void) {
 
     while (1) {
 	// check keys
-	if (btn(BTN_BACK))  break;
+	if (btnl(BTN_BACK))  break;
 	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    if (btn(BTN_BACK))  key_beep();
 	    // change channel number
@@ -289,6 +289,14 @@ static void main_screen(u8 item) {
 
 
 
+// global setup
+void global_setup(void) {
+
+}
+
+
+
+
 // selected submenus
 static void menu_model(void) {
     s8 model = (s8)cg.model;
@@ -461,14 +469,20 @@ static void menu_loop(void) {
 	btnra();
 	menu_stop();
 
-	// Enter key
-	if (btn(BTN_ENTER)) {
+	// Enter long key
+	if (btnl(BTN_ENTER)) {
 	    key_beep();
 	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
 		calibrate();
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		key_test();
-	    else  select_menu();
+	    else global_setup;
+	}
+
+	// Enter key
+	else if (btn(BTN_ENTER)) {
+	    key_beep();
+	    select_menu();
 	    main_screen(item);
 	}
 
