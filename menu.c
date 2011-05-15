@@ -441,13 +441,65 @@ static s16 menu_change_val(s16 val, s16 min, s16 max) {
 // global setup
 
 // steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
+static const u16 bl_steps[] = {
+    15, 30,
+    60, 2*60, 5*60, 10*60, 20*60, 30*60,
+    3600, 2*3600, 5*3600,
+    BACKLIGHT_MAX
+};
+#define BL_STEPS_MAX  (sizeof(bl_steps) / sizeof(u16))
+static void bl_num2(u8 val) {
+    if (val < 10)  lcd_char(LCHR1, ' ');
+    else           lcd_char(LCHR1, (u8)((u8)(val / 10) + '0'));
+    lcd_char(LCHR2, (u8)((u8)(val % 10) + '0'));
+
+}
 static void gs_backlight_time(u8 change) {
+    s8 i;
+    u16 *addr = &cg.backlight_time;
+
     if (change == 0xff) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    // XXX
+    if (change) {
+	if (btn(BTN_ROT_L)) {
+	    // find lower value
+	    for (i = BL_STEPS_MAX - 1; i >= 0; i--) {
+		if (bl_steps[i] >= *addr)  continue;
+		*addr = bl_steps[i];
+		break;
+	    }
+	}
+	else {
+	    // find upper value
+	    for (i = 0; i < BL_STEPS_MAX; i++) {
+		if (bl_steps[i] <= *addr)  continue;
+		*addr = bl_steps[i];
+		break;
+	    }
+	}
+    }
     lcd_7seg(5);	// Seconds
+    if (*addr < 60) {
+	// seconds
+	bl_num2((u8)*addr);
+	lcd_char(LCHR3, 's');
+    }
+    else if (*addr < 3600) {
+	// minutes
+	bl_num2((u8)(*addr / 60));
+	lcd_char(LCHR3, 'm');
+    }
+    else if (*addr != BACKLIGHT_MAX) {
+	// hours
+	bl_num2((u8)(*addr / 3600));
+	lcd_char(LCHR3, 'h');
+    }
+    else {
+	// max
+	lcd_chars("MAX");
+    }
 }
 
 static void gs_battery_low(u8 change) {
@@ -459,14 +511,15 @@ static void gs_battery_low(u8 change) {
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
 }
 
-// steps: 1 2 5 10 20
 static void gs_trim_step(u8 change) {
+    u8 *addr = &cg.trim_step;
     if (change == 0xff) {
 	lcd_segment(LS_MENU_TRIM, LS_OFF);
 	return;
     }
-    // XXX
+    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20);
     lcd_segment(LS_MENU_TRIM, LS_ON);
+    lcd_char_num3(*addr);
 }
 
 static void gs_endpoint_max(u8 change) {
