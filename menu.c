@@ -437,9 +437,171 @@ static s16 menu_change_val(s16 val, s16 min, s16 max) {
 
 
 
+
 // global setup
+
+// steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
+static void gs_backlight_time(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    // XXX
+    lcd_7seg(5);	// Seconds
+}
+
+static void gs_battery_low(u8 change) {
+    if (change == 0xff) {
+	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+	return;
+    }
+    // XXX
+    lcd_segment(LS_SYM_LOWPWR, LS_ON);
+}
+
+// steps: 1 2 5 10 20
+static void gs_trim_step(u8 change) {
+    if (change == 0xff) {
+	lcd_segment(LS_MENU_TRIM, LS_OFF);
+	return;
+    }
+    // XXX
+    lcd_segment(LS_MENU_TRIM, LS_ON);
+}
+
+static void gs_endpoint_max(u8 change) {
+    u8 *addr = &cg.endpoint_max;
+    if (change == 0xff) {
+	lcd_segment(LS_MENU_EPO, LS_OFF);
+	return;
+    }
+    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200);
+    lcd_segment(LS_MENU_EPO, LS_ON);
+    lcd_char_num3(*addr);
+}
+
+static void gs_key_beep(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  cg.key_beep ^= 1;
+    lcd_7seg(L7_B);
+    if (cg.key_beep)  lcd_chars("ON ");
+    else              lcd_chars("OFF");
+}
+
+static void gs_ch3_momentary(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  cg.ch3_momentary ^= 1;
+    lcd_7seg(3);
+    if (cg.ch3_momentary)  lcd_chars("ON ");
+    else                   lcd_chars("OFF");
+}
+
+static void gs_steering_dead(u8 change) {
+    u8 *addr = &cg.steering_dead_zone;
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50);
+    lcd_7seg(1);
+    lcd_char_num3(*addr);
+}
+
+static void gs_throttle_dead(u8 change) {
+    u8 *addr = &cg.throttle_dead_zone;
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50);
+    lcd_7seg(1);
+    lcd_char_num3(*addr);
+}
+
+typedef void (*global_setup_t)(u8 change);
+static const global_setup_t gs_config[] = {
+    gs_backlight_time,
+    gs_battery_low,
+    gs_endpoint_max,
+    gs_trim_step,
+    gs_steering_dead,
+    gs_throttle_dead,
+    gs_ch3_momentary,
+    gs_key_beep
+};
+#define GS_CONFIG_MAX  (sizeof(gs_config) / sizeof(u8 *))
 static void global_setup(void) {
     // XXX
+    u8 item = 0;
+    u8 item_val = 0;		// now selecting item
+    global_setup_t func = gs_config[item];
+
+    // cleanup screen and disable possible low bat warning
+    buzzer_off();
+    menu_battery_low = 0;	// it will be set automatically again
+    backlight_set_default(BACKLIGHT_MAX);
+    backlight_on();
+    lcd_clear();
+
+    lcd_segment(LS_MENU_MODEL, LS_ON);
+    lcd_segment_blink(LS_MENU_MODEL, LB_INV);
+    lcd_segment_blink(LS_MENU_NAME, LB_INV);
+    func(0);			// show current value
+
+    while (1) {
+	btnra();
+	stop();
+
+	if (btnl(BTN_BACK))  break;
+
+	if (btn(BTN_ENTER)) {
+	    item_val = (u8)(1 - item_val);
+	    if (item_val) {
+		// changing value
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
+	    }
+	    else {
+		// selecting item
+		lcd_set_blink(LCHR1, LB_OFF);
+		lcd_set_blink(LCHR2, LB_OFF);
+		lcd_set_blink(LCHR3, LB_OFF);
+	    }
+	}
+
+	else if (btn(BTN_ROT_ALL)) {
+	    if (item_val) {
+		// change item value
+		func(1);
+	    }
+	    else {
+		// select another item
+		func(0xff);		// un-show labels
+		if (btn(BTN_ROT_L)) {
+		    if (item)  item--;
+		    else       item = GS_CONFIG_MAX - 1;
+		}
+		else {
+		    if (++item >= GS_CONFIG_MAX)  item = 0;
+		}
+		func = gs_config[item];
+		func(0);		// show current value
+	    }
+	}
+    }
+
+    beep(60);
+    lcd_clear();
+    config_global_save();
+    backlight_set_default(cg.backlight_time);
+    backlight_on();
 }
 
 
@@ -693,6 +855,7 @@ static void menu_loop(void) {
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		key_test();
 	    else global_setup;
+	    main_screen(item);
 	}
 
 	// Enter key
@@ -702,9 +865,9 @@ static void menu_loop(void) {
 	    main_screen(item);
 	}
 
-	// trims
+	// trims XXX
 
-	// dualrate
+	// dualrate XXX
 
 	// channel 3 button
 	else if (btn(BTN_CH3)) {
