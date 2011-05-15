@@ -28,7 +28,7 @@
 
 // global config
 
-#define CONFIG_GLOBAL_MAGIC  0xfe01
+#define CONFIG_GLOBAL_MAGIC  0xfd02
 typedef struct {
     u16 magic_global;
     u16 magic_model;
@@ -43,8 +43,9 @@ typedef struct {
     u8  throttle_dead_zone;
     u16 backlight_time;
     u16 battery_low;		// low battery threshold
-    u8  autorepeat;		// at what TRIM+DR is autorepeat on
     u8  trim_step;
+    u8  endpoint_max;
+    u8  autorepeat;		// at what TRIM+DR is autorepeat on
     u8	key_beep:1;
     u8  ch3_momentary:1;
 } config_global_s;
@@ -73,14 +74,16 @@ typedef struct {
     u8 endpoint[MAX_CHANNELS][2];
     s8 trim[2];			// for steering and throttle
     u8 dualrate[2];		// for steering and throttle
-    s8 expo_steering;
-    s8 expo_forward;
-    s8 expo_back;
+    s8 expo[3];			// steering/forward/back
     u8 abs_type;
 } config_model_s;
 
 extern config_model_s config_model;
 #define cm config_model
+#define expo_steering  expo[0]
+#define expo_forward   expo[1]
+#define expo_back      expo[2]
+
 
 
 #include "eeprom.h"

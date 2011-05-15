@@ -48,8 +48,9 @@ u8 config_global_set_default(void) {
     cg.throttle_dead_zone = 2;
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
-    cg.autorepeat	= BTN_DR_ALL;
     cg.trim_step	= 2;
+    cg.endpoint_max	= 120;
+    cg.autorepeat	= BTN_DR_ALL;
     cg.key_beep		= 1;
     cg.ch3_momentary	= 0;
 
@@ -85,9 +86,9 @@ void config_model_set_default(void) {
     cm.trim[1]		= 0;
     cm.dualrate[0]	= 100;
     cm.dualrate[1]	= 100;
-    cm.expo_steering	= 0;
-    cm.expo_forward	= 0;
-    cm.expo_back	= 0;
+    cm.expo[0]		= 0;
+    cm.expo[1]		= 0;
+    cm.expo[2]		= 0;
     cm.abs_type		= 0;
 }
 
