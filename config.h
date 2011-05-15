@@ -44,6 +44,7 @@ typedef struct {
     u16 backlight_time;
     u16 battery_low;		// low battery threshold
     u8  autorepeat;		// at what TRIM+DR is autorepeat on
+    u8  trim_step;
     u8	key_beep:1;
     u8  ch3_momentary:1;
 } config_global_s;

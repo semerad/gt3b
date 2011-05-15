@@ -18,6 +18,7 @@
 
 
 
+#include <string.h>
 #include "menu.h"
 #include "config.h"
 #include "calc.h"
@@ -298,10 +299,11 @@ void global_setup(void) {
 
 
 // selected submenus
-static void menu_model(void) {
+static void menu_model(u8 saveas) {
     s8 model = (s8)cg.model;
     u8 amount;
 
+    if (saveas)  lcd_set_blink(LMENU, LB_SPC);
     lcd_set_blink(L7SEG, LB_SPC);
 
     while (1) {
@@ -333,9 +335,18 @@ static void menu_model(void) {
     if ((u8)model != cg.model) {
 	cg.model = (u8)model;
 	config_global_save();
-	load_model();
-	awake(CALC);	// must be awaked to do first PPM calc
+	if (saveas) {
+	    // save to new model position
+	    memcpy(cm.name, config_model_name(model), 3);
+	    config_model_save();
+	}
+	else {
+	    // load selected model
+	    load_model();
+	    awake(CALC);	// must be awaked to do first PPM calc
+	}
     }
+    if (saveas)  lcd_set_blink(LMENU, LB_OFF);
 }
 
 static void menu_name(void) {
@@ -395,6 +406,10 @@ static void menu_trim(void) {
 
 }
 
+static void menu_subtrim(void) {
+
+}
+
 static void menu_dualrate(void) {
 
 }
@@ -426,11 +441,14 @@ static void select_menu(void) {
 	// Enter key
 	if (btn(BTN_ENTER)) {
 	    key_beep();
-	    if (menu == LM_MODEL)	menu_model();
+	    if (menu == LM_MODEL)	menu_model((u8)(btnl(BTN_ENTER) ? 1 : 0));
 	    else if (menu == LM_NAME)	menu_name();
 	    else if (menu == LM_REV)	menu_reverse();
 	    else if (menu == LM_EPO)	menu_endpoint();
-	    else if (menu == LM_TRIM)	menu_trim();
+	    else if (menu == LM_TRIM) {
+		if (btnl(BTN_ENTER))	menu_trim();
+		else			menu_subtrim();
+	    }
 	    else if (menu == LM_DR)	menu_dualrate();
 	    else if (menu == LM_EXP)	menu_expo();
 	    else 			menu_abs();

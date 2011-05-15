@@ -44,11 +44,12 @@ u8 config_global_set_default(void) {
     cg.magic_global	= CONFIG_GLOBAL_MAGIC;
     cg.magic_model	= CONFIG_MODEL_MAGIC;
     cg.model		= 0;
+    cg.steering_dead_zone = 2;
+    cg.throttle_dead_zone = 2;
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
     cg.autorepeat	= BTN_DR_ALL;
-    cg.steering_dead_zone = 2;
-    cg.throttle_dead_zone = 2;
+    cg.trim_step	= 2;
     cg.key_beep		= 1;
     cg.ch3_momentary	= 0;
 
