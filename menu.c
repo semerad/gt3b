@@ -290,15 +290,113 @@ static void main_screen(u8 item) {
 
 
 
+// common menu processing, selecting channel and then changing values
+static _Bool menu_adc_direction;
+void menu_set_adc_direction(u8 channel) {
+    u16 adc, calm;
+
+    // for channel 2 use throttle, for others steering
+    if (channel == 2) {
+	adc = adc_throttle_ovs;
+	calm = cg.calib_throttle_mid;
+    }
+    else {
+	adc = adc_steering_ovs;
+	calm = cg.calib_steering_mid;
+    }
+    // if over threshold to one side, set menu_adc_direction
+    if (adc < ((calm - 40) << ADC_OVS_SHIFT))       menu_adc_direction = 0;
+    else if (adc > ((calm + 40) << ADC_OVS_SHIFT))  menu_adc_direction = 1;
+}
+void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
+    u8 channel = 1;
+    u8 chan_val = 0;			// now in channel
+    u8 last_direction = menu_adc_direction;
+
+    if (use_adc) {
+	menu_takes_adc = 1;
+	menu_set_adc_direction(channel);
+    }
+
+    // show CHANNEL
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+
+    lcd_7seg(channel);
+    lcd_set_blink(L7SEG, LB_SPC);
+    subfunc(channel, 0);		// show current value
+
+    while (1) {
+	if (btn(BTN_BACK | BTN_ENTER))  break;
+
+	last_direction = menu_adc_direction;
+	if (use_adc)  menu_set_adc_direction(channel);
+
+	if (btn(BTN_ROT_ALL)) {
+	    if (chan_val) {
+		// change value
+		subfunc(channel, 1);
+	    }
+	    else {
+		// change channel number
+		if (btn(BTN_ROT_L)) {
+		    if (!--channel)  channel = end_channel;
+		}
+		else {
+		    if (++channel > end_channel)  channel = 1;
+		}
+		subfunc(channel, 0);
+	    }
+	    last_direction = menu_adc_direction;  // was already showed
+	}
+
+	else if (btn(BTN_END)) {
+	    // switch channel/value
+	    if (chan_val) {
+		// switch to channel number
+		lcd_set_blink(L7SEG, LB_OFF);
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
+		chan_val = 0;
+	    }
+	    else {
+		// switch to value
+		lcd_set_blink(L7SEG, LB_SPC);
+		lcd_set_blink(LCHR1, LB_OFF);
+		lcd_set_blink(LCHR2, LB_OFF);
+		lcd_set_blink(LCHR3, LB_OFF);
+		chan_val = 1;
+	    }
+	}
+
+	if (last_direction != menu_adc_direction)  // show other dir value
+	    subfunc(channel, 0);
+
+	btnra();
+	menu_stop();
+    }
+
+    menu_takes_adc = 0;
+    key_beep();
+    config_model_save();
+}
+
+
+
+
 // global setup
 void global_setup(void) {
-
+    // XXX
 }
 
 
 
 
 // selected submenus
+// select model/save model as (to selected model position)
 static void menu_model(u8 saveas) {
     s8 model = (s8)cg.model;
     u8 amount;
@@ -349,6 +447,7 @@ static void menu_model(u8 saveas) {
     if (saveas)  lcd_set_blink(LMENU, LB_OFF);
 }
 
+// change model name
 static void menu_name(void) {
     u8 pos = LCHR1;
     u8 letter = cm.name[0];
@@ -394,31 +493,51 @@ static void menu_name(void) {
     config_model_save();
 }
 
+// reset model to default values
+static void menu_reset_model(void) {
+    config_model_set_default();
+    config_model_save();
+}
+
+// set reverse
 static void menu_reverse(void) {
+    // XXX
 
 }
 
+// set endpoints
 static void menu_endpoint(void) {
+    // XXX
 
 }
 
+// set trims
 static void menu_trim(void) {
+    // XXX
 
 }
 
+// set subtrims
 static void menu_subtrim(void) {
+    // XXX
 
 }
 
+// set dualrate
 static void menu_dualrate(void) {
+    // XXX
 
 }
 
+// set expos
 static void menu_expo(void) {
+    // XXX
 
 }
 
+// set abs
 static void menu_abs(void) {
+    // XXX
 
 }
 
@@ -442,12 +561,15 @@ static void select_menu(void) {
 	if (btn(BTN_ENTER)) {
 	    key_beep();
 	    if (menu == LM_MODEL)	menu_model((u8)(btnl(BTN_ENTER) ? 1 : 0));
-	    else if (menu == LM_NAME)	menu_name();
+	    else if (menu == LM_NAME) {
+		if (btnl(BTN_ENTER))	menu_reset_model();
+		else			menu_name();
+	    }
 	    else if (menu == LM_REV)	menu_reverse();
 	    else if (menu == LM_EPO)	menu_endpoint();
 	    else if (menu == LM_TRIM) {
-		if (btnl(BTN_ENTER))	menu_trim();
-		else			menu_subtrim();
+		if (btnl(BTN_ENTER))	menu_subtrim();
+		else			menu_trim();
 	    }
 	    else if (menu == LM_DR)	menu_dualrate();
 	    else if (menu == LM_EXP)	menu_expo();
