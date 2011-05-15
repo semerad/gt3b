@@ -106,6 +106,21 @@ extern void lcd_menu(u8 menus);     // OR-ed selected menus
 #define LM_EXP		0x02
 #define LM_ABS		0x01
 
+// values for lcd_7seg()
+#define L7_A		10
+#define L7_B		11
+#define L7_C		12
+#define L7_D		13
+#define L7_E		14
+#define L7_F		15
+#define L7_G		16
+#define L7_H		17
+#define L7_J		18
+#define L7_L		19
+#define L7_M		20
+#define L7_P		21
+#define L7_U		22
+
 
 
 
