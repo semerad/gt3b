@@ -35,6 +35,11 @@
 #define SUBTRIM_MAX 99
 
 
+// variables to be used in CALC task
+_Bool ch3_state;		// state of channel 3 button
+
+
+
 
 
 // flags for wakeup after each ADC measure
@@ -702,6 +707,9 @@ static void menu_loop(void) {
 	// dualrate
 
 	// channel 3 button
+	else if (btn(BTN_CH3)) {
+	    ch3_state = ~ch3_state;
+	}
 
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {

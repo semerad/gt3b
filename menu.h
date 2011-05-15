@@ -25,6 +25,14 @@
 
 
 
+// variables to be used in CALC task
+extern _Bool ch3_state;		// state of channel 3 button
+
+
+
+
+
+
 // task MENU will be alias for task OPER
 #define MENU OPER
 

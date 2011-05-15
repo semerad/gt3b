@@ -99,7 +99,9 @@ static void calc_loop(void) {
 
 
 	// channel 3
-	rev_epo_subtrim(3, btns(BTN_CH3) ? 5000 : -5000);
+	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? 5000 : -5000;
+	else                   val = ch3_state ? 5000 : -5000;
+	rev_epo_subtrim(3, val);
 
 
 	// sync signal
