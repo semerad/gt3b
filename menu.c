@@ -292,7 +292,7 @@ static void main_screen(u8 item) {
 
 // common menu processing, selecting channel and then changing values
 static _Bool menu_adc_direction;
-void menu_set_adc_direction(u8 channel) {
+static void menu_set_adc_direction(u8 channel) {
     u16 adc, calm;
 
     // for channel 2 use throttle, for others steering
@@ -305,10 +305,22 @@ void menu_set_adc_direction(u8 channel) {
 	calm = cg.calib_steering_mid;
     }
     // if over threshold to one side, set menu_adc_direction
-    if (adc < ((calm - 40) << ADC_OVS_SHIFT))       menu_adc_direction = 0;
-    else if (adc > ((calm + 40) << ADC_OVS_SHIFT))  menu_adc_direction = 1;
+    if (adc < ((calm - 40) << ADC_OVS_SHIFT)) {
+	if (menu_adc_direction) {
+	    menu_adc_direction = 0;
+	    lcd_segment(LS_SYM_LEFT, LS_ON);
+	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+	}
+    }
+    else if (adc > ((calm + 40) << ADC_OVS_SHIFT)) {
+	if (!menu_adc_direction) {
+	    menu_adc_direction = 1;
+	    lcd_segment(LS_SYM_LEFT, LS_OFF);
+	    lcd_segment(LS_SYM_RIGHT, LS_ON);
+	}
+    }
 }
-void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
+static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     u8 channel = 1;
     u8 chan_val = 0;			// now in channel
     u8 last_direction = menu_adc_direction;
@@ -327,8 +339,12 @@ void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     lcd_7seg(channel);
     lcd_set_blink(L7SEG, LB_SPC);
     subfunc(channel, 0);		// show current value
+    lcd_update();
 
     while (1) {
+	btnra();
+	menu_stop();
+
 	if (btn(BTN_BACK | BTN_ENTER))  break;
 
 	last_direction = menu_adc_direction;
@@ -347,7 +363,10 @@ void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 		else {
 		    if (++channel > end_channel)  channel = 1;
 		}
+		lcd_7seg(channel);
+		lcd_set_blink(L7SEG, LB_SPC);
 		subfunc(channel, 0);
+		lcd_update();
 	    }
 	    last_direction = menu_adc_direction;  // was already showed
 	}
@@ -372,11 +391,11 @@ void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    }
 	}
 
-	if (last_direction != menu_adc_direction)  // show other dir value
+	if (last_direction != menu_adc_direction) {
+	    // show other dir value
 	    subfunc(channel, 0);
-
-	btnra();
-	menu_stop();
+	    lcd_update();
+	}
     }
 
     menu_takes_adc = 0;
@@ -385,10 +404,30 @@ void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 }
 
 
+// change value 
+static s16 menu_change_val(s16 val, s16 min, s16 max) {
+    u8 amount = 1;
+
+    if (btn(BTN_ROT_L)) {
+	// left
+	if (btnl(BTN_ROT_L))  amount = 5;
+	val -= amount;
+	if (val < min)  val = min;
+    }
+    else {
+	// right
+	if (btnl(BTN_ROT_R))  amount = 5;
+	val += amount;
+	if (val > max)  val = max;
+    }
+    return val;
+}
+
+
 
 
 // global setup
-void global_setup(void) {
+static void global_setup(void) {
     // XXX
 }
 
