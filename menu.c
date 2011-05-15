@@ -31,6 +31,12 @@
 
 
 
+#define TRIM_MAX  99
+#define SUBTRIM_MAX 99
+
+
+
+
 // flags for wakeup after each ADC measure
 _Bool menu_takes_adc;
 _Bool menu_wants_battery;
@@ -538,45 +544,72 @@ static void menu_reset_model(void) {
 }
 
 // set reverse
-static void menu_reverse(void) {
-    // XXX
-
+void sf_reverse(u8 channel, u8 change) {
+    u8 bit = (u8)(1 << (channel - 1));
+    if (change)  cm.reverse ^= bit;
+    if (cm.reverse & bit)  lcd_chars("REV");
+    else                   lcd_chars("NOR");
+}
+@inline static void menu_reverse(void) {
+    menu_channel(MAX_CHANNELS, 0, sf_reverse);
 }
 
 // set endpoints
-static void menu_endpoint(void) {
-    // XXX
-
+void sf_endpoint(u8 channel, u8 change) {
+    u8 *addr = &cm.endpoint[channel][menu_adc_direction];
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max);
+    lcd_char_num3(*addr);
+}
+@inline static void menu_endpoint(void) {
+    menu_channel(MAX_CHANNELS, 1, sf_endpoint);
 }
 
 // set trims
-static void menu_trim(void) {
-    // XXX
-
+static void sf_trim(u8 channel, u8 change) {
+    s8 *addr = &cm.trim[channel];
+    if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX);
+    if (channel == 1)  lcd_char_num2_lbl(*addr, "LNR");
+    else               lcd_char_num2_lbl(*addr, "FNB");
+}
+@inline static void menu_trim(void) {
+    menu_channel(2, 0, sf_trim);
 }
 
 // set subtrims
+static void sf_subtrim(u8 channel, u8 change) {
+    s8 *addr = &cm.subtrim[channel];
+    if (change)  *addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX);
+    lcd_char_num2(*addr);
+}
 static void menu_subtrim(void) {
-    // XXX
-
+    lcd_set_blink(LMENU, LB_SPC);
+    menu_channel(MAX_CHANNELS, 0, sf_subtrim);
+    lcd_set_blink(LMENU, LB_OFF);
 }
 
 // set dualrate
-static void menu_dualrate(void) {
-    // XXX
-
+static void sf_dualrate(u8 channel, u8 change) {
+    u8 *addr = &cm.dualrate[channel];
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 100);
+    lcd_char_num3(*addr);
+}
+@inline static void menu_dualrate(void) {
+    menu_channel(2, 0, sf_dualrate);
 }
 
 // set expos
-static void menu_expo(void) {
-    // XXX
-
+static void sf_expo(u8 channel, u8 change) {
+    s8 *addr = &cm.expo[channel];
+    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99);
+    lcd_char_num2(*addr);
+}
+@inline static void menu_expo(void) {
+    menu_channel(3, 0, sf_expo);
 }
 
 // set abs
 static void menu_abs(void) {
     // XXX
-
 }
 
 
