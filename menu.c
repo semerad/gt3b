@@ -435,7 +435,6 @@ static void menu_model(u8 saveas) {
 	config_global_save();
 	if (saveas) {
 	    // save to new model position
-	    memcpy(cm.name, config_model_name(model), 3);
 	    config_model_save();
 	}
 	else {
