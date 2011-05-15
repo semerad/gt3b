@@ -42,23 +42,33 @@ void calc_init(void) {
 
 
 // limit adc value to -5000..5000 (standard servo signal * 10)
-static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr, u16 dead) {
+static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
+                         u16 dead, s16 trim) {
     s16 val;
     if (adc_ovs < calm) {
 	// left part
 	if (adc_ovs < call) adc_ovs = call;		// limit to calib left
 	val = (s16)adc_ovs - (s16)(calm - dead);
-	if (val >= 0)  return 0;			// in dead zone
-	return (s16)((s32)val * 5000 / ((calm - dead) - call));
+	if (val >= 0)  return trim;			// in dead zone
+	return (s16)((s32)val * (5000 + trim) / ((calm - dead) - call)) + trim;
     }
     else {
 	// right part
 	if (adc_ovs > calr) adc_ovs = calr;		// limit to calib right
 	val = (s16)adc_ovs - (s16)(calm + dead);
-	if (val <= 0)  return 0;			// in dead zone
-	return (s16)((s32)val * 5000 / (calr - (calm + dead)));
+	if (val <= 0)  return trim;			// in dead zone
+	return (s16)((s32)val * (5000 - trim) / (calr - (calm + dead))) + trim;
     }
 }
+
+static void rev_epo_subtrim(u8 channel, s16 inval) {
+    s16 val = (s16)(((s32)inval * cm.endpoint[channel][(u8)(inval < 0 ? 0 : 1)]
+                     + 50) / 100);
+    val += cm.subtrim[channel] * 10;
+    if (cm.reverse & (u8)(1 << (channel - 1)))  val = -val;
+    ppm_set_value(channel, (u16)(15000 + val));
+}
+
 // calculate new PPM values from ADC and internal variables
 // called for each PPM cycle
 static void calc_loop(void) {
@@ -71,8 +81,10 @@ static void calc_loop(void) {
 			    cg.calib_steering_left << ADC_OVS_SHIFT,
 			    cg.calib_steering_mid << ADC_OVS_SHIFT,
 			    cg.calib_steering_right << ADC_OVS_SHIFT,
-			    cg.steering_dead_zone << ADC_OVS_SHIFT);
-	ppm_set_value(1, (u16)(15000 + val));
+			    cg.steering_dead_zone << ADC_OVS_SHIFT,
+			    cm.trim[0] * 10);
+	// XXX apply expos
+	rev_epo_subtrim(1, (s16)(((s32)val * cm.dualrate[0] + 50) / 100));
 
 
 	// throttle
@@ -80,12 +92,14 @@ static void calc_loop(void) {
 			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
 			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
 			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
-			    cg.throttle_dead_zone << ADC_OVS_SHIFT);
-	ppm_set_value(2, (u16)(15000 + val));
+			    cg.throttle_dead_zone << ADC_OVS_SHIFT,
+			    cm.trim[1] * 10);
+	// XXX apply expos
+	rev_epo_subtrim(2, (s16)(((s32)val * cm.dualrate[1] + 50) / 100));
 
 
 	// channel 3
-	ppm_set_value(3, btns(BTN_CH3) ? 20000 : 10000);
+	rev_epo_subtrim(3, btns(BTN_CH3) ? 5000 : -5000);
 
 
 	// sync signal
