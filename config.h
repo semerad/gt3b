@@ -45,6 +45,7 @@ typedef struct {
     u16 battery_low;		// low battery threshold
     u8  autorepeat;		// at what TRIM+DR is autorepeat on
     u8	key_beep:1;
+    u8  ch3_momentary:1;
 } config_global_s;
 
 extern config_global_s config_global;
@@ -62,17 +63,18 @@ extern config_global_s config_global;
 
 // model config
 
-#define CONFIG_MODEL_MAGIC  (0xf708 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xef10 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
     u8 reverse;			// bit for each channel
-    u8 trim[MAX_CHANNELS];
+    s8 subtrim[MAX_CHANNELS];
     u8 endpoint[MAX_CHANNELS][2];
-    u8 expo_steering;
-    u8 expo_forward;
-    u8 expo_back;
+    s8 trim[2];			// for steering and throttle
     u8 dualrate[2];		// for steering and throttle
+    s8 expo_steering;
+    s8 expo_forward;
+    s8 expo_back;
     u8 abs_type;
 } config_model_s;
 

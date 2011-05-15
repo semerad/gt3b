@@ -47,9 +47,10 @@ u8 config_global_set_default(void) {
     cg.backlight_time	= 30;
     cg.battery_low	= 616;
     cg.autorepeat	= BTN_DR_ALL;
-    cg.key_beep		= 1;
     cg.steering_dead_zone = 2;
     cg.throttle_dead_zone = 2;
+    cg.key_beep		= 1;
+    cg.ch3_momentary	= 0;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
@@ -77,13 +78,15 @@ void config_model_set_default(void) {
     cm.channels		= 3;
     default_model_name(cg.model, cm.name);
     cm.reverse		= 0;
-    memset(&cm.trim, 0, MAX_CHANNELS);
+    memset(&cm.subtrim, 0, MAX_CHANNELS);
     memset(&cm.endpoint, 100, MAX_CHANNELS * 2);
+    cm.trim[0]		= 0;
+    cm.trim[1]		= 0;
+    cm.dualrate[0]	= 100;
+    cm.dualrate[1]	= 100;
     cm.expo_steering	= 0;
     cm.expo_forward	= 0;
     cm.expo_back	= 0;
-    cm.dualrate[0]	= 100;
-    cm.dualrate[1]	= 100;
     cm.abs_type		= 0;
 }
 
