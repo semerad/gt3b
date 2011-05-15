@@ -1,10 +1,14 @@
 
 This is alternative firmware for model radio FlySky FS-TH9X and clones.
+This software comes with absolutely NO-WARRANTY.
+
 
 
 It is programmed with using possibilities of hardware, using timers,
 interrupts and cooperative multitasking (this is because it is much
 simplier to program it then).
+
+
 
 
 There are 2 interrupts:
@@ -21,6 +25,8 @@ timer_interrupt
     - handles buzzer
     - wakeups task INPUT
     - handles task MENU delay and wakeups this task
+
+
 
 
 There are 4 tasks:
@@ -45,22 +51,29 @@ MENU
 	- status of battery low changed
 
 
+
+
 Files:
 
 stm8.h		- macros for STM8 handling
 gt3b.h		- global common values
 
-vector.c	- table of interrupt vectors
-task.c		- cooperative multitasking
-buzzer.c	- buzzer
-eeprom.c	- eeprom read/write
-timer.c		- timer 5ms
-input.c		- INPUT task, reading ADC and keys
-lcd.c		- LCD task, writing to LCD controller, blinking
-ppm.c		- generating of PPM signal
-config.c	- global and model configuration
-main.c		- initialize all and call MENU task
+vector.c,h	- table of interrupt vectors
+task.c,h	- cooperative multitasking
+buzzer.c,h	- buzzer
+eeprom.c,h	- eeprom read/write
+timer.c,h	- timer 5ms
+input.c,h	- INPUT task, reading ADC and keys
+lcd.c,h		- LCD task, writing to LCD controller, blinking
+ppm.c,h		- generating of PPM signal
+config.c,h	- global and model configuration
+main.c,h	- initialize all and call MENU task
 
-menu.c		- MENU task, handling keys, menus, lcd
-calc.c		- CALC task, calculate PPM values
+menu.c,h	- MENU task, handling keys, menus, lcd
+calc.c,h	- CALC task, calculate PPM values
+
+
+Only last two files are used to implement what means what button
+and how it changes signal for servos. Other files are sort of libraries
+(or it can be viewed as a little operating system :-)
 
