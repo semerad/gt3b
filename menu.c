@@ -67,11 +67,13 @@ static void key_beep(void) {
 // ***************** SERVICE MENUS **************************************
 
 // calibrate menu
+static void apply_global_config(void);
 static void calibrate(void) {
     u8 channel = 1;
     u16 last_val = 0xffff;
     u16 val;
     u8 seg;
+    u8 bat_volts;
 
     menu_takes_adc = 1;
 
@@ -98,6 +100,7 @@ static void calibrate(void) {
     while (1) {
 	// check keys
 	if (btnl(BTN_BACK))  break;
+
 	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    if (btn(BTN_BACK))  key_beep();
 	    // change channel number
@@ -112,8 +115,10 @@ static void calibrate(void) {
 	    lcd_7seg(channel);
 	    lcd_update();
 	}
+
 	else if (btn(BTN_ENTER)) {
 	    // save calibrate value for channels 1 and 2
+	    // select actual voltage for channel 4
 	    if (channel == 1) {
 		key_beep();
 		val = (adc_steering_ovs + ADC_OVS_RND) >> ADC_OVS_SHIFT;
@@ -150,6 +155,39 @@ static void calibrate(void) {
 		lcd_segment(seg, LS_OFF);  // set corresponding LCD off
 		lcd_update();
 	    }
+	    else if (channel == 4) {
+		key_beep();
+		// allow to set actual battery voltage
+		lcd_segment(LS_SYM_DOT, LS_ON);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		bat_volts = (u8)(((u32)adc_battery * 100 + 300) / cg.battery_calib);
+		lcd_char_num3(bat_volts);
+		lcd_update();
+
+		while (1) {
+		    btnra();
+		    stop();
+
+		    if (btnl(BTN_BACK) || btn(BTN_ENTER | BTN_END))  break;
+		    if (btn(BTN_ROT_ALL)) {
+			if (btn(BTN_ROT_L))  bat_volts--;
+			else                 bat_volts++;
+		    }
+		}
+
+		lcd_segment(LS_SYM_DOT, LS_ON);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		last_val = 0xffff;	// show ADC value
+		if (btn(BTN_END)) {
+		    // don't save value, switch to channel 1
+		    channel = 1;
+		}
+		else {
+		    // recalculate calibrate value for 10V
+		    cg.battery_calib = (u16)(((u32)adc_battery * 100 + 40) / bat_volts);
+		    if (btnl(BTN_BACK))  break;
+		}
+	    }
 	}
 
 	// show ADC value if other than last val
@@ -170,8 +208,7 @@ static void calibrate(void) {
     lcd_menu(0);
     lcd_update();
     config_global_save();
-    backlight_set_default(cg.backlight_time);
-    backlight_on();
+    apply_global_config();
 }
 
 
