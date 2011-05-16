@@ -172,11 +172,13 @@ static void calibrate(void) {
 		    if (btn(BTN_ROT_ALL)) {
 			if (btn(BTN_ROT_L))  bat_volts--;
 			else                 bat_volts++;
+			lcd_char_num3(bat_volts);
+			lcd_update();
 		    }
 		}
 
-		lcd_segment(LS_SYM_DOT, LS_ON);
-		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		lcd_segment(LS_SYM_DOT, LS_OFF);
+		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		last_val = 0xffff;	// show ADC value
 		if (btn(BTN_END)) {
 		    // don't save value, switch to channel 1
@@ -410,7 +412,9 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 
     lcd_7seg(channel);
     lcd_set_blink(L7SEG, LB_SPC);
-    subfunc(channel, 0);		// show current value
+    subfunc((u8)(channel - 1), 0);	// show current value
+    menu_adc_direction = 0;
+    if (use_adc)  menu_set_adc_direction(channel);
     lcd_update();
 
     while (1) {
@@ -425,7 +429,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	if (btn(BTN_ROT_ALL)) {
 	    if (chan_val) {
 		// change value
-		subfunc(channel, 1);
+		subfunc((u8)(channel - 1), 1);
 		lcd_set_blink(LCHR1, LB_SPC);
 		lcd_set_blink(LCHR2, LB_SPC);
 		lcd_set_blink(LCHR3, LB_SPC);
@@ -440,7 +444,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 		}
 		lcd_7seg(channel);
 		lcd_set_blink(L7SEG, LB_SPC);
-		subfunc(channel, 0);
+		subfunc((u8)(channel - 1), 0);
 	    }
 	    lcd_update();
 	    last_direction = menu_adc_direction;  // was already showed
@@ -468,7 +472,10 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 
 	if (last_direction != menu_adc_direction) {
 	    // show other dir value
-	    subfunc(channel, 0);
+	    subfunc((u8)(channel - 1), 0);
+	    lcd_set_blink(LCHR1, LB_SPC);
+	    lcd_set_blink(LCHR2, LB_SPC);
+	    lcd_set_blink(LCHR3, LB_SPC);
 	    lcd_update();
 	}
     }
@@ -503,6 +510,8 @@ static s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast) {
 // if another key pressed, return
 static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
                           s8 min, s8 max, u8 step, u8 *labels) {
+    u16 to_time;
+
     // show MENU and CHANNEL
     lcd_segment(menu, LS_ON);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
@@ -533,7 +542,10 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 	if (buttons)  break;
 
 	// sleep 5s, and if no button was pressed during, end this screen
-	delay_menu(5 * 200);
+	to_time = time_sec + 5;
+	while (time_sec < to_time && !buttons)
+	    delay_menu((to_time - time_sec) * 200);
+
 	if (!buttons)  break;
     }
 
@@ -920,7 +932,7 @@ static void menu_reset_model(void) {
 
 // set reverse
 void sf_reverse(u8 channel, u8 change) {
-    u8 bit = (u8)(1 << (channel - 1));
+    u8 bit = (u8)(1 << channel);
     if (change)  cm.reverse ^= bit;
     if (cm.reverse & bit)  lcd_chars("REV");
     else                   lcd_chars("NOR");
@@ -1072,7 +1084,7 @@ static void menu_loop(void) {
 		calibrate();
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		key_test();
-	    else global_setup;
+	    else global_setup();
 	}
 
 	// Enter key
@@ -1089,16 +1101,16 @@ static void menu_loop(void) {
 	    goto check_keys;
 	}
 	else if (btn(BTN_TRIM_FWD | BTN_TRIM_BCK)) {
-	    trim_dualrate(LS_MENU_TRIM, 2,
-	                  &cm.trim[1], BTN_TRIM_FWD, BTN_TRIM_BCK,
+	    trim_dualrate(LS_MENU_TRIM, 2, &cm.trim[1],
+	                  BTN_TRIM_FWD, BTN_TRIM_BCK,
 	                  -TRIM_MAX, TRIM_MAX, cg.trim_step, "FNB");
 	    goto check_keys;
 	}
 
 	// dualrate
 	else if (btn(BTN_DR_L | BTN_DR_R)) {
-	    trim_dualrate(LS_MENU_DR, 1,
-	                  (s8 *)&cm.dualrate[0], BTN_DR_L, BTN_DR_R,
+	    trim_dualrate(LS_MENU_DR, 1, (s8 *)&cm.dualrate[0],
+	                  BTN_DR_L, BTN_DR_R,
 			  0, 100, 1, 0);
 	    goto check_keys;
 	}

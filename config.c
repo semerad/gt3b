@@ -81,15 +81,15 @@ void config_model_set_default(void) {
     cm.channels		= 3;
     default_model_name(cg.model, cm.name);
     cm.reverse		= 0;
-    memset(&cm.subtrim, 0, MAX_CHANNELS);
-    memset(&cm.endpoint, 100, MAX_CHANNELS * 2);
+    memset(cm.subtrim, 0, MAX_CHANNELS);
+    memset(cm.endpoint, 100, MAX_CHANNELS * 2);
     cm.trim[0]		= 0;
     cm.trim[1]		= 0;
     cm.dualrate[0]	= 100;
     cm.dualrate[1]	= 100;
-    cm.expo[0]		= 0;
-    cm.expo[1]		= 0;
-    cm.expo[2]		= 0;
+    cm.expo_steering	= 0;
+    cm.expo_forward	= 0;
+    cm.expo_back	= 0;
     cm.abs_type		= 0;
 }
 
@@ -132,6 +132,7 @@ u8 config_global_read(void) {
     else if (config_global.magic_model != CONFIG_MODEL_MAGIC) {
 	// set new model magic
 	config_global.magic_model = CONFIG_MODEL_MAGIC;
+	config_global.model = 0;
 	config_global_save();
 	// model config changed, empty all models
 	eeprom_empty_models();

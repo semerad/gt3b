@@ -66,7 +66,7 @@ extern config_global_s config_global;
 
 // model config
 
-#define CONFIG_MODEL_MAGIC  (0xef10 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xe718 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
