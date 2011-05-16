@@ -42,7 +42,7 @@ void timer_init(void) {
 // count seconds from power on
 volatile u16 time_sec;
 volatile u8  time_5ms;
-static u8 menu_delay;		// timer for delay in MENU task
+static u16 menu_delay;		// timer for delay in MENU task
 
 
 // interrupt every 5ms
@@ -111,7 +111,7 @@ static u8 menu_delay;		// timer for delay in MENU task
 
 
 // delay in task MENU
-void delay_menu(u8 len_5ms) {
+void delay_menu(u16 len_5ms) {
     menu_delay = len_5ms;
     stop();
     menu_delay = 0;	// MENU task can be awaked from input also, so set no delay for sure

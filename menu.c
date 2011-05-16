@@ -499,6 +499,52 @@ static s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast) {
 }
 
 
+// temporary show trim/dualrate value
+// if another key pressed, return
+static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
+                          s8 min, s8 max, u8 step, u8 *labels) {
+    // show MENU and CHANNEL
+    lcd_segment(menu, LS_ON);
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    lcd_7seg(channel);
+
+    while (1) {
+	// check value left/right
+	if (btn(btn_l | btn_r)) {
+	    key_beep();
+	    if (btn(btn_l)) {
+		*val -= step;
+		if (*val < min)  *val = min;
+	    }
+	    else {
+		*val += step;
+		if (*val > max)  *val = max;
+	    }
+	    btnr(btn_l | btn_r);
+	}
+
+	// show current value
+	if (labels)  lcd_char_num2_lbl(*val, labels);
+	else         lcd_char_num3(*val);
+	lcd_update();
+
+	// if another button was pressed, leave this screen
+	if (buttons)  break;
+
+	// sleep 5s, and if no button was pressed during, end this screen
+	delay_menu(5 * 200);
+	if (!buttons)  break;
+    }
+
+    // set selected MENU off
+    lcd_segment(menu, LS_OFF);
+
+    // save model config
+    config_model_save();
+}
+
+
 
 
 
@@ -1012,12 +1058,13 @@ static void menu_loop(void) {
     u8 item = MS_NAME;
 
     lcd_clear();
-    main_screen(item);
 
     while (1) {
+	main_screen(item);
 	btnra();
 	menu_stop();
 
+    check_keys:
 	// Enter long key
 	if (btnl(BTN_ENTER)) {
 	    key_beep();
@@ -1026,19 +1073,36 @@ static void menu_loop(void) {
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		key_test();
 	    else global_setup;
-	    main_screen(item);
 	}
 
 	// Enter key
 	else if (btn(BTN_ENTER)) {
 	    key_beep();
 	    select_menu();
-	    main_screen(item);
 	}
 
-	// trims XXX
+	// trims
+	else if (btn(BTN_TRIM_LEFT | BTN_TRIM_RIGHT)) {
+	    trim_dualrate(LS_MENU_TRIM, 1, &cm.trim[0],
+	                  BTN_TRIM_LEFT, BTN_TRIM_RIGHT,
+	                  -TRIM_MAX, TRIM_MAX, cg.trim_step, "LNR");
+	    goto check_keys;
+	}
+	else if (btn(BTN_TRIM_FWD | BTN_TRIM_BCK)) {
+	    trim_dualrate(LS_MENU_TRIM, 2,
+	                  &cm.trim[1], BTN_TRIM_FWD, BTN_TRIM_BCK,
+	                  -TRIM_MAX, TRIM_MAX, cg.trim_step, "FNB");
+	    goto check_keys;
+	}
 
-	// dualrate XXX
+	// dualrate
+	else if (btn(BTN_DR_L | BTN_DR_R)) {
+	    trim_dualrate(LS_MENU_DR, 1,
+	                  (s8 *)&cm.dualrate[0], BTN_DR_L, BTN_DR_R,
+			  0, 100, 1, 0);
+	    goto check_keys;
+	}
+	
 
 	// channel 3 button
 	else if (btn(BTN_CH3)) {
@@ -1054,7 +1118,6 @@ static void menu_loop(void) {
 	    else {
 		if (++item >= MS_MAX)  item = 0;
 	    }
-	    main_screen(item);
 	}
     }
 }
