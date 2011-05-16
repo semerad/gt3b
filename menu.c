@@ -286,6 +286,7 @@ static void menu_stop(void) {
 // show main screen (model number and name/battery/...)
 #define MS_NAME		0
 #define MS_BATTERY	1
+#define MS_MAX		2
 static void main_screen(u8 item) {
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     lcd_segment(LS_SYM_CHANNEL, LS_OFF);
@@ -387,8 +388,8 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 		lcd_7seg(channel);
 		lcd_set_blink(L7SEG, LB_SPC);
 		subfunc(channel, 0);
-		lcd_update();
 	    }
+	    lcd_update();
 	    last_direction = menu_adc_direction;  // was already showed
 	}
 
@@ -396,18 +397,18 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    // switch channel/value
 	    if (chan_val) {
 		// switch to channel number
-		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
-		chan_val = 0;
-	    }
-	    else {
-		// switch to value
 		lcd_set_blink(L7SEG, LB_SPC);
 		lcd_set_blink(LCHR1, LB_OFF);
 		lcd_set_blink(LCHR2, LB_OFF);
 		lcd_set_blink(LCHR3, LB_OFF);
+		chan_val = 0;
+	    }
+	    else {
+		// switch to value
+		lcd_set_blink(L7SEG, LB_OFF);
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
 		chan_val = 1;
 	    }
 	}
@@ -426,18 +427,18 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 
 
 // change value 
-static s16 menu_change_val(s16 val, s16 min, s16 max) {
+static s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast) {
     u8 amount = 1;
 
     if (btn(BTN_ROT_L)) {
 	// left
-	if (btnl(BTN_ROT_L))  amount = 5;
+	if (btnl(BTN_ROT_L))  amount = amount_fast;
 	val -= amount;
 	if (val < min)  val = min;
     }
     else {
 	// right
-	if (btnl(BTN_ROT_R))  amount = 5;
+	if (btnl(BTN_ROT_R))  amount = amount_fast;
 	val += amount;
 	if (val > max)  val = max;
     }
@@ -532,7 +533,7 @@ static void gs_trim_step(u8 change) {
 	lcd_segment(LS_MENU_TRIM, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20);
+    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2);
     lcd_segment(LS_MENU_TRIM, LS_ON);
     lcd_char_num3(*addr);
 }
@@ -543,7 +544,7 @@ static void gs_endpoint_max(u8 change) {
 	lcd_segment(LS_MENU_EPO, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200);
+    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200, 5);
     lcd_segment(LS_MENU_EPO, LS_ON);
     lcd_char_num3(*addr);
 }
@@ -576,7 +577,7 @@ static void gs_steering_dead(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
     lcd_7seg(1);
     lcd_char_num3(*addr);
 }
@@ -587,7 +588,7 @@ static void gs_throttle_dead(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
     lcd_7seg(1);
     lcd_char_num3(*addr);
 }
@@ -619,6 +620,7 @@ static void global_setup(void) {
     lcd_segment(LS_MENU_MODEL, LS_ON);
     lcd_segment_blink(LS_MENU_MODEL, LB_INV);
     lcd_segment_blink(LS_MENU_NAME, LB_INV);
+    lcd_update();
     func(0);			// show current value
 
     while (1) {
@@ -661,6 +663,7 @@ static void global_setup(void) {
 		func = gs_config[item];
 		func(0);		// show current value
 	    }
+	    lcd_update();
 	}
     }
 
@@ -797,7 +800,7 @@ void sf_reverse(u8 channel, u8 change) {
 // set endpoints
 void sf_endpoint(u8 channel, u8 change) {
     u8 *addr = &cm.endpoint[channel][menu_adc_direction];
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max, 5);
     lcd_char_num3(*addr);
 }
 @inline static void menu_endpoint(void) {
@@ -807,7 +810,7 @@ void sf_endpoint(u8 channel, u8 change) {
 // set trims
 static void sf_trim(u8 channel, u8 change) {
     s8 *addr = &cm.trim[channel];
-    if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX);
+    if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX, 5);
     if (channel == 1)  lcd_char_num2_lbl(*addr, "LNR");
     else               lcd_char_num2_lbl(*addr, "FNB");
 }
@@ -818,7 +821,8 @@ static void sf_trim(u8 channel, u8 change) {
 // set subtrims
 static void sf_subtrim(u8 channel, u8 change) {
     s8 *addr = &cm.subtrim[channel];
-    if (change)  *addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX);
+    if (change)
+	*addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX, 5);
     lcd_char_num2(*addr);
 }
 static void menu_subtrim(void) {
@@ -830,7 +834,7 @@ static void menu_subtrim(void) {
 // set dualrate
 static void sf_dualrate(u8 channel, u8 change) {
     u8 *addr = &cm.dualrate[channel];
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 100);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, 5);
     lcd_char_num3(*addr);
 }
 @inline static void menu_dualrate(void) {
@@ -840,7 +844,7 @@ static void sf_dualrate(u8 channel, u8 change) {
 // set expos
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
-    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99);
+    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, 5);
     lcd_char_num2(*addr);
 }
 @inline static void menu_expo(void) {
@@ -957,7 +961,13 @@ static void menu_loop(void) {
 
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {
-	    item = (u8)(1 - item);	// only name/battery now
+	    if (btn(BTN_ROT_L)) {
+		if (item)  item--;
+		else       item = MS_MAX - 1;
+	    }
+	    else {
+		if (++item >= MS_MAX)  item = 0;
+	    }
 	    main_screen(item);
 	}
     }
