@@ -58,6 +58,12 @@ static void key_beep(void) {
 
 
 
+
+
+
+
+// ***************** SERVICE MENUS **************************************
+
 // calibrate menu
 static void calibrate(void) {
     u8 channel = 1;
@@ -220,6 +226,10 @@ static void key_test(void) {
 
 
 
+
+
+
+// ****************** UTILITY FUNCTIONS ******************************
 
 // load model config from eeprom and set model settings
 static void load_model(void) {
@@ -438,7 +448,11 @@ static s16 menu_change_val(s16 val, s16 min, s16 max) {
 
 
 
-// global setup
+
+
+
+
+// ************************* GLOBAL MENUS *********************************
 
 // steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
 static const u16 bl_steps[] = {
@@ -509,6 +523,7 @@ static void gs_battery_low(u8 change) {
     }
     // XXX
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
+    lcd_chars("XXX");
 }
 
 static void gs_trim_step(u8 change) {
@@ -590,7 +605,6 @@ static const global_setup_t gs_config[] = {
 };
 #define GS_CONFIG_MAX  (sizeof(gs_config) / sizeof(u8 *))
 static void global_setup(void) {
-    // XXX
     u8 item = 0;
     u8 item_val = 0;		// now selecting item
     global_setup_t func = gs_config[item];
@@ -659,6 +673,12 @@ static void global_setup(void) {
 
 
 
+
+
+
+
+
+// *************************** MODEL MENUS *******************************
 
 // selected submenus
 // select model/save model as (to selected model position)
@@ -888,6 +908,14 @@ static void select_menu(void) {
     lcd_menu(0);
 }
 
+
+
+
+
+
+
+
+// ****************** MAIN LOOP and init *********************************
 
 // main menu loop, shows main screen and handle keys
 static void menu_loop(void) {
