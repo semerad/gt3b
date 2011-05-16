@@ -61,12 +61,35 @@ static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
     }
 }
 
+// apply reverse, endpoint, subtrim
 static void rev_epo_subtrim(u8 channel, s16 inval) {
     s16 val = (s16)(((s32)inval * cm.endpoint[channel][(u8)(inval < 0 ? 0 : 1)]
                      + 50) / 100);
     val += cm.subtrim[channel] * 10;
     if (cm.reverse & (u8)(1 << (channel - 1)))  val = -val;
     ppm_set_value(channel, (u16)(15000 + val));
+}
+
+// expo only for plus values
+static s16 expou(u16 x, u8 exp) {
+    // (x * x * x * exp / (5000 * 5000) + x * (100 - exp) + 50) / 100
+    return (s16)(((u32)x * x / 5000 * x * exp / 5000
+                  + (u32)x * (100 - exp) + 50) / 100);
+}
+// apply expo
+static s16 expo(s16 inval, s8 exp) {
+    u8  neg;
+    s16 val;
+
+    if (exp == 0)  return inval;	// no expo
+
+    neg = (u8)(inval < 0 ? 1 : 0);
+    if (neg)  inval = -inval;
+
+    if (exp > 0)  val = expou(inval, exp);
+    else          val = 5000 - expou(5000 - inval, (u8)-exp);
+
+    return  neg ? -val : val;
 }
 
 // calculate new PPM values from ADC and internal variables
@@ -83,7 +106,7 @@ static void calc_loop(void) {
 			    cg.calib_steering_right << ADC_OVS_SHIFT,
 			    cg.steering_dead_zone << ADC_OVS_SHIFT,
 			    cm.trim[0] * 10);
-	// XXX apply expos
+	val = expo(val, cm.expo_steering);
 	rev_epo_subtrim(1, (s16)(((s32)val * cm.dualrate[0] + 50) / 100));
 
 
@@ -94,7 +117,8 @@ static void calc_loop(void) {
 			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
 			    cg.throttle_dead_zone << ADC_OVS_SHIFT,
 			    cm.trim[1] * 10);
-	// XXX apply expos
+	if (val < 0)  val = expo(val, cm.expo_forward);
+	else          val = expo(val, cm.expo_back);
 	rev_epo_subtrim(2, (s16)(((s32)val * cm.dualrate[1] + 50) / 100));
 
 
