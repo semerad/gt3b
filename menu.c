@@ -43,8 +43,7 @@ _Bool ch3_state;		// state of channel 3 button
 
 
 // flags for wakeup after each ADC measure
-_Bool menu_takes_adc;
-_Bool menu_wants_battery;
+_Bool menu_wants_adc;
 // battery low flag
 _Bool menu_battery_low;
 // raw battery ADC value for check to battery low
@@ -75,10 +74,11 @@ static void calibrate(void) {
     u8 seg;
     u8 bat_volts;
 
-    menu_takes_adc = 1;
+    menu_wants_adc = 1;
 
     // cleanup screen and disable possible low bat warning
     buzzer_off();
+    key_beep();
     menu_battery_low = 0;	// it will be set automatically again
     backlight_set_default(BACKLIGHT_MAX);
     backlight_on();
@@ -102,7 +102,7 @@ static void calibrate(void) {
 	if (btnl(BTN_BACK))  break;
 
 	if (btn(BTN_END | BTN_ROT_ALL)) {
-	    if (btn(BTN_BACK))  key_beep();
+	    if (btn(BTN_END))  key_beep();
 	    // change channel number
 	    if (btn(BTN_ROT_L)) {
 		// down
@@ -177,14 +177,11 @@ static void calibrate(void) {
 		    }
 		}
 
+		key_beep();
 		lcd_segment(LS_SYM_DOT, LS_OFF);
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		last_val = 0xffff;	// show ADC value
-		if (btn(BTN_END)) {
-		    // don't save value, switch to channel 1
-		    channel = 1;
-		}
-		else {
+		if (!btn(BTN_END)) {
 		    // recalculate calibrate value for 10V
 		    cg.battery_calib = (u16)(((u32)adc_battery * 100 + 40) / bat_volts);
 		    if (btnl(BTN_BACK))  break;
@@ -205,7 +202,7 @@ static void calibrate(void) {
 	stop();
     }
 
-    menu_takes_adc = 0;
+    menu_wants_adc = 0;
     beep(60);
     lcd_menu(0);
     lcd_update();
@@ -232,6 +229,7 @@ static void key_test(void) {
     
     // cleanup screen and disable possible low bat warning
     buzzer_off();
+    key_beep();
     menu_battery_low = 0;	// it will be set automatically again
 
     // do full screen blink
@@ -277,6 +275,7 @@ static void load_model(void) {
     config_model_read();
 
     ppm_set_channels(cm.channels);
+    ch3_state = 0;
 }
 
 
@@ -339,10 +338,15 @@ static void menu_stop(void) {
 #define MS_BATTERY	1
 #define MS_MAX		2
 static void main_screen(u8 item) {
+    static u16 bat_val = 0;
+    static u16 bat_time = 0;
+
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     lcd_segment(LS_SYM_CHANNEL, LS_OFF);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
     show_model_number(cg.model);
+
+    menu_wants_adc = 0;
 
     // chars is item dependent
     if (item == MS_NAME) {
@@ -356,7 +360,12 @@ static void main_screen(u8 item) {
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
 	// calculate voltage from current raw value and calib value
-	lcd_char_num3((u16)(((u32)adc_battery * 100 + 300) / cg.battery_calib));
+	if (time_sec >= bat_time) {
+	    bat_time = time_sec + 2;
+	    bat_val = (u16)(((u32)adc_battery * 100 + 300) / cg.battery_calib);
+	}
+	lcd_char_num3(bat_val);
+	menu_wants_adc = 1;
     }
     lcd_update();
 }
@@ -400,21 +409,21 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     u8 last_direction = menu_adc_direction;
 
     if (use_adc) {
-	menu_takes_adc = 1;
+	menu_wants_adc = 1;
 	menu_set_adc_direction(channel);
     }
 
     // show CHANNEL
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_ON);
     lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
 
     lcd_7seg(channel);
     lcd_set_blink(L7SEG, LB_SPC);
-    subfunc((u8)(channel - 1), 0);	// show current value
     menu_adc_direction = 0;
     if (use_adc)  menu_set_adc_direction(channel);
+    subfunc((u8)(channel - 1), 0);	// show current value
     lcd_update();
 
     while (1) {
@@ -473,14 +482,16 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	if (last_direction != menu_adc_direction) {
 	    // show other dir value
 	    subfunc((u8)(channel - 1), 0);
-	    lcd_set_blink(LCHR1, LB_SPC);
-	    lcd_set_blink(LCHR2, LB_SPC);
-	    lcd_set_blink(LCHR3, LB_SPC);
 	    lcd_update();
+	    if (chan_val) {
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
+	    }
 	}
     }
 
-    menu_takes_adc = 0;
+    menu_wants_adc = 0;
     key_beep();
     config_model_save();
 }
@@ -606,21 +617,21 @@ static void gs_backlight_time(u8 change) {
 	    }
 	}
     }
-    lcd_7seg(5);	// Seconds
+    lcd_7seg(8);	// as B(acklight)
     if (*addr < 60) {
 	// seconds
 	bl_num2((u8)*addr);
-	lcd_char(LCHR3, 's');
+	lcd_char(LCHR3, 'S');
     }
     else if (*addr < 3600) {
 	// minutes
 	bl_num2((u8)(*addr / 60));
-	lcd_char(LCHR3, 'm');
+	lcd_char(LCHR3, 'M');
     }
     else if (*addr != BACKLIGHT_MAX) {
 	// hours
 	bl_num2((u8)(*addr / 3600));
-	lcd_char(LCHR3, 'h');
+	lcd_char(LCHR3, 'H');
     }
     else {
 	// max
@@ -681,7 +692,10 @@ static void gs_ch3_momentary(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  cg.ch3_momentary ^= 1;
+    if (change) {
+	cg.ch3_momentary ^= 1;
+	ch3_state = 0;
+    }
     lcd_7seg(3);
     if (cg.ch3_momentary)  lcd_chars("ON ");
     else                   lcd_chars("OFF");
@@ -705,7 +719,7 @@ static void gs_throttle_dead(u8 change) {
 	return;
     }
     if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
-    lcd_7seg(1);
+    lcd_7seg(2);
     lcd_char_num3(*addr);
 }
 
@@ -754,6 +768,7 @@ static void global_setup(void) {
 
     // cleanup screen and disable possible low bat warning
     buzzer_off();
+    key_beep();
     menu_battery_low = 0;	// it will be set automatically again
     backlight_set_default(BACKLIGHT_MAX);
     backlight_on();
@@ -772,6 +787,7 @@ static void global_setup(void) {
 	if (btnl(BTN_BACK))  break;
 
 	if (btn(BTN_ENTER)) {
+	    key_beep();
 	    item_val = (u8)(1 - item_val);
 	    if (item_val) {
 		// changing value
@@ -955,7 +971,7 @@ void sf_endpoint(u8 channel, u8 change) {
 static void sf_trim(u8 channel, u8 change) {
     s8 *addr = &cm.trim[channel];
     if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX, 5);
-    if (channel == 1)  lcd_char_num2_lbl(*addr, "LNR");
+    if (channel == 0)  lcd_char_num2_lbl(*addr, "LNR");
     else               lcd_char_num2_lbl(*addr, "FNB");
 }
 @inline static void menu_trim(void) {
@@ -1076,10 +1092,12 @@ static void menu_loop(void) {
 	btnra();
 	menu_stop();
 
+	// don't wanted in submenus, will be set back in main_screen()
+	menu_wants_adc = 0;
+
     check_keys:
 	// Enter long key
 	if (btnl(BTN_ENTER)) {
-	    key_beep();
 	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
 		calibrate();
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
@@ -1117,7 +1135,8 @@ static void menu_loop(void) {
 	
 
 	// channel 3 button
-	else if (btn(BTN_CH3)) {
+	else if (!cg.ch3_momentary && btn(BTN_CH3)) {
+	    key_beep();
 	    ch3_state = ~ch3_state;
 	}
 

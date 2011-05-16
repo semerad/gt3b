@@ -28,7 +28,6 @@
 
 #include <string.h>
 #include "ppm.h"
-#include "menu.h"
 #include "calc.h"
 
 
@@ -105,8 +104,7 @@ void ppm_init(void) {
 	    // wakeup CALC task to compute new PPM values
 	    // values for ARR registers will be updated after calculate done
 	    // (and when we are still generating SYNC pulse)
-	    if (!menu_takes_adc)
-		awake(CALC);
+	    awake(CALC);
 	}
 	// set servo channel
 	TIM3_PSCR = PPM_PSC_SERVO;

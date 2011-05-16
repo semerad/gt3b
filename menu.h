@@ -38,9 +38,7 @@ extern _Bool ch3_state;		// state of channel 3 button
 
 
 // menu tasks will be handling ADC now (for calibrate)
-extern _Bool menu_takes_adc;
-// or wants to show battery voltage
-extern _Bool menu_wants_battery;
+extern _Bool menu_wants_adc;
 // flag low battery voltage
 extern _Bool menu_battery_low;
 // raw battery ADC value for check to battery low
