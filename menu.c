@@ -533,8 +533,9 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 
     while (1) {
 	// check value left/right
-	if (btnl(btn_l | btn_r)) {
+	if (btnl_all(btn_l | btn_r)) {
 	    // reset to 0
+	    key_beep();
 	    *val = 0;
 	    btnr(btn_l | btn_r);
 	}
@@ -548,7 +549,7 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 		*val += step;
 		if (*val > max)  *val = max;
 	    }
-	    button_reset_nolong(btn_l | btn_r);  // waiting for possible 0-set
+	    btnr_nolong(btn_l | btn_r);  // waiting for possible 0-set
 	}
 
 	// show current value
