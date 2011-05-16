@@ -415,7 +415,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 
     // show CHANNEL
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_ON);
+    lcd_segment(LS_SYM_LEFT, (u8)(use_adc ? LS_ON : LS_OFF));
     lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
 
