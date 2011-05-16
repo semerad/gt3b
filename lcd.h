@@ -95,6 +95,7 @@ extern void lcd_char_num2(s8 num);  // num -99..99
 extern void lcd_char_num2_lbl(s8 num, u8 *labels);  // num -99..99 with labels for <0, =0, >0
 extern void lcd_7seg(u8 number);    // num 0-15 (>=10 as hexa numbers)
 extern void lcd_menu(u8 menus);     // OR-ed selected menus
+extern void lcd_chars_blink(u8 on_off);  // lcd_set_blink() for 3 chars
 
 // values for lcd_menu()
 #define LM_MODEL	0x80

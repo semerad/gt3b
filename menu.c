@@ -441,9 +441,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    if (chan_val) {
 		// change value
 		subfunc((u8)(channel - 1), 1);
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
+		lcd_chars_blink(LB_SPC);
 	    }
 	    else {
 		// change channel number
@@ -466,17 +464,13 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    if (chan_val) {
 		// switch to channel number
 		lcd_set_blink(L7SEG, LB_SPC);
-		lcd_set_blink(LCHR1, LB_OFF);
-		lcd_set_blink(LCHR2, LB_OFF);
-		lcd_set_blink(LCHR3, LB_OFF);
+		lcd_chars_blink(LB_OFF);
 		chan_val = 0;
 	    }
 	    else {
 		// switch to value
 		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
+		lcd_chars_blink(LB_SPC);
 		chan_val = 1;
 	    }
 	}
@@ -486,9 +480,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    subfunc((u8)(channel - 1), 0);
 	    lcd_update();
 	    if (chan_val) {
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
+		lcd_chars_blink(LB_SPC);
 	    }
 	}
     }
@@ -803,15 +795,11 @@ static void global_setup(void) {
 	    item_val = (u8)(1 - item_val);
 	    if (item_val) {
 		// changing value
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
+		lcd_chars_blink(LB_SPC);
 	    }
 	    else {
 		// selecting item
-		lcd_set_blink(LCHR1, LB_OFF);
-		lcd_set_blink(LCHR2, LB_OFF);
-		lcd_set_blink(LCHR3, LB_OFF);
+		lcd_chars_blink(LB_OFF);
 	    }
 	}
 
@@ -819,9 +807,7 @@ static void global_setup(void) {
 	    if (item_val) {
 		// change item value
 		func(1);
-		lcd_set_blink(LCHR1, LB_SPC);
-		lcd_set_blink(LCHR2, LB_SPC);
-		lcd_set_blink(LCHR3, LB_SPC);
+		lcd_chars_blink(LB_SPC);
 	    }
 	    else {
 		// select another item
@@ -1043,9 +1029,7 @@ static void menu_abs(void) {
 
     lcd_7seg(2);
     lcd_chars(abs_labels[cm.abs_type]);
-    lcd_set_blink(LCHR1, LB_SPC);
-    lcd_set_blink(LCHR2, LB_SPC);
-    lcd_set_blink(LCHR3, LB_SPC);
+    lcd_chars_blink(LB_SPC);
     lcd_update();
 
     while (1) {
@@ -1057,9 +1041,7 @@ static void menu_abs(void) {
 	if (btn(BTN_ROT_ALL)) {
 	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_MAX-1, 1);
 	    lcd_chars(abs_labels[cm.abs_type]);
-	    lcd_set_blink(LCHR1, LB_SPC);
-	    lcd_set_blink(LCHR2, LB_SPC);
-	    lcd_set_blink(LCHR3, LB_SPC);
+	    lcd_chars_blink(LB_SPC);
 	    lcd_update();
 	}
     }

@@ -654,6 +654,12 @@ void lcd_menu(u8 menus) {
     lcd_set(LMENU, (u8 *)(menus | 0xff00));
 }
 
+// lcd_set_blink() for 3 chars
+void lcd_chars_blink(u8 on_off) {
+    lcd_set_blink(LCHR1, on_off);
+    lcd_set_blink(LCHR2, on_off);
+    lcd_set_blink(LCHR3, on_off);
+}
 
 
 
