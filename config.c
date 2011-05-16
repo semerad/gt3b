@@ -47,7 +47,8 @@ u8 config_global_set_default(void) {
     cg.steering_dead_zone = 2;
     cg.throttle_dead_zone = 2;
     cg.backlight_time	= 30;
-    cg.battery_low	= 616;
+    cg.battery_calib	= 672;
+    cg.battery_low	= 92;		// 9.2 V
     cg.trim_step	= 2;
     cg.endpoint_max	= 120;
     cg.autorepeat	= BTN_DR_ALL;

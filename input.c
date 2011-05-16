@@ -306,7 +306,7 @@ static void read_ADC(void) {
 		       + adc_battery_last;
     adc_battery = (u16)((adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT);
     // wakeup task only when something changed
-    if (adc_battery > 50 && adc_battery < cg.battery_low) {
+    if (adc_battery > 50 && adc_battery < battery_low_raw) {
 	// bat low
 	if (!menu_battery_low) {
 	    menu_battery_low = 1;
@@ -315,7 +315,7 @@ static void read_ADC(void) {
     }
     else {
 	// bat OK, but apply some hysteresis to not switch quickly ON/OFF
-	if (menu_battery_low && adc_battery > cg.battery_low + 5) {
+	if (menu_battery_low && adc_battery > battery_low_raw + 5) {
 	    menu_battery_low = 0;
 	    awake(MENU);
 	}

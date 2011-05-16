@@ -47,6 +47,8 @@ _Bool menu_takes_adc;
 _Bool menu_wants_battery;
 // battery low flag
 _Bool menu_battery_low;
+// raw battery ADC value for check to battery low
+u16 battery_low_raw;
 
 
 
@@ -236,6 +238,16 @@ static void load_model(void) {
     config_model_read();
 
     ppm_set_channels(cm.channels);
+}
+
+
+// apply global setting to libraries
+static void apply_global_config(void) {
+    button_autorepeat(cg.autorepeat);
+    backlight_set_default(cg.backlight_time);
+    backlight_on();
+    // compute raw value for battery low voltage
+    battery_low_raw = (u16)(((u32)cg.battery_calib * cg.battery_low + 50) / 100);
 }
 
 
@@ -670,8 +682,7 @@ static void global_setup(void) {
     beep(60);
     lcd_clear();
     config_global_save();
-    backlight_set_default(cg.backlight_time);
-    backlight_on();
+    apply_global_config();
 }
 
 
@@ -983,10 +994,7 @@ void menu_init(void) {
     //   call calibrate
     if (config_global_read())
 	calibrate();
-    // apply global settings
-    button_autorepeat(cg.autorepeat);
-    backlight_set_default(cg.backlight_time);
-    backlight_on();
+    apply_global_config();
 
     // read model config from eeprom
     load_model();

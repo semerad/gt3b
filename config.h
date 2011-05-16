@@ -42,7 +42,8 @@ typedef struct {
     u8  steering_dead_zone;
     u8  throttle_dead_zone;
     u16 backlight_time;
-    u16 battery_low;		// low battery threshold
+    u16 battery_calib;		// raw ADC value for 10 Volts
+    u8  battery_low;		// low battery threshold in .1 Volts
     u8  trim_step;
     u8  endpoint_max;
     u8  autorepeat;		// at what TRIM+DR is autorepeat on
