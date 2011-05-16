@@ -62,9 +62,17 @@ typedef unsigned long  u32;
     BSET(P ## port ## _DDR, pin); \
     BSET(P ## port ## _CR1, pin); \
     BRES(P ## port ## _CR2, pin)
+#define IO_OO(port, pin) \
+    BSET(P ## port ## _DDR, pin); \
+    BRES(P ## port ## _CR1, pin); \
+    BRES(P ## port ## _CR2, pin)
 #define IO_OPF(port, pin) \
     BSET(P ## port ## _DDR, pin); \
     BSET(P ## port ## _CR1, pin); \
+    BSET(P ## port ## _CR2, pin)
+#define IO_OOF(port, pin) \
+    BSET(P ## port ## _DDR, pin); \
+    BRES(P ## port ## _CR1, pin); \
     BSET(P ## port ## _CR2, pin)
 
 

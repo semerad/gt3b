@@ -57,10 +57,10 @@ void input_init(void) {
 
 
     // buttons
-    IO_OPF(B, 4);  // button row B4
-    IO_OPF(B, 5);  // button row B5
-    IO_OPF(C, 4);  // button row C4
-    IO_OPF(D, 3);  // button row D3
+    IO_OOF(B, 4);  // button row B4
+    IO_OOF(B, 5);  // button row B5
+    IO_OOF(C, 4);  // button row C4
+    IO_OOF(D, 3);  // button row D3
     IO_IP(C, 5);   // button col C5
     IO_IP(C, 6);   // button col C6
     IO_IP(C, 7);   // button col C7
@@ -116,6 +116,9 @@ u32 adc_battery_filt;
 void button_reset(u16 btn) {
     buttons &= ~btn;
     buttons_long &= ~btn;
+}
+void button_reset_nolong(u16 btn) {
+    buttons &= ~btn;
 }
 
 
@@ -307,7 +310,7 @@ static void read_ADC(void) {
 		       + adc_battery_last;
     adc_battery = (u16)((adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT);
     // start checking battery after 5s from power on
-    if (time_sec < 5) {
+    if (time_sec >= 5) {
 	// wakeup task only when something changed
 	if (adc_battery > 50 && adc_battery < battery_low_raw) {
 	    // bat low

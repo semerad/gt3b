@@ -526,12 +526,19 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
     // show MENU and CHANNEL
     lcd_segment(menu, LS_ON);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_DOT, LS_OFF);
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg(channel);
 
     while (1) {
 	// check value left/right
-	if (btn(btn_l | btn_r)) {
+	if (btnl(btn_l | btn_r)) {
+	    // reset to 0
+	    *val = 0;
+	    btnr(btn_l | btn_r);
+	}
+	else if (btn(btn_l | btn_r)) {
 	    key_beep();
 	    if (btn(btn_l)) {
 		*val -= step;
@@ -541,7 +548,7 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 		*val += step;
 		if (*val > max)  *val = max;
 	    }
-	    btnr(btn_l | btn_r);
+	    button_reset_nolong(btn_l | btn_r);  // waiting for possible 0-set
 	}
 
 	// show current value
@@ -559,6 +566,8 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 
 	if (!buttons)  break;
     }
+
+    btnr(btn_l | btn_r);  // reset also long values
 
     // set selected MENU off
     lcd_segment(menu, LS_OFF);
@@ -963,8 +972,10 @@ void sf_endpoint(u8 channel, u8 change) {
     if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max, 5);
     lcd_char_num3(*addr);
 }
-@inline static void menu_endpoint(void) {
+static void menu_endpoint(void) {
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     menu_channel(MAX_CHANNELS, 1, sf_endpoint);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 // set trims
@@ -997,8 +1008,10 @@ static void sf_dualrate(u8 channel, u8 change) {
     if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, 5);
     lcd_char_num3(*addr);
 }
-@inline static void menu_dualrate(void) {
+static void menu_dualrate(void) {
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     menu_channel(2, 0, sf_dualrate);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 // set expos
@@ -1007,8 +1020,10 @@ static void sf_expo(u8 channel, u8 change) {
     if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, 5);
     lcd_char_num2(*addr);
 }
-@inline static void menu_expo(void) {
+static void menu_expo(void) {
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     menu_channel(3, 0, sf_expo);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 // set abs

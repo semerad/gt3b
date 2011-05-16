@@ -78,6 +78,7 @@ extern volatile u16 adc_battery_last;
 extern void button_reset(u16 btn);
 #define btnr(mask)  button_reset(mask)
 #define btnra()     button_reset(BTN_ALL)
+extern void button_reset_nolong(u16 btn);
 
 
 // set autorepeat
