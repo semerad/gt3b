@@ -426,6 +426,9 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	    if (chan_val) {
 		// change value
 		subfunc(channel, 1);
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
 	    }
 	    else {
 		// change channel number
@@ -648,6 +651,30 @@ static void gs_throttle_dead(u8 change) {
     lcd_char_num3(*addr);
 }
 
+static void gs_trim_autorepeat(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  cg.autorepeat ^= BTN_TRIM_LEFT | BTN_TRIM_RIGHT | BTN_TRIM_FWD | BTN_TRIM_BCK;
+    lcd_7seg(L7_A);
+    lcd_char(LCHR1, 'T');
+    lcd_char(LCHR2, 'O');
+    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_TRIM_LEFT ? 'N' : 'F'));
+}
+
+static void gs_dr_autorepeat(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  cg.autorepeat ^= BTN_DR_L | BTN_DR_R;
+    lcd_7seg(L7_A);
+    lcd_char(LCHR1, 'D');
+    lcd_char(LCHR2, 'O');
+    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_DR_L ? 'N' : 'F'));
+}
+
 typedef void (*global_setup_t)(u8 change);
 static const global_setup_t gs_config[] = {
     gs_backlight_time,
@@ -657,7 +684,9 @@ static const global_setup_t gs_config[] = {
     gs_steering_dead,
     gs_throttle_dead,
     gs_ch3_momentary,
-    gs_key_beep
+    gs_key_beep,
+    gs_trim_autorepeat,
+    gs_dr_autorepeat
 };
 #define GS_CONFIG_MAX  (sizeof(gs_config) / sizeof(u8 *))
 static void global_setup(void) {
@@ -704,6 +733,9 @@ static void global_setup(void) {
 	    if (item_val) {
 		// change item value
 		func(1);
+		lcd_set_blink(LCHR1, LB_SPC);
+		lcd_set_blink(LCHR2, LB_SPC);
+		lcd_set_blink(LCHR3, LB_SPC);
 	    }
 	    else {
 		// select another item
