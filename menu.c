@@ -342,6 +342,8 @@ static void main_screen(u8 item) {
     static u16 bat_time = 0;
 
     lcd_segment(LS_SYM_MODELNO, LS_ON);
+    if (ch3_state)
+	lcd_segment_blink(LS_SYM_MODELNO, LB_SPC);
     lcd_segment(LS_SYM_CHANNEL, LS_OFF);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
     show_model_number(cg.model);
