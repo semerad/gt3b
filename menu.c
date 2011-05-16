@@ -1029,9 +1029,43 @@ static void menu_expo(void) {
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
-// set abs
+// set abs: OFF, SLO(6), NOR(4), FAS(3)
+// pulses between full brake and 1/2 brake and only when enought brake applied
+static const u8 *abs_labels[] = {
+    "OFF", "SLO", "NOR", "FAS"
+};
+#define ABS_LABEL_MAX  (sizeof(abs_labels) / sizeof(u8 *))
 static void menu_abs(void) {
-    // XXX
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+
+    lcd_7seg(2);
+    lcd_chars(abs_labels[cm.abs_type]);
+    lcd_set_blink(LCHR1, LB_SPC);
+    lcd_set_blink(LCHR2, LB_SPC);
+    lcd_set_blink(LCHR3, LB_SPC);
+    lcd_update();
+
+    while (1) {
+	btnra();
+	menu_stop();
+
+	if (btn(BTN_BACK | BTN_ENTER))  break;
+
+	if (btn(BTN_ROT_ALL)) {
+	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_MAX-1, 1);
+	    lcd_chars(abs_labels[cm.abs_type]);
+	    lcd_set_blink(LCHR1, LB_SPC);
+	    lcd_set_blink(LCHR2, LB_SPC);
+	    lcd_set_blink(LCHR3, LB_SPC);
+	    lcd_update();
+	}
+    }
+
+    key_beep();
+    config_model_save();
 }
 
 
