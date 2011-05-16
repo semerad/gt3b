@@ -56,11 +56,12 @@ void input_init(void) {
     ADC_CR1 = 0b01110001;	// clock/18, no-CONT, enable
 
 
-    // buttons
-    IO_OOF(B, 4);  // button row B4
-    IO_OOF(B, 5);  // button row B5
-    IO_OOF(C, 4);  // button row C4
-    IO_OOF(D, 3);  // button row D3
+    // buttons - rows are inputs with pullups and are switched to output
+    //           only when reading that row
+    IO_IP(B, 4);  // button row B4
+    IO_IP(B, 5);  // button row B5
+    IO_IP(C, 4);  // button row C4
+    IO_IP(D, 3);  // button row D3
     IO_IP(C, 5);   // button col C5
     IO_IP(C, 6);   // button col C6
     IO_IP(C, 7);   // button col C7
@@ -132,12 +133,16 @@ void button_autorepeat(u8 btn) {
 
 
 // read key matrix (11 keys)
-#define button_row(odr, bit, c5, c6, c7) \
-    BRES(P ## odr ## _ODR, bit); \
+#define button_row(port, bit, c5, c6, c7) \
+    BSET(P ## port ## _DDR, bit); \
+    BSET(P ## port ## _CR2, bit); \
+    BRES(P ## port ## _ODR, bit); \
     if (!BCHK(PC_IDR, 5))        btn |= c5; \
     if (!BCHK(PC_IDR, 6))        btn |= c6; \
     if (c7 && !BCHK(PC_IDR, 7))  btn |= c7; \
-    BSET(P ## odr ## _ODR, bit)
+    BSET(P ## port ## _ODR, bit); \
+    BRES(P ## port ## _CR2, bit); \
+    BRES(P ## port ## _DDR, bit)
 static u16 read_key_matrix(void) {
     u16 btn = 0;
     button_row(B, 4, BTN_TRIM_LEFT,  BTN_TRIM_CH3_L, BTN_END);
