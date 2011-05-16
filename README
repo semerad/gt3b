@@ -8,6 +8,10 @@ It is programmed with using possibilities of hardware, using timers,
 interrupts and cooperative multitasking (this is because it is much
 simplier to program it then).
 
+It was written for Cosmic C compiler and will need changes to support
+other compilers.
+
+
 
 
 
