@@ -23,6 +23,7 @@
 #include "config.h"
 #include "calc.h"
 #include "lcd.h"
+#include "timer.h"
 
 
 
@@ -305,19 +306,22 @@ static void read_ADC(void) {
     adc_battery_filt = (adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT
 		       + adc_battery_last;
     adc_battery = (u16)((adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT);
-    // wakeup task only when something changed
-    if (adc_battery > 50 && adc_battery < battery_low_raw) {
-	// bat low
-	if (!menu_battery_low) {
-	    menu_battery_low = 1;
-	    awake(MENU);
+    // start checking battery after 5s from power on
+    if (time_sec < 5) {
+	// wakeup task only when something changed
+	if (adc_battery > 50 && adc_battery < battery_low_raw) {
+	    // bat low
+	    if (!menu_battery_low) {
+		menu_battery_low = 1;
+		awake(MENU);
+	    }
 	}
-    }
-    else {
-	// bat OK, but apply some hysteresis to not switch quickly ON/OFF
-	if (menu_battery_low && adc_battery > battery_low_raw + 5) {
-	    menu_battery_low = 0;
-	    awake(MENU);
+	else {
+	    // bat OK, but apply some hysteresis to not switch quickly ON/OFF
+	    if (menu_battery_low && adc_battery > battery_low_raw + 5) {
+		menu_battery_low = 0;
+		awake(MENU);
+	    }
 	}
     }
     // wakeup task when showing battery or at calibrate

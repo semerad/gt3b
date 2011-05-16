@@ -50,27 +50,27 @@
 
 
 // variables representing pressed buttons
-extern u16 buttons_state;	// actual state of buttons
-extern u16 buttons;		// pressed buttons (must be cleared by SW)
-extern u16 buttons_long;	// >1s presses buttons
+extern volatile u16 buttons_state;	// actual state of buttons
+extern volatile u16 buttons;		// pressed buttons (must be cleared by SW)
+extern volatile u16 buttons_long;	// >1s presses buttons
 #define btn(mask)  (buttons & (mask))
 #define btns(mask)  (buttons_state & (mask))
 #define btnl(mask)  (buttons_long & (mask))
 // variables for ADC values
-extern u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
+extern volatile u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
 #define ADC_OVS_SHIFT 2
 #define ADC_OVS_RND   2
 #define adc_steering_ovs   adc_all_ovs[0]
 #define adc_throttle_ovs   adc_all_ovs[1]
 #define adc_ch3_ovs        adc_all_ovs[2]
-extern u32 adc_battery_filt;	// battery will be filtered more times
+extern volatile u32 adc_battery_filt;	// battery will be filtered more times
 #define ADC_BAT_FILT  512
-extern u16 adc_battery;		// adc_battery_filt >> ADC_BATTERY_SHIFT
-extern u16 adc_all_last[3];	// last readed value
+extern volatile u16 adc_battery;	// adc_battery_filt >> ADC_BATTERY_SHIFT
+extern volatile u16 adc_all_last[3];	// last readed value
 #define adc_steering_last  adc_all_last[0]
 #define adc_throttle_last  adc_all_last[1]
 #define adc_ch3_last       adc_all_last[2]
-extern u16 adc_battery_last;
+extern volatile u16 adc_battery_last;
 
 
 // reset pressed button(s)
