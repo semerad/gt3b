@@ -316,7 +316,8 @@ static void main_screen(u8 item) {
 	// battery voltage
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
-	lcd_chars("XXX");
+	// calculate voltage from current raw value and calib value
+	lcd_char_num3((u16)(((u32)adc_battery * 100 + 300) / cg.battery_calib));
     }
     lcd_update();
 }
@@ -530,13 +531,18 @@ static void gs_backlight_time(u8 change) {
 }
 
 static void gs_battery_low(u8 change) {
+    u8 *addr = &cg.battery_low;
     if (change == 0xff) {
 	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+	lcd_segment(LS_SYM_DOT, LS_OFF);
+	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	return;
     }
-    // XXX
+    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2);
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
-    lcd_chars("XXX");
+    lcd_segment(LS_SYM_DOT, LS_ON);
+    lcd_segment(LS_SYM_VOLTS, LS_ON);
+    lcd_char_num3(cg.battery_low);
 }
 
 static void gs_trim_step(u8 change) {
