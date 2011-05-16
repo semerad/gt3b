@@ -63,9 +63,9 @@ static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
 
 // apply reverse, endpoint, subtrim
 static void rev_epo_subtrim(u8 channel, s16 inval) {
-    s16 val = (s16)(((s32)inval * cm.endpoint[channel][(u8)(inval < 0 ? 0 : 1)]
+    s16 val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)]
                      + 50) / 100);
-    val += cm.subtrim[channel] * 10;
+    val += cm.subtrim[channel-1] * 10;
     if (cm.reverse & (u8)(1 << (channel - 1)))  val = -val;
     ppm_set_value(channel, (u16)(15000 + val));
 }
@@ -74,7 +74,7 @@ static void rev_epo_subtrim(u8 channel, s16 inval) {
 static s16 expou(u16 x, u8 exp) {
     // (x * x * x * exp / (5000 * 5000) + x * (100 - exp) + 50) / 100
     return (s16)(((u32)x * x / 5000 * x * exp / 5000
-                  + (u32)x * (100 - exp) + 50) / 100);
+                  + x * (100 - exp) + 50) / 100);
 }
 // apply expo
 static s16 expo(s16 inval, s8 exp) {
