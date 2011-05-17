@@ -17,6 +17,7 @@ Global:
     - added SaveAs to save model config to another memory location
     - added Global Setup menu to change backlight_time, ...
     - CH3 switched is indicated by blinking MODEL NO.
+    - dead zone for steering and throttle
 
 
 Buttons:
