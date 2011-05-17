@@ -6,6 +6,8 @@
 Some suggestions taken from manuals of other radios:
 
 assign functions to buttons
+    ? global/model specific
+    ? use one(more) button as SHIFT/SHIFT-LOCK
 throttle acceleration
 brake acceleration
 throttle curves EXP/VTR/CRV
