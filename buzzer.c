@@ -19,6 +19,7 @@
 
 
 #include "buzzer.h"
+#include "config.h"
 
 
 void buzzer_init(void) {
@@ -56,5 +57,11 @@ void buzzer_off(void) {
 void beep(u8 len_5ms) {
     if (buzzer_running)  return;
     buzzer_on(len_5ms, 0, 1);
+}
+
+
+// key beep if enabled in config
+void key_beep(void) {
+    if (cg.key_beep)  beep(1);
 }
 
