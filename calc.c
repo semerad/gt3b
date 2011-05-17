@@ -26,6 +26,13 @@
 
 
 
+
+#define ABS_THRESHOLD  50
+
+
+
+
+
 // CALC task
 TASK(CALC, 256);
 static void calc_loop(void);
@@ -37,6 +44,7 @@ void calc_init(void) {
     activate(CALC, calc_loop);
     sleep(CALC);	// nothing to do yet
 }
+
 
 
 
@@ -92,6 +100,12 @@ static s16 expo(s16 inval, s8 exp) {
     return  neg ? -val : val;
 }
 
+
+
+
+
+
+
 // calculate new PPM values from ADC and internal variables
 // called for each PPM cycle
 static void calc_loop(void) {
@@ -110,6 +124,8 @@ static void calc_loop(void) {
 	rev_epo_subtrim(1, (s16)(((s32)val * cm.dualrate[0] + 50) / 100));
 
 
+
+
 	// throttle
 	val = channel_calib(adc_throttle_ovs,
 			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
@@ -119,13 +135,41 @@ static void calc_loop(void) {
 			    cm.trim[1] * 10);
 	if (val < 0)  val = expo(val, cm.expo_forward);
 	else          val = expo(val, cm.expo_back);
+	if (cm.abs_type) {
+	    // apply selected ABS
+	    static u8    abs_cnt;
+	    static _Bool abs_state;	// when 1, lower brake value
+
+	    if (val > ABS_THRESHOLD) {
+		// count ABS
+		abs_cnt++;
+		if (cm.abs_type == 1 && abs_cnt >= 6
+			|| cm.abs_type == 2 && abs_cnt >= 4
+			|| cm.abs_type == 3 && abs_cnt >=3) {
+		    abs_cnt = 0;
+		    abs_state ^= 1;
+		}
+		// apply ABS
+		if (abs_state)
+		    val /= 2;
+	    }
+	    else {
+		// no ABS
+		abs_cnt = 0;
+		abs_state = 0;
+	    }
+	}
 	rev_epo_subtrim(2, (s16)(((s32)val * cm.dualrate[1] + 50) / 100));
+
+
 
 
 	// channel 3
 	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? 5000 : -5000;
 	else                   val = ch3_state ? 5000 : -5000;
 	rev_epo_subtrim(3, val);
+
+
 
 
 	// sync signal
