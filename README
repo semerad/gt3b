@@ -70,14 +70,14 @@ timer.c,h	- timer 5ms
 input.c,h	- INPUT task, reading ADC and keys
 lcd.c,h		- LCD task, writing to LCD controller, blinking
 ppm.c,h		- generating of PPM signal
-config.c,h	- global and model configuration
 main.c,h	- initialize all and call MENU task
 
+config.c,h	- global and model configuration
 menu.c,h	- MENU task, handling keys, menus, lcd
 calc.c,h	- CALC task, calculate PPM values
 
 
-Only last two files are used to implement what means what button
+Only last 3 files are used to implement what means what button
 and how it changes signal for servos. Other files are sort of libraries
 (or it can be viewed as a little operating system :-)
 

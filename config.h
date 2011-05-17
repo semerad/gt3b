@@ -28,6 +28,8 @@
 
 // global config
 
+// change MAGIC number when changing global config
+// also add code to setting default values
 #define CONFIG_GLOBAL_MAGIC  0xfd02
 typedef struct {
     u16 magic_global;
@@ -66,6 +68,8 @@ extern config_global_s config_global;
 
 // model config
 
+// change MAGIC number when changing model config
+// also add code to setting default values
 #define CONFIG_MODEL_MAGIC  (0xe718 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 channels;		// number of channels for this model
