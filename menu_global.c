@@ -119,10 +119,12 @@ static void gs_trim_step(u8 change) {
     u8 *addr = &cg.trim_step;
     if (change == 0xff) {
 	lcd_segment(LS_MENU_TRIM, LS_OFF);
+	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
     if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2, 0);
     lcd_segment(LS_MENU_TRIM, LS_ON);
+    lcd_7seg(5);
     lcd_char_num3(*addr);
 }
 
@@ -194,27 +196,29 @@ static void gs_throttle_dead(u8 change) {
 
 static void gs_trim_autorepeat(u8 change) {
     if (change == 0xff) {
+	lcd_segment(LS_MENU_TRIM, LS_OFF);
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
     if (change)  cg.autorepeat ^= BTN_TRIM_LEFT | BTN_TRIM_RIGHT | BTN_TRIM_FWD | BTN_TRIM_BCK;
+    lcd_segment(LS_MENU_TRIM, LS_ON);
     lcd_7seg(L7_A);
-    lcd_char(LCHR1, 'T');
-    lcd_char(LCHR2, 'O');
-    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_TRIM_LEFT ? 'N' : 'F'));
+    if (cg.autorepeat & BTN_TRIM_LEFT)  lcd_chars("ON ");
+    else				lcd_chars("OFF");
 }
 
 
 static void gs_dr_autorepeat(u8 change) {
     if (change == 0xff) {
+	lcd_segment(LS_MENU_DR, LS_OFF);
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
     if (change)  cg.autorepeat ^= BTN_DR_L | BTN_DR_R;
+    lcd_segment(LS_MENU_DR, LS_ON);
     lcd_7seg(L7_A);
-    lcd_char(LCHR1, 'D');
-    lcd_char(LCHR2, 'O');
-    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_DR_L ? 'N' : 'F'));
+    if (cg.autorepeat & BTN_DR_L)  lcd_chars("ON ");
+    else			   lcd_chars("OFF");
 }
 
 
