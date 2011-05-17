@@ -27,7 +27,7 @@
 
 
 
-#define ABS_THRESHOLD  50
+#define ABS_THRESHOLD  500
 
 
 
