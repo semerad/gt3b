@@ -1,0 +1,33 @@
+
+? CH3 button momentary model specific
+
+
+
+Some suggestions taken from manuals of other radios:
+
+assign functions to buttons
+throttle acceleration
+brake acceleration
+throttle curves EXP/VTR/CRV
+steering speed TURN/RETURN 1-100%
+throttle speed 1-3 SPEED 1-100%
+start function
+engine cut function
+ABS 
+    amount of brake return 0-100%
+    delay 0-1.4s
+    cycle speed 1-30
+    trigger point 10-100
+    cycle duty ratio -3..3
+    steering mixing N10-100, E10-100
+brake mixing
+boat tilt mixing
+neutral brake
+throttle mode FWD50/BRK50 or FWD70/BRK30
+throttle Idle-Up 0-50%
+programmable mixes
+steering 4WS mixes
+timer - up/down/lap/lap navigate
+alarm 10min when not used
+throttle ATL function
+
