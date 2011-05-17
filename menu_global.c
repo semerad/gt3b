@@ -39,7 +39,7 @@ static const u16 bl_steps[] = {
     3600, 2*3600, 5*3600,
     BACKLIGHT_MAX
 };
-#define BL_STEPS_MAX  (sizeof(bl_steps) / sizeof(u16))
+#define BL_STEPS_SIZE  (sizeof(bl_steps) / sizeof(u16))
 static void bl_num2(u8 val) {
     if (val < 10)  lcd_char(LCHR1, ' ');
     else           lcd_char(LCHR1, (u8)((u8)(val / 10) + '0'));
@@ -57,19 +57,23 @@ static void gs_backlight_time(u8 change) {
     if (change) {
 	if (btn(BTN_ROT_L)) {
 	    // find lower value
-	    for (i = BL_STEPS_MAX - 1; i >= 0; i--) {
+	    for (i = BL_STEPS_SIZE - 1; i >= 0; i--) {
 		if (bl_steps[i] >= *addr)  continue;
 		*addr = bl_steps[i];
 		break;
 	    }
+	    if (i < 0)
+		*addr = bl_steps[BL_STEPS_SIZE - 1];
 	}
 	else {
 	    // find upper value
-	    for (i = 0; i < BL_STEPS_MAX; i++) {
+	    for (i = 0; i < BL_STEPS_SIZE; i++) {
 		if (bl_steps[i] <= *addr)  continue;
 		*addr = bl_steps[i];
 		break;
 	    }
+	    if (i == BL_STEPS_SIZE)
+		*addr = bl_steps[0];
 	}
     }
     lcd_7seg(8);	// as B(acklight)
@@ -103,7 +107,7 @@ static void gs_battery_low(u8 change) {
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2, 1);
+    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2, 0);
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
     lcd_segment(LS_SYM_DOT, LS_ON);
     lcd_segment(LS_SYM_VOLTS, LS_ON);
@@ -117,7 +121,7 @@ static void gs_trim_step(u8 change) {
 	lcd_segment(LS_MENU_TRIM, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2, 1);
+    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2, 0);
     lcd_segment(LS_MENU_TRIM, LS_ON);
     lcd_char_num3(*addr);
 }

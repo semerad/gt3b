@@ -129,9 +129,6 @@ static void menu_stop(void) {
 #define MS_BATTERY	1
 #define MS_MAX		2
 static void main_screen(u8 item) {
-    static u16 bat_val = 0;
-    static u16 bat_time = 0;
-
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     if (ch3_state)
 	lcd_segment_blink(LS_SYM_MODELNO, LB_SPC);
@@ -149,6 +146,9 @@ static void main_screen(u8 item) {
 	lcd_chars(cm.name);
     }
     else if (item == MS_BATTERY) {
+	static u16 bat_val = 0;
+	static u16 bat_time = 0;
+
 	// battery voltage
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
