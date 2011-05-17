@@ -50,7 +50,7 @@ extern u16 battery_low_raw;
 extern void menu_calibrate(void);
 extern void menu_key_test(void);
 extern void menu_global_setup(void);
-extern s16  menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast);
+extern s16  menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate);
 extern void apply_global_config(void);
 
 

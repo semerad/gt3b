@@ -103,7 +103,7 @@ static void gs_battery_low(u8 change) {
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2);
+    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2, 1);
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
     lcd_segment(LS_SYM_DOT, LS_ON);
     lcd_segment(LS_SYM_VOLTS, LS_ON);
@@ -117,7 +117,7 @@ static void gs_trim_step(u8 change) {
 	lcd_segment(LS_MENU_TRIM, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2);
+    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2, 1);
     lcd_segment(LS_MENU_TRIM, LS_ON);
     lcd_char_num3(*addr);
 }
@@ -129,7 +129,7 @@ static void gs_endpoint_max(u8 change) {
 	lcd_segment(LS_MENU_EPO, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200, 5);
+    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200, 5, 0);
     lcd_segment(LS_MENU_EPO, LS_ON);
     lcd_char_num3(*addr);
 }
@@ -168,7 +168,7 @@ static void gs_steering_dead(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
     lcd_7seg(1);
     lcd_char_num3(*addr);
 }
@@ -180,7 +180,7 @@ static void gs_throttle_dead(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
     lcd_7seg(2);
     lcd_char_num3(*addr);
 }
