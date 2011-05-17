@@ -131,9 +131,11 @@ static void gs_endpoint_max(u8 change) {
     u8 *addr = &cg.endpoint_max;
     if (change == 0xff) {
 	lcd_segment(LS_MENU_EPO, LS_OFF);
+	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	return;
     }
     if (change)  *addr = (u8)menu_change_val(*addr, 50, 200, 5, 0);
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     lcd_segment(LS_MENU_EPO, LS_ON);
     lcd_char_num3(*addr);
 }
