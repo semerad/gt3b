@@ -63,6 +63,8 @@ Calibrate menu:
 	- set Your current battery voltage (measure it by voltmeter)
 	- press ENTER to save it or END to no-save
     - press BACK-long to end calibrate menu
+    - this menu will be atomatically invoked after first power-on with
+      this firmware
 
 
 Key-test menu:
