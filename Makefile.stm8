@@ -109,9 +109,12 @@ endif
 
 compile.bat: Makefile Makefile.stm8
 	make clean
-	make $(MFLAGS) | grep /c | tee $@
-	sed  -i -e 's|^\(wine \)\?[^ ]*/||' -e "s|-i$(TOOLSET)[^ ]*||" -e "s|-l$(TOOLSET)[^ ]*||" $@
+	echo '@if "%TOOLSET%"=="" goto NoToolset' > $@
+	make $(MFLAGS) | grep /c | grep -v ^make | tee -a $@
+	sed  -i -e "s|^\(wine \)\?$(TOOLSET)|%TOOLSET%|" \
+	        -e "s|-\([il]\)$(TOOLSET)|-\1%TOOLSET%|" $@
 	cp -p $(PROGRAM).lkf compile.lkf
 	sed -i -e "s|$(PROGRAM)\.lkf|compile.lkf|" $@
+	echo -e '@goto:EOF\n\n:NoToolset\n@echo TOOLSET variable is not set, set it with "set TOOLSET=path"' >>$@
 	sed -i -e 's|\(.*\)|\1|' $@
 
