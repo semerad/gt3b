@@ -80,14 +80,14 @@ Global setup menu:
     - use ROTATE to change value and press ENTER to end value changing
     - press BACK-long to end global setup menu, values will be saved to eeprom
     - selected menu items are indicated by following symbols:
-	8		backlight time			15s..5h..MAX
+	b		backlight time			15s..5h..MAX
 	LOW POWER	battery low voltage		7.0..12.0V
 	E.POINT		maximum allowed endpoint value	50..200%
 	TRIM + S	trim step for trim buttons	1..20
 	1		dead zone for steering		0..50
 	2		dead zone for throttle		0..50
 	3		CH3 buttons is momentary	OFF/ON
-	b		key beep			OFF/ON
+	k		key beep			OFF/ON
 	TRIM + A	autorepeat for trim buttons	OFF/ON
 	D/R + A		autorepeat for dualrate buttons	OFF/ON
 

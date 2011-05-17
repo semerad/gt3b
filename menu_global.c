@@ -76,7 +76,7 @@ static void gs_backlight_time(u8 change) {
 		*addr = bl_steps[0];
 	}
     }
-    lcd_7seg(8);	// as B(acklight)
+    lcd_7seg(L7_B);
     if (*addr < 60) {
 	// seconds
 	bl_num2((u8)*addr);
@@ -149,7 +149,7 @@ static void gs_key_beep(u8 change) {
 	return;
     }
     if (change)  cg.key_beep ^= 1;
-    lcd_7seg(L7_B);
+    lcd_7seg(L7_K);
     if (cg.key_beep)  lcd_chars("ON ");
     else              lcd_chars("OFF");
 }
