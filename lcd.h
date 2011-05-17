@@ -129,6 +129,7 @@ extern void lcd_chars_blink(u8 on_off);  // lcd_set_blink() for 3 chars
 #define L7_U		28
 #define L7_V		29
 #define L7_Y		30
+#define L7_MINUS	31
 
 
 
