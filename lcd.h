@@ -107,7 +107,7 @@ extern void lcd_chars_blink(u8 on_off);  // lcd_set_blink() for 3 chars
 #define LM_EXP		0x02
 #define LM_ABS		0x01
 
-// values for lcd_7seg()
+// values for lcd_7seg() - IDs of 7seg letters
 #define L7_A		10
 #define L7_B		11
 #define L7_C		12
@@ -116,11 +116,19 @@ extern void lcd_chars_blink(u8 on_off);  // lcd_set_blink() for 3 chars
 #define L7_F		15
 #define L7_G		16
 #define L7_H		17
-#define L7_J		18
-#define L7_L		19
-#define L7_M		20
-#define L7_P		21
-#define L7_U		22
+#define L7_I		18
+#define L7_J		19
+#define L7_K		20
+#define L7_L		21
+#define L7_M		22
+#define L7_N		23
+#define L7_O		24
+#define L7_P		25
+#define L7_R		26
+#define L7_T		27
+#define L7_U		28
+#define L7_V		29
+#define L7_Y		30
 
 
 
