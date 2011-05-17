@@ -1,0 +1,90 @@
+
+This is manual for alternative firmware for FlySky FS-GT3B and clones.
+
+It will be written as changes to original firmware.
+
+
+
+
+Global:
+    - up to 45 models for 3 (default) channel code
+	- numbers 10-19 will show Right-Arrow
+	- numbers 20-29 will show Left-Arrow
+	- numbers 30-39 will show both arrows
+	- numbers 40-44 will show both arrow blinking
+	- but all your model setups from original firmware will be destroyed
+    - added Subtrims
+    - added SaveAs to save model config to another memory location
+    - added Global Setup menu to change backlight_time, ...
+    - CH3 switched is indicated by blinking MODEL NO.
+
+
+Buttons:
+    - it is now possible to differentiate long press (>1 second) to
+      normal button press and it will be written like "ENTER-long"
+    - buttons of CH3.TRIM are currently used for nothing
+    - Trims (channel 1 and 2) and DualRate
+	- now shows changed value only temporaly (5 seconds or till another
+	  key press)
+	- when autorepeat disabled on trims (default), reset trim to 0
+	  by pressing both trim keys together for long
+	  (eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
+
+
+Standard menu:
+    - Trims are now only for steering and throttle
+    - Expo uses value set for channel 3 for Back and value for channel 2
+        for Forward
+    - SaveAs
+	- choose menu MODEL and press ENTER-long
+	- choose memory position where to save model config
+	- press ENTER/BACK to save it
+    - Model reset
+	- choose menu NAME and press ENTER-long
+    - Subtrims
+	- choose menu TRIM and press ENTER-long
+	- set subtrims for each channel
+	- press ENTER/BACK to end this submenu
+
+
+Calibrate menu:
+    - enter it be right-turn and ENTER-long
+    - 6 menu items starts to blink
+    - use END or ROTATE to change channels
+	- there is also channel 3 representing CH3 button
+	- there is also channal 4 representing battery voltage
+    - calibrate as usual (for channel 1/2 left+mid+right and ENTER)
+	- calibrated value will disappear from menu
+	- it is not needed to calibrate all values
+    - calibrate battery
+	- select channel 4
+	- press ENTER
+	- set Your current battery voltage (measure it by voltmeter)
+	- press ENTER to save it or END to no-save
+    - press BACK-long to end calibrate menu
+
+
+Key-test menu:
+    - enter it by left-turn and ENTER-long
+    - now check keys by pressing them short or long
+    - press BACK-long to end calibrate menu
+
+
+Global setup menu:
+    - enter it by ENTER-long
+    - now menu items MODEL and NAME will start blinking
+    - select requested item by ROTATE and press ENTER
+    - use ROTATE to change value and press ENTER to end value changing
+    - press BACK-long to end global setup menu
+    - selected menu items are indicated by following symbols:
+	8		backlight time			15s..5h..MAX
+	LOW POWER	battery low voltage		7.0..12.0V
+	E.POINT		maximum allowed endpoint value	50..200%
+	TRIM		trim step for trim buttons	1..20
+	1		dead zone for steering		0..50
+	2		dead zone for throttle		0..50
+	3		CH3 buttons is momentary	OFF/ON
+	b		key beep			OFF/ON
+	A+T		autorepeat for trim buttons	OFF/ON
+	A+D		autorepeat for dualrate buttons	OFF/ON
+
