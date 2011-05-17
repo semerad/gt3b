@@ -283,7 +283,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 
 
 // change value 
-static s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast) {
+s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast) {
     u8 amount = 1;
 
     if (btn(BTN_ROT_L)) {
@@ -368,271 +368,8 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 
 
 
-
-
-// ************************* GLOBAL MENUS *********************************
-
-// steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
-static const u16 bl_steps[] = {
-    15, 30,
-    60, 2*60, 5*60, 10*60, 20*60, 30*60,
-    3600, 2*3600, 5*3600,
-    BACKLIGHT_MAX
-};
-#define BL_STEPS_MAX  (sizeof(bl_steps) / sizeof(u16))
-static void bl_num2(u8 val) {
-    if (val < 10)  lcd_char(LCHR1, ' ');
-    else           lcd_char(LCHR1, (u8)((u8)(val / 10) + '0'));
-    lcd_char(LCHR2, (u8)((u8)(val % 10) + '0'));
-
-}
-static void gs_backlight_time(u8 change) {
-    s8 i;
-    u16 *addr = &cg.backlight_time;
-
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
-	if (btn(BTN_ROT_L)) {
-	    // find lower value
-	    for (i = BL_STEPS_MAX - 1; i >= 0; i--) {
-		if (bl_steps[i] >= *addr)  continue;
-		*addr = bl_steps[i];
-		break;
-	    }
-	}
-	else {
-	    // find upper value
-	    for (i = 0; i < BL_STEPS_MAX; i++) {
-		if (bl_steps[i] <= *addr)  continue;
-		*addr = bl_steps[i];
-		break;
-	    }
-	}
-    }
-    lcd_7seg(8);	// as B(acklight)
-    if (*addr < 60) {
-	// seconds
-	bl_num2((u8)*addr);
-	lcd_char(LCHR3, 'S');
-    }
-    else if (*addr < 3600) {
-	// minutes
-	bl_num2((u8)(*addr / 60));
-	lcd_char(LCHR3, 'M');
-    }
-    else if (*addr != BACKLIGHT_MAX) {
-	// hours
-	bl_num2((u8)(*addr / 3600));
-	lcd_char(LCHR3, 'H');
-    }
-    else {
-	// max
-	lcd_chars("MAX");
-    }
-}
-
-static void gs_battery_low(u8 change) {
-    u8 *addr = &cg.battery_low;
-    if (change == 0xff) {
-	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-	lcd_segment(LS_SYM_DOT, LS_OFF);
-	lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 70, 120, 2);
-    lcd_segment(LS_SYM_LOWPWR, LS_ON);
-    lcd_segment(LS_SYM_DOT, LS_ON);
-    lcd_segment(LS_SYM_VOLTS, LS_ON);
-    lcd_char_num3(cg.battery_low);
-}
-
-static void gs_trim_step(u8 change) {
-    u8 *addr = &cg.trim_step;
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_TRIM, LS_OFF);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2);
-    lcd_segment(LS_MENU_TRIM, LS_ON);
-    lcd_char_num3(*addr);
-}
-
-static void gs_endpoint_max(u8 change) {
-    u8 *addr = &cg.endpoint_max;
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_EPO, LS_OFF);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 50, 200, 5);
-    lcd_segment(LS_MENU_EPO, LS_ON);
-    lcd_char_num3(*addr);
-}
-
-static void gs_key_beep(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.key_beep ^= 1;
-    lcd_7seg(L7_B);
-    if (cg.key_beep)  lcd_chars("ON ");
-    else              lcd_chars("OFF");
-}
-
-static void gs_ch3_momentary(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
-	cg.ch3_momentary ^= 1;
-	ch3_state = 0;
-    }
-    lcd_7seg(3);
-    if (cg.ch3_momentary)  lcd_chars("ON ");
-    else                   lcd_chars("OFF");
-}
-
-static void gs_steering_dead(u8 change) {
-    u8 *addr = &cg.steering_dead_zone;
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
-    lcd_7seg(1);
-    lcd_char_num3(*addr);
-}
-
-static void gs_throttle_dead(u8 change) {
-    u8 *addr = &cg.throttle_dead_zone;
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2);
-    lcd_7seg(2);
-    lcd_char_num3(*addr);
-}
-
-static void gs_trim_autorepeat(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.autorepeat ^= BTN_TRIM_LEFT | BTN_TRIM_RIGHT | BTN_TRIM_FWD | BTN_TRIM_BCK;
-    lcd_7seg(L7_A);
-    lcd_char(LCHR1, 'T');
-    lcd_char(LCHR2, 'O');
-    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_TRIM_LEFT ? 'N' : 'F'));
-}
-
-static void gs_dr_autorepeat(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.autorepeat ^= BTN_DR_L | BTN_DR_R;
-    lcd_7seg(L7_A);
-    lcd_char(LCHR1, 'D');
-    lcd_char(LCHR2, 'O');
-    lcd_char(LCHR3, (u8)(cg.autorepeat & BTN_DR_L ? 'N' : 'F'));
-}
-
-typedef void (*global_setup_t)(u8 change);
-static const global_setup_t gs_config[] = {
-    gs_backlight_time,
-    gs_battery_low,
-    gs_endpoint_max,
-    gs_trim_step,
-    gs_steering_dead,
-    gs_throttle_dead,
-    gs_ch3_momentary,
-    gs_key_beep,
-    gs_trim_autorepeat,
-    gs_dr_autorepeat
-};
-#define GS_CONFIG_MAX  (sizeof(gs_config) / sizeof(u8 *))
-static void global_setup(void) {
-    u8 item = 0;
-    u8 item_val = 0;		// now selecting item
-    global_setup_t func = gs_config[item];
-
-    // cleanup screen and disable possible low bat warning
-    buzzer_off();
-    key_beep();
-    menu_battery_low = 0;	// it will be set automatically again
-    backlight_set_default(BACKLIGHT_MAX);
-    backlight_on();
-    lcd_clear();
-
-    lcd_segment(LS_MENU_MODEL, LS_ON);
-    lcd_segment_blink(LS_MENU_MODEL, LB_INV);
-    lcd_segment_blink(LS_MENU_NAME, LB_INV);
-    lcd_update();
-    func(0);			// show current value
-
-    while (1) {
-	btnra();
-	stop();
-
-	if (btnl(BTN_BACK))  break;
-
-	if (btn(BTN_ENTER)) {
-	    key_beep();
-	    item_val = (u8)(1 - item_val);
-	    if (item_val) {
-		// changing value
-		lcd_chars_blink(LB_SPC);
-	    }
-	    else {
-		// selecting item
-		lcd_chars_blink(LB_OFF);
-	    }
-	}
-
-	else if (btn(BTN_ROT_ALL)) {
-	    if (item_val) {
-		// change item value
-		func(1);
-		lcd_chars_blink(LB_SPC);
-	    }
-	    else {
-		// select another item
-		func(0xff);		// un-show labels
-		if (btn(BTN_ROT_L)) {
-		    if (item)  item--;
-		    else       item = GS_CONFIG_MAX - 1;
-		}
-		else {
-		    if (++item >= GS_CONFIG_MAX)  item = 0;
-		}
-		func = gs_config[item];
-		func(0);		// show current value
-	    }
-	    lcd_update();
-	}
-    }
-
-    beep(60);
-    lcd_clear();
-    config_global_save();
-    apply_global_config();
-}
-
-
-
-
-
-
-
-
 // *************************** MODEL MENUS *******************************
 
-// selected submenus
 // select model/save model as (to selected model position)
 static void menu_model(u8 saveas) {
     s8 model = (s8)cg.model;
@@ -683,6 +420,7 @@ static void menu_model(u8 saveas) {
     if (saveas)  lcd_set_blink(LMENU, LB_OFF);
 }
 
+
 // change model name
 static void menu_name(void) {
     u8 pos = LCHR1;
@@ -729,11 +467,13 @@ static void menu_name(void) {
     config_model_save();
 }
 
+
 // reset model to default values
 static void menu_reset_model(void) {
     config_model_set_default();
     config_model_save();
 }
+
 
 // set reverse
 void sf_reverse(u8 channel, u8 change) {
@@ -745,6 +485,7 @@ void sf_reverse(u8 channel, u8 change) {
 @inline static void menu_reverse(void) {
     menu_channel(MAX_CHANNELS, 0, sf_reverse);
 }
+
 
 // set endpoints
 void sf_endpoint(u8 channel, u8 change) {
@@ -758,6 +499,7 @@ static void menu_endpoint(void) {
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
+
 // set trims
 static void sf_trim(u8 channel, u8 change) {
     s8 *addr = &cm.trim[channel];
@@ -768,6 +510,7 @@ static void sf_trim(u8 channel, u8 change) {
 @inline static void menu_trim(void) {
     menu_channel(2, 0, sf_trim);
 }
+
 
 // set subtrims
 static void sf_subtrim(u8 channel, u8 change) {
@@ -782,6 +525,7 @@ static void menu_subtrim(void) {
     lcd_set_blink(LMENU, LB_OFF);
 }
 
+
 // set dualrate
 static void sf_dualrate(u8 channel, u8 change) {
     u8 *addr = &cm.dualrate[channel];
@@ -793,6 +537,7 @@ static void menu_dualrate(void) {
     menu_channel(2, 0, sf_dualrate);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
+
 
 // set expos
 static void sf_expo(u8 channel, u8 change) {
@@ -806,12 +551,13 @@ static void menu_expo(void) {
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
+
 // set abs: OFF, SLO(6), NOR(4), FAS(3)
 // pulses between full brake and 1/2 brake and only when enought brake applied
 static const u8 *abs_labels[] = {
     "OFF", "SLO", "NOR", "FAS"
 };
-#define ABS_LABEL_MAX  (sizeof(abs_labels) / sizeof(u8 *))
+#define ABS_LABEL_SIZE  (sizeof(abs_labels) / sizeof(u8 *))
 static void menu_abs(void) {
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_LEFT, LS_OFF);
@@ -830,7 +576,7 @@ static void menu_abs(void) {
 	if (btn(BTN_BACK | BTN_ENTER))  break;
 
 	if (btn(BTN_ROT_ALL)) {
-	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_MAX-1, 1);
+	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_SIZE-1, 1);
 	    lcd_chars(abs_labels[cm.abs_type]);
 	    lcd_chars_blink(LB_SPC);
 	    lcd_update();
@@ -907,8 +653,6 @@ static void select_menu(void) {
 // ****************** MAIN LOOP and init *********************************
 
 // main menu loop, shows main screen and handle keys
-extern void menu_calibrate(void);
-extern void menu_key_test(void);
 static void menu_loop(void) {
     u8 item = MS_NAME;
 
@@ -929,7 +673,7 @@ static void menu_loop(void) {
 		menu_calibrate();
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		menu_key_test();
-	    else global_setup();
+	    else menu_global_setup();
 	}
 
 	// Enter key
