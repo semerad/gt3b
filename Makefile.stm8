@@ -21,7 +21,6 @@ LDFLAGS	= -l$(LIBDIR)
 
 ifdef CHANNELS
 CFLAGS	+= -dMAX_CHANNELS=$(CHANNELS)
-MFLAGS	= CHANNELS=$(CHANNELS)
 endif
 
 # used programs
@@ -110,9 +109,11 @@ endif
 compile.bat: Makefile Makefile.stm8
 	make clean
 	echo '@if "%TOOLSET%"=="" goto NoToolset' > $@
-	make $(MFLAGS) | grep /c | grep -v ^make | tee -a $@
+	echo -e '@if not "%CHANNELS%"=="" goto ChannelOK\n@set CHANNELS=3\n:ChannelOK' >>$@
+	make CHANNELS=3 | grep /c | grep -v ^make | tee -a $@
 	sed  -i -e "s|^\(wine \)\?$(TOOLSET)|%TOOLSET%|" \
-	        -e "s|-\([il]\)$(TOOLSET)|-\1%TOOLSET%|" $@
+	        -e "s|-\([il]\)$(TOOLSET)|-\1%TOOLSET%|" \
+		-e "s|-dMAX_CHANNELS=.|-dMAX_CHANNELS=%CHANNELS%|" $@
 	cp -p $(PROGRAM).lkf compile.lkf
 	sed -i -e "s|$(PROGRAM)\.lkf|compile.lkf|" $@
 	echo -e '@goto:EOF\n\n:NoToolset\n@echo TOOLSET variable is not set, set it with "set TOOLSET=path"' >>$@
