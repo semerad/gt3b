@@ -73,16 +73,25 @@ u16 battery_low_raw;
 
 // ****************** UTILITY FUNCTIONS ******************************
 
+
+// apply model settings to variables
+static _Bool awake_calc_allowed;
+static void apply_model_settings(void) {
+    ppm_set_channels(cm.channels);
+    // task CALC must be awaked to do first PPM calculation
+    if (awake_calc_allowed)  awake(CALC);
+}
+
+
 // load model config from eeprom and set model settings
 static void load_model(void) {
     config_model_read();
-
-    ppm_set_channels(cm.channels);
+    apply_model_settings();
     ch3_state = 0;
 }
 
 
-// apply global setting to libraries
+// apply global setting to variables
 void apply_global_config(void) {
     button_autorepeat(cg.autorepeat);
     backlight_set_default(cg.backlight_time);
@@ -308,6 +317,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     menu_wants_adc = 0;
     key_beep();
     config_model_save();
+    apply_model_settings();
 }
 
 
@@ -456,7 +466,6 @@ static void menu_model(u8 saveas) {
 	else {
 	    // load selected model
 	    load_model();
-	    awake(CALC);	// must be awaked to do first PPM calc
 	}
     }
     if (saveas)  lcd_set_blink(LMENU, LB_OFF);
@@ -514,6 +523,7 @@ static void menu_name(void) {
 static void menu_reset_model(void) {
     config_model_set_default();
     config_model_save();
+    apply_model_settings();
 }
 
 
@@ -787,8 +797,9 @@ void menu_init(void) {
 	menu_calibrate();
     apply_global_config();
 
-    // read model config from eeprom
+    // read model config from eeprom, but now awake CALC yet
     load_model();
+    awake_calc_allowed = 1;
 
     // and main loop
     menu_loop();
