@@ -35,16 +35,22 @@ Buttons:
 
 Standard menu:
     - Trims are now only for steering and throttle
-    - Expo uses value set for channel 3 for Back and value for channel 2
-        for Forward
+    - Expo
+	- value for channel 2 is splitted to forward and back and
+          is indicated by arrows
+    - DualRate
+	- value for channel 2 is splitted to forward and back and
+	  is indicated by arrows
     - SaveAs
 	- choose menu MODEL and press ENTER-long
+	- menu MODEL will blink
 	- choose memory position where to save model config
 	- press ENTER/BACK to save it
     - Model reset
 	- choose menu NAME and press ENTER-long
     - Subtrims
 	- choose menu TRIM and press ENTER-long
+	- menu TRIM will blink
 	- set subtrims for each channel
 	- press ENTER/BACK to end this submenu
 
