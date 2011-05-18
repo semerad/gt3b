@@ -70,7 +70,7 @@ extern config_global_s config_global;
 
 // change MAGIC number when changing model config
 // also add code to setting default values
-#define CONFIG_MODEL_MAGIC  (0xe718 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xff20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
@@ -78,16 +78,19 @@ typedef struct {
     s8 subtrim[MAX_CHANNELS];
     u8 endpoint[MAX_CHANNELS][2];
     s8 trim[2];			// for steering and throttle
-    u8 dualrate[2];		// for steering and throttle
+    u8 dualrate[3];		// for steering and throttle
     s8 expo[3];			// steering/forward/back
     u8 abs_type;
 } config_model_s;
 
 extern config_model_s config_model;
 #define cm config_model
-#define expo_steering  expo[0]
-#define expo_forward   expo[1]
-#define expo_back      expo[2]
+#define dr_steering	dualrate[0]
+#define dr_forward	dualrate[1]
+#define dr_back		dualrate[2]
+#define expo_steering	expo[0]
+#define expo_forward	expo[1]
+#define expo_back	expo[2]
 
 
 

@@ -196,26 +196,44 @@ static void menu_set_adc_direction(u8 channel) {
 	}
     }
 }
-static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
-    u8 channel = 1;
-    u8 chan_val = 0;			// now in channel
-    u8 last_direction = menu_adc_direction;
-
-    if (use_adc) {
+static _Bool menu_set_adc(u8 channel, u8 use_adc) {
+    if ((u8)(use_adc & (1 << (channel - 1)))) {
+	// use ADC
+	if (menu_adc_direction) {
+	    lcd_segment(LS_SYM_LEFT, LS_OFF);
+	    lcd_segment(LS_SYM_RIGHT, LS_ON);
+	}
+	else {
+	    lcd_segment(LS_SYM_LEFT, LS_ON);
+	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+	}
 	menu_wants_adc = 1;
 	menu_set_adc_direction(channel);
+	return 1;
     }
+    else {
+	// don't use ADC
+	lcd_segment(LS_SYM_LEFT,    LS_OFF);
+	lcd_segment(LS_SYM_RIGHT,   LS_OFF);
+	menu_wants_adc = 0;
+	return 0;
+    }
+}
+static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
+    u8 channel = 1;
+    _Bool chan_val = 0;			// now in channel
+    _Bool adc_active;
+    u8 last_direction;
 
     // show CHANNEL
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, (u8)(use_adc ? LS_ON : LS_OFF));
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
 
+    // show channel number and possible direction
+    menu_adc_direction = 0;
     lcd_7seg(channel);
     lcd_set_blink(L7SEG, LB_SPC);
-    menu_adc_direction = 0;
-    if (use_adc)  menu_set_adc_direction(channel);
+    adc_active = menu_set_adc(channel, use_adc);
     subfunc((u8)(channel - 1), 0);	// show current value
     lcd_update();
 
@@ -226,7 +244,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 	if (btn(BTN_BACK | BTN_ENTER))  break;
 
 	last_direction = menu_adc_direction;
-	if (use_adc)  menu_set_adc_direction(channel);
+	if (adc_active)  menu_set_adc_direction(channel);
 
 	if (btn(BTN_ROT_ALL)) {
 	    if (chan_val) {
@@ -244,6 +262,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 		}
 		lcd_7seg(channel);
 		lcd_set_blink(L7SEG, LB_SPC);
+		adc_active = menu_set_adc(channel, use_adc);
 		subfunc((u8)(channel - 1), 0);
 	    }
 	    lcd_update();
@@ -499,7 +518,7 @@ void sf_endpoint(u8 channel, u8 change) {
 }
 static void menu_endpoint(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(MAX_CHANNELS, 1, sf_endpoint);
+    menu_channel(MAX_CHANNELS, 0xff, sf_endpoint);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
@@ -533,12 +552,13 @@ static void menu_subtrim(void) {
 // set dualrate
 static void sf_dualrate(u8 channel, u8 change) {
     u8 *addr = &cm.dualrate[channel];
+    if (channel == 1 && menu_adc_direction)  addr = &cm.dualrate[2];
     if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, 5, 0);
     lcd_char_num3(*addr);
 }
 static void menu_dualrate(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(2, 0, sf_dualrate);
+    menu_channel(2, 0x2, sf_dualrate);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
@@ -546,12 +566,13 @@ static void menu_dualrate(void) {
 // set expos
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
+    if (channel == 1 && menu_adc_direction)  addr = &cm.expo[2];
     if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, 5, 0);
     lcd_char_num2(*addr);
 }
 static void menu_expo(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(3, 0, sf_expo);
+    menu_channel(2, 0x2, sf_expo);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 

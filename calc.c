@@ -50,6 +50,7 @@ void calc_init(void) {
 
 
 // limit adc value to -5000..5000 (standard servo signal * 10)
+// also apply trim
 static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
                          u16 dead, s16 trim) {
     s16 val;
@@ -70,6 +71,7 @@ static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
 }
 
 // apply reverse, endpoint, subtrim
+// set value to ppm channel
 static void rev_epo_subtrim(u8 channel, s16 inval) {
     s16 val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)]
                      + 50) / 100);
@@ -100,6 +102,11 @@ static s16 expo(s16 inval, s8 exp) {
     return  neg ? -val : val;
 }
 
+// apply dualrate
+@inline static s16 dualrate(s16 val, u8 dr) {
+    return (s16)(((s32)val * dr + 50) / 100);
+}
+
 
 
 
@@ -121,7 +128,7 @@ static void calc_loop(void) {
 			    cg.steering_dead_zone << ADC_OVS_SHIFT,
 			    cm.trim[0] * 10);
 	val = expo(val, cm.expo_steering);
-	rev_epo_subtrim(1, (s16)(((s32)val * cm.dualrate[0] + 50) / 100));
+	rev_epo_subtrim(1, dualrate(val, cm.dr_steering));
 
 
 
@@ -159,7 +166,8 @@ static void calc_loop(void) {
 		abs_state = 0;
 	    }
 	}
-	rev_epo_subtrim(2, (s16)(((s32)val * cm.dualrate[1] + 50) / 100));
+	rev_epo_subtrim(2, dualrate(val,
+	                (u8)(val < 0 ? cm.dr_forward : cm.dr_back)));
 
 
 

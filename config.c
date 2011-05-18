@@ -85,8 +85,9 @@ void config_model_set_default(void) {
     memset(cm.endpoint, 100, MAX_CHANNELS * 2);
     cm.trim[0]		= 0;
     cm.trim[1]		= 0;
-    cm.dualrate[0]	= 100;
-    cm.dualrate[1]	= 100;
+    cm.dr_steering	= 100;
+    cm.dr_forward	= 100;
+    cm.dr_back		= 100;
     cm.expo_steering	= 0;
     cm.expo_forward	= 0;
     cm.expo_back	= 0;
