@@ -1,0 +1,38 @@
+
+microcontroller: STM8S105K6T6C LQFP32, crystal 18.432 MHz
+LCD driver: HOLTEK HT1621B
+encoder: 30 ticks/360deg
+
+processor pinout (i-input/o-output, f-floating/o-opencollector/p-push_pull, f-fast):
+    PB0         if  AIN0 steering
+    PB1         if  AIN1 throttle
+    PB2         if  AIN2 CH3 button
+    PB3         if  AIN3 battery voltage (3:1 divider)
+    PB4         oof button row B4
+    PB5         oof button row B5
+    PC1         if  TIM1_CH1 - rotate encoder
+    PC2         if  TIM1_CH2 - rotate encoder
+    PC3         opf CS/ to LCD controller
+    PC4         oof button row C4
+    PC5         ip  button col C5
+    PC6         ip  button col C6
+    PC7         ip  button col C7
+    PD0         op  PPM signal
+    PD2         op  LCD backlight
+    PD3         oof button row D3
+    PD4         op  buzzer
+    PE5         op  DATA to LCD controller
+    PF4         op  WR/ to LCD controller
+    -----
+    PD1         SWIM
+    PD5         ? UART TX
+    PD6         ? UART RX
+    PD7         ?
+
+buttons matrix:
+	C5			C6			C7
+B4	TrimSteerLeft		TrimCh3_Minus		End
+B5	TrimSteerRight		TrimCh3_Plus		Back
+D3	TrimThrotFwd		DR_Plus
+C4	TrimThrotBack		DR_Minus		Enter
+
