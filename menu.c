@@ -31,8 +31,20 @@
 
 
 
-#define TRIM_MAX  99
-#define SUBTRIM_MAX 99
+// trims/subtrims limits
+#define TRIM_MAX	99
+#define SUBTRIM_MAX	99
+
+// amount of step when fast encoder rotate
+#define MODEL_FAST	2
+#define ENDPOINT_FAST	5
+#define TRIM_FAST	5
+#define SUBTRIM_FAST	5
+#define DUALRATE_FAST	5
+#define EXPO_FAST	5
+
+// delay in seconds of popup menu (trim, dualrate, ...)
+#define POPUP_DELAY	5
 
 
 
@@ -298,7 +310,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 }
 
 
-// change value 
+// change value based on state of rotate encoder
 s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate) {
     u8 amount = 1;
 
@@ -322,58 +334,77 @@ s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate) {
 }
 
 
-// temporary show trim/dualrate value
+// temporary show popup value (trim, subtrim, dualrate, ...)
 // if another key pressed, return
-static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
-                          s8 min, s8 max, u8 step, u8 *labels) {
+static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
+		       u8 channel, s8 *aval,
+		       s16 min, s16 max, s16 reset, u8 step,
+		       u8 rot_fast, u8 *labels) {
+    u16 btn_lr = btn_l | btn_r;
     u16 to_time;
+    s16 val;
+
+    if (min >= 0)  val = *(u8 *)aval;	// *aval is unsigned
+    else           val = *aval;		// *aval is signed
 
     // show MENU and CHANNEL
     lcd_segment(menu, LS_ON);
+    if (blink) lcd_segment_blink(menu, LB_SPC);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_DOT, LS_OFF);
     lcd_segment(LS_SYM_VOLTS, LS_OFF);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg(channel);
 
     while (1) {
 	// check value left/right
-	if (btnl_all(btn_l | btn_r)) {
-	    // reset to 0
+	if (btnl_all(btn_lr)) {
+	    // reset to given reset value
 	    key_beep();
-	    *val = 0;
-	    btnr(btn_l | btn_r);
+	    val = reset;
+	    *aval = (s8)val;
+	    btnr(btn_lr);
 	}
-	else if (btn(btn_l | btn_r)) {
+	else if (btn(btn_lr)) {
 	    key_beep();
 	    if (btn(btn_l)) {
-		*val -= step;
-		if (*val < min)  *val = min;
+		val -= step;
+		if (val < min)  val = min;
 	    }
 	    else {
-		*val += step;
-		if (*val > max)  *val = max;
+		val += step;
+		if (val > max)  val = max;
 	    }
-	    btnr_nolong(btn_l | btn_r);  // waiting for possible 0-set
+	    *aval = (s8)val;
+	    btnr_nolong(btn_lr);  // waiting for possible both long presses
 	}
-
-	// show current value
-	if (labels)  lcd_char_num2_lbl(*val, labels);
-	else         lcd_char_num3(*val);
-	lcd_update();
+	else if (btn(BTN_ROT_ALL)) {
+	    val = menu_change_val(val, min, max, rot_fast, 0);
+	    *aval = (s8)val;
+	}
+	btnr(BTN_ROT_ALL);
 
 	// if another button was pressed, leave this screen
 	if (buttons)  break;
 
+	// show current value
+	if (labels)		lcd_char_num2_lbl((s8)val, labels);
+	else if (min < 0)	lcd_char_num2((s8)val);
+	else			lcd_char_num3((u16)val);
+	lcd_update();
+
 	// sleep 5s, and if no button was pressed during, end this screen
-	to_time = time_sec + 5;
+	to_time = time_sec + POPUP_DELAY;
 	while (time_sec < to_time && !buttons)
 	    delay_menu((to_time - time_sec) * 200);
 
-	if (!buttons)  break;
+	if (!buttons)  break;  // timeouted without button press
     }
 
-    btnr(btn_l | btn_r);  // reset also long values
+    btnr(btn_lr);  // reset also long values
 
     // set selected MENU off
     lcd_segment(menu, LS_OFF);
@@ -392,8 +423,7 @@ static void trim_dualrate(u8 menu, u8 channel, s8 *val, u16 btn_l, u16 btn_r,
 
 // select model/save model as (to selected model position)
 static void menu_model(u8 saveas) {
-    s8 model = (s8)cg.model;
-    u8 amount;
+    u8 model = cg.model;
 
     if (saveas)  lcd_set_blink(LMENU, LB_SPC);
     lcd_set_blink(L7SEG, LB_SPC);
@@ -404,17 +434,8 @@ static void menu_model(u8 saveas) {
 
 	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
-	    amount = 1;
-	    if (btn(BTN_ROT_L)) {
-		if (btnl(BTN_ROT_L))  amount = 2;
-		model -= amount;
-		if (model < 0)  model += CONFIG_MODEL_MAX;
-	    }
-	    else {
-		if (btnl(BTN_ROT_R))  amount = 2;
-		model += amount;
-		if (model >= CONFIG_MODEL_MAX)  model -= CONFIG_MODEL_MAX;
-	    }
+	    model = (u8)menu_change_val((s16)model, 0, CONFIG_MODEL_MAX - 1,
+	                            MODEL_FAST, 1);
 	    show_model_number(model);
 	    lcd_set_blink(L7SEG, LB_SPC);
 	    lcd_chars(config_model_name(model));
@@ -424,8 +445,8 @@ static void menu_model(u8 saveas) {
 
     key_beep();
     // if new model choosed, save it
-    if ((u8)model != cg.model) {
-	cg.model = (u8)model;
+    if (model != cg.model) {
+	cg.model = model;
 	config_global_save();
 	if (saveas) {
 	    // save to new model position
@@ -510,7 +531,8 @@ void sf_reverse(u8 channel, u8 change) {
 // set endpoints
 void sf_endpoint(u8 channel, u8 change) {
     u8 *addr = &cm.endpoint[channel][menu_adc_direction];
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max, 5, 0);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max,
+                                             ENDPOINT_FAST, 0);
     lcd_char_num3(*addr);
 }
 static void menu_endpoint(void) {
@@ -523,7 +545,8 @@ static void menu_endpoint(void) {
 // set trims
 static void sf_trim(u8 channel, u8 change) {
     s8 *addr = &cm.trim[channel];
-    if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX, 5, 0);
+    if (change)  *addr = (s8)menu_change_val(*addr, -TRIM_MAX, TRIM_MAX,
+                                             TRIM_FAST, 0);
     if (channel == 0)  lcd_char_num2_lbl(*addr, "LNR");
     else               lcd_char_num2_lbl(*addr, "FNB");
 }
@@ -536,7 +559,8 @@ static void sf_trim(u8 channel, u8 change) {
 static void sf_subtrim(u8 channel, u8 change) {
     s8 *addr = &cm.subtrim[channel];
     if (change)
-	*addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX, 5, 0);
+	*addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX,
+	                            SUBTRIM_FAST, 0);
     lcd_char_num2(*addr);
 }
 static void menu_subtrim(void) {
@@ -550,7 +574,7 @@ static void menu_subtrim(void) {
 static void sf_dualrate(u8 channel, u8 change) {
     u8 *addr = &cm.dualrate[channel];
     if (channel == 1 && menu_adc_direction)  addr = &cm.dualrate[2];
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, 5, 0);
+    if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, DUALRATE_FAST, 0);
     lcd_char_num3(*addr);
 }
 static void menu_dualrate(void) {
@@ -564,7 +588,7 @@ static void menu_dualrate(void) {
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
     if (channel == 1 && menu_adc_direction)  addr = &cm.expo[2];
-    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, 5, 0);
+    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, EXPO_FAST, 0);
     lcd_char_num2(*addr);
 }
 static void menu_expo(void) {
@@ -707,23 +731,26 @@ static void menu_loop(void) {
 
 	// trims
 	else if (btn(BTN_TRIM_LEFT | BTN_TRIM_RIGHT)) {
-	    trim_dualrate(LS_MENU_TRIM, 1, &cm.trim[0],
-	                  BTN_TRIM_LEFT, BTN_TRIM_RIGHT,
-	                  -TRIM_MAX, TRIM_MAX, cg.trim_step, "LNR");
+	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_LEFT, BTN_TRIM_RIGHT,
+		       1, &cm.trim[0],
+	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
+		       TRIM_FAST, "LNR");
 	    goto check_keys;
 	}
 	else if (btn(BTN_TRIM_FWD | BTN_TRIM_BCK)) {
-	    trim_dualrate(LS_MENU_TRIM, 2, &cm.trim[1],
-	                  BTN_TRIM_FWD, BTN_TRIM_BCK,
-	                  -TRIM_MAX, TRIM_MAX, cg.trim_step, "FNB");
+	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_FWD, BTN_TRIM_BCK,
+		       2, &cm.trim[1],
+	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
+		       SUBTRIM_FAST, "FNB");
 	    goto check_keys;
 	}
 
 	// dualrate
 	else if (btn(BTN_DR_L | BTN_DR_R)) {
-	    trim_dualrate(LS_MENU_DR, 1, (s8 *)&cm.dualrate[0],
-	                  BTN_DR_L, BTN_DR_R,
-			  0, 100, 1, 0);
+	    menu_popup(LS_MENU_DR, 0, BTN_DR_L, BTN_DR_R,
+		       1, (s8 *)&cm.dr_steering,
+		       0, 100, 100, 1,
+		       DUALRATE_FAST, NULL);
 	    goto check_keys;
 	}
 	
