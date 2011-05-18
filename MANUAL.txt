@@ -7,11 +7,11 @@ It will be written as changes to original firmware.
 
 
 Global:
-    - up to 45 models for 3 (default) channel code
+    - up to 43 models for 3 (default) channel code
 	- numbers 10-19 will show Right-Arrow
 	- numbers 20-29 will show Left-Arrow
 	- numbers 30-39 will show both arrows
-	- numbers 40-44 will show both arrow blinking
+	- numbers 40-42 will show both arrow blinking
 	- but all your model setups from original firmware will be destroyed
     - added Subtrims
     - added SaveAs to save model config to another memory location
