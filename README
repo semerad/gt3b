@@ -15,7 +15,7 @@ other compilers.
 
 
 
-There are 2 interrupts:
+There are 2 interrupts used:
 
 ppm_interrupt
     - timer3 update interrupt
@@ -80,4 +80,14 @@ calc.c,h	- CALC task, calculate PPM values
 Only last 3 files are used to implement what means what button
 and how it changes signal for servos. Other files are sort of libraries
 (or it can be viewed as a little operating system :-)
+
+
+
+To compile it at windows:
+
+- cd to directory with sources
+- set variable TOOLSET to path to Cosmic C compiler (set TOOLSET=...)
+- if more than 3 channels needed, set variable CHANNELS to number 3..8
+- run compile.bat
+- file gt3b.s19 is newly compiled firmware ready to load to radio
 
