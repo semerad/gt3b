@@ -34,3 +34,20 @@ timer - up/down/lap/lap navigate
 alarm 10min when not used
 throttle ATL function
 
+losikid67:
+On mixing for crawling applications will need to be able to mix Throttle to an
+AUX channel (channel 3) and to be able to adjust the mix rate via 3 way switch
+when not programming. So for ex. when the 3 way switch is pushed down it will
+decrease the percentage by 10%. So the slave will be 90% of the master channel.
+If it is pushed up it will increase the the percentage 10% So the slave will be
+110% of the master channel. Also it would need need another 3 position switch
+that in center position the radio uses the above mixing features, but the outer
+positions will connect just the throttle or Aux channel to the trigger, the
+inactive channel will be sent to center.
+As its basic functions. If possible, other functions could include adjustable
+step rate (so not a set 10%) and auto return, so if you change direction of
+click it will return to 100% mix.
+Also at least one additional channel could be useful. Preferably have them
+support 3 position switches. OR have them as virtual channels since i/o's are
+limited. It be another mix, steering mix for 4 wheel steer.
+
