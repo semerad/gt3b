@@ -18,6 +18,8 @@ Global:
     - added Global Setup menu to change backlight_time, ...
     - CH3 switched is indicated by blinking MODEL NO.
     - dead zone for steering and throttle
+    - calibrate menu will be automatically invoked after first power-on with
+      this firmware, so 6 menu items will start to blink
 
 
 Buttons:
@@ -63,8 +65,6 @@ Calibrate menu:
 	- set Your current battery voltage (measure it by voltmeter)
 	- press ENTER to save it or END to no-save
     - press BACK-long to end calibrate menu
-    - this menu will be atomatically invoked after first power-on with
-      this firmware
 
 
 Key-test menu:
