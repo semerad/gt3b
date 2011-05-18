@@ -49,7 +49,7 @@ u8 config_global_set_default(void) {
     cg.backlight_time	= 30;
     cg.battery_calib	= 672;
     cg.battery_low	= 92;		// 9.2 V
-    cg.trim_step	= 2;
+    cg.trim_step	= 1;
     cg.endpoint_max	= 120;
     cg.autorepeat	= BTN_DR_ALL;
     cg.key_beep		= 1;
