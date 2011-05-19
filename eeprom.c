@@ -58,25 +58,23 @@ void eeprom_read_model(u8 model) {
 // write to eeprom
 
 static void eeprom_write(u8 *ee_addr, u8 *ram_addr, u16 length) {
-    u8 i = 10;
-
+    _Bool writed = 0;
     // enable write to eeprom
     FLASH_DUKR = 0xAE;
     FLASH_DUKR = 0x56;
-    // check if write is enabled for some time
-    do {
-	if (BCHK(FLASH_IAPSR, 3))  break;
-    } while (--i);
     // write only values, which are different
     do {
 	if (*ee_addr != *ram_addr) {
 	    *ee_addr = *ram_addr;
+	    writed = 1;
 	}
 	ee_addr++;
 	ram_addr++;
     } while (--length);
-    // wait to end of write and disable write to eeprom
-    while (!BCHK(FLASH_IAPSR, 2))  pause();
+    // wait to end of write and disable write to eeprom, but only when
+    //   some byte was writed
+    if (writed)
+	while (!BCHK(FLASH_IAPSR, 2))  pause();
     BRES(FLASH_IAPSR, 3);
 }
 
@@ -96,11 +94,24 @@ void eeprom_write_model(u8 model) {
 
 // initialize model memories to empty one
 void eeprom_empty_models(void) {
-    config_model_s *cm = (config_model_s *)EEPROM_CONFIG_MODEL;
+    _Bool writed = 0;
     u8 cnt = CONFIG_MODEL_MAX;
+    config_model_s *cm = (config_model_s *)EEPROM_CONFIG_MODEL;
+    // enable write to eeprom
+    FLASH_DUKR = 0xAE;
+    FLASH_DUKR = 0x56;
+    // write 0xFF to first letter of each model config
     do {
-	cm->name[0] = CONFIG_MODEL_EMPTY;
+	if (cm->name[0] != CONFIG_MODEL_EMPTY) {
+	    cm->name[0] = CONFIG_MODEL_EMPTY;
+	    writed = 1;
+	}
 	cm++;
     } while (--cnt);
+    // wait to end of write and disable write to eeprom, but only when
+    //   some byte was writed
+    if (writed)
+	while (!BCHK(FLASH_IAPSR, 2))  pause();
+    BRES(FLASH_IAPSR, 3);
 }
 
