@@ -59,9 +59,14 @@ void eeprom_read_model(u8 model) {
 
 static void eeprom_write(u8 *ee_addr, u8 *ram_addr, u16 length) {
     _Bool writed = 0;
+    u8 i = 10;
     // enable write to eeprom
     FLASH_DUKR = 0xAE;
     FLASH_DUKR = 0x56;
+    // wait for write enabled
+    do {
+	if (BCHK(FLASH_IAPSR, 3))  break;
+    } while (--i);
     // write only values, which are different
     do {
 	if (*ee_addr != *ram_addr) {
@@ -95,11 +100,16 @@ void eeprom_write_model(u8 model) {
 // initialize model memories to empty one
 void eeprom_empty_models(void) {
     _Bool writed = 0;
+    u8 i = 0;
     u8 cnt = CONFIG_MODEL_MAX;
     config_model_s *cm = (config_model_s *)EEPROM_CONFIG_MODEL;
     // enable write to eeprom
     FLASH_DUKR = 0xAE;
     FLASH_DUKR = 0x56;
+    // wait for write enabled
+    do {
+	if (BCHK(FLASH_IAPSR, 3))  break;
+    } while (--i);
     // write 0xFF to first letter of each model config
     do {
 	if (cm->name[0] != CONFIG_MODEL_EMPTY) {
