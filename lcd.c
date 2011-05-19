@@ -584,6 +584,7 @@ static const u8 lcd_7segmap[] = {
 
 // write char to LCD item id (LCHR1..3)
 void lcd_char(u8 id, u8 c) {
+    if (c < LCHAR_MIN || c > LCHAR_MAX)  c = '?';
     lcd_set(id, lcd_charmap + (c - LCHAR_MIN) * LCD_CHAR_COLS);
 }
 
