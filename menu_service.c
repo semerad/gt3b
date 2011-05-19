@@ -63,7 +63,7 @@ void menu_calibrate(void) {
 
     while (1) {
 	// check keys
-	if (btnl(BTN_BACK))  break;
+	if (btnl(BTN_BACK || BTN_ENTER))  break;
 
 	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    if (btn(BTN_END))  key_beep();
@@ -148,7 +148,7 @@ void menu_calibrate(void) {
 		if (!btn(BTN_END)) {
 		    // recalculate calibrate value for 10V
 		    cg.battery_calib = (u16)(((u32)adc_battery * 100 + 40) / bat_volts);
-		    if (btnl(BTN_BACK))  break;
+		    if (btnl(BTN_BACK || BTN_ENTER))  break;
 		}
 	    }
 	}

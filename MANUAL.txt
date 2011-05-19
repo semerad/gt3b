@@ -25,15 +25,17 @@ Buttons:
     - it is now possible to differentiate long press (>1 second) to
       normal button press and it will be written like "ENTER-long"
     - buttons of CH3.TRIMs are now also used for steering trim
-    - Trims (channel 1 and 2) and DualRate
+    - Trims and DualRate
 	- now shows changed value only temporaly (5 seconds or till another
-	  key press)
+	  key press), values are saved to EEPROm automatically when it
+	  disappears
 	- when autorepeat disabled on trims (default), reset trim to 0
 	  by pressing both trim keys together for long
 	  (eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
 
 
 Standard menu:
+    - can be ended also by ENTER-long
     - Trims are now only for steering and throttle
     - Expo
 	- value for channel 2 is splitted to forward and back and
@@ -56,7 +58,7 @@ Standard menu:
 
 
 Calibrate menu:
-    - enter it be right-turn and ENTER-long
+    - enter it by right-turn and ENTER-long
     - 6 menu items starts to blink
     - use END or ROTATE to change channels
 	- there is also channel 3 representing CH3 button
@@ -69,7 +71,7 @@ Calibrate menu:
 	- press ENTER
 	- set Your current battery voltage (measure it by voltmeter)
 	- press ENTER to save it or END to no-save
-    - press BACK-long to end calibrate menu
+    - press BACK-long or ENTER-long to end calibrate menu
 
 
 Key-test menu:
@@ -83,7 +85,8 @@ Global setup menu:
     - now menu items MODEL and NAME will start blinking
     - select requested item by ROTATE and press ENTER
     - use ROTATE to change value and press ENTER to end value changing
-    - press BACK-long to end global setup menu, values will be saved to eeprom
+    - press BACK-long or ENTER-long to end global setup menu,
+      values will be saved to eeprom
     - selected menu items are indicated by following symbols:
 	b		backlight time			15s..5h..MAX
 	LOW POWER	battery low voltage		7.5..10.5V
