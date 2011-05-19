@@ -24,7 +24,7 @@ Global:
 Buttons:
     - it is now possible to differentiate long press (>1 second) to
       normal button press and it will be written like "ENTER-long"
-    - buttons of CH3.TRIM are currently used for nothing
+    - buttons of CH3.TRIMs are now also used for steering trim
     - Trims (channel 1 and 2) and DualRate
 	- now shows changed value only temporaly (5 seconds or till another
 	  key press)
