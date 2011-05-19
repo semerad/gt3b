@@ -18,8 +18,6 @@
 
 
 
-#include "gt3b.h"
-
 
 typedef void @far (*intr_handler_t)(void);
 

@@ -20,4 +20,4 @@ menu_service.o: menu_service.c  menu.h gt3b.h stm8.h  task.h \
  config.h eeprom.h timer.h lcd.h buzzer.h input.h
 menu_global.o: menu_global.c  menu.h gt3b.h stm8.h  task.h \
  config.h eeprom.h timer.h lcd.h buzzer.h input.h
-vector.o: vector.c  gt3b.h stm8.h  task.h
+vector.o: vector.c 
