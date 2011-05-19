@@ -103,3 +103,11 @@ Global setup menu:
 	TRIM + A	autorepeat for trim buttons	OFF/ON
 	D/R + A		autorepeat for dualrate buttons	OFF/ON
 
+
+
+
+Return to original (and modified) firmware:
+    - delete whole eeprom (tab DATA MEMORY in STVP and write those empty zeroes
+    - flash original firmware
+    - calibrate steering and throttle
+
