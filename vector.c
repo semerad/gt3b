@@ -39,7 +39,6 @@ struct intr_vector {
 extern void _stext();     /* startup routine */
 extern void ppm_interrupt(void);
 extern void timer_interrupt(void);
-extern void lcd_interrupt(void);
 
 
 struct intr_vector const _vectab[] = {
