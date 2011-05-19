@@ -65,7 +65,7 @@ void menu_calibrate(void) {
 
     while (1) {
 	// check keys
-	if (btnl(BTN_BACK || BTN_ENTER))  break;
+	if (btnl(BTN_BACK | BTN_ENTER))  break;
 
 	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    if (btn(BTN_END))  key_beep();
@@ -80,6 +80,7 @@ void menu_calibrate(void) {
 	    }
 	    lcd_7seg(channel);
 	    lcd_update();
+	    update_time = 0;
 	}
 
 	else if (btn(BTN_ENTER)) {
@@ -150,7 +151,7 @@ void menu_calibrate(void) {
 		if (!btn(BTN_END)) {
 		    // recalculate calibrate value for 10V
 		    cg.battery_calib = (u16)(((u32)adc_battery * 100 + 40) / bat_volts);
-		    if (btnl(BTN_BACK || BTN_ENTER))  break;
+		    if (btnl(BTN_BACK | BTN_ENTER))  break;
 		}
 	    }
 	}
@@ -159,7 +160,7 @@ void menu_calibrate(void) {
 	if (channel == 4)  val = adc_battery;
 	else  val = (adc_all_ovs[channel-1] + ADC_OVS_RND) >> ADC_OVS_SHIFT;
 	// only update display every 1s
-	if (update_time >= time_sec) {
+	if (time_sec >= update_time) {
 	    update_time = time_sec + 1;
 	    update_val = val;
 	}

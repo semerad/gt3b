@@ -269,7 +269,7 @@ void menu_global_setup(void) {
 	btnra();
 	stop();
 
-	if (btnl(BTN_BACK || BTN_ENTER))  break;
+	if (btnl(BTN_BACK | BTN_ENTER))  break;
 
 	if (btn(BTN_ENTER)) {
 	    key_beep();
