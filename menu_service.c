@@ -37,6 +37,8 @@ void menu_calibrate(void) {
     u16 val;
     u8 seg;
     u8 bat_volts;
+    u16 update_time = 0;
+    u16 update_val = 0;
 
     menu_wants_adc = 1;
 
@@ -156,8 +158,13 @@ void menu_calibrate(void) {
 	// show ADC value if other than last val
 	if (channel == 4)  val = adc_battery;
 	else  val = (adc_all_ovs[channel-1] + ADC_OVS_RND) >> ADC_OVS_SHIFT;
-	if (val != last_val) {
-	    last_val = val;
+	// only update display every 1s
+	if (update_time >= time_sec) {
+	    update_time = time_sec + 1;
+	    update_val = val;
+	}
+	if (update_val != last_val) {
+	    last_val = update_val;
 	    lcd_char_num3(val);
 	    lcd_update();
 	}
