@@ -748,6 +748,13 @@ static void menu_loop(void) {
 		       TRIM_FAST, "LNR");
 	    goto check_keys;
 	}
+	else if (btn(BTN_TRIM_CH3_L | BTN_TRIM_CH3_R)) {
+	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_CH3_L, BTN_TRIM_CH3_R,
+		       1, &cm.trim[0],
+	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
+		       TRIM_FAST, "LNR");
+	    goto check_keys;
+	}
 	else if (btn(BTN_TRIM_FWD | BTN_TRIM_BCK)) {
 	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_FWD, BTN_TRIM_BCK,
 		       2, &cm.trim[1],

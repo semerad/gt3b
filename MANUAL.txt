@@ -86,8 +86,12 @@ Global setup menu:
     - press BACK-long to end global setup menu, values will be saved to eeprom
     - selected menu items are indicated by following symbols:
 	b		backlight time			15s..5h..MAX
-	LOW POWER	battery low voltage		7.0..12.0V
-	E.POINT		maximum allowed endpoint value	50..200%
+	LOW POWER	battery low voltage		7.5..10.5V
+	E.POINT		maximum allowed endpoint value	100..150%
+			DANGER - values greater than 120% can damage
+				 your servo or will not be possible
+				 to transmit to receiver because of
+				 2.4GHz modules limitation
 	TRIM + S	trim step for trim buttons	1..20
 	1		dead zone for steering		0..50
 	2		dead zone for throttle		0..50
