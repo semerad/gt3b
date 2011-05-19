@@ -58,9 +58,15 @@ void eeprom_read_model(u8 model) {
 // write to eeprom
 
 static void eeprom_write(u8 *ee_addr, u8 *ram_addr, u16 length) {
+    u8 i = 10;
+
     // enable write to eeprom
     FLASH_DUKR = 0xAE;
     FLASH_DUKR = 0x56;
+    // check if write is enabled for some time
+    do {
+	if (BCHK(FLASH_IAPSR, 3))  break;
+    } while (--i);
     // write only values, which are different
     do {
 	if (*ee_addr != *ram_addr) {
