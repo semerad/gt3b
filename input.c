@@ -169,6 +169,7 @@ static void read_keys(void) {
 
     // add CH3 button
     if (adc_ch3_last < 50)  buttons1 |= BTN_CH3;
+    if (adc_ch3_last > 256 && adc_ch3_last < 768)  buttons1 = BTN_CH3_MID;
 
     // combine last 3 readed buttons
     buttons_state |= buttons1 & buttons2 & buttons3;
