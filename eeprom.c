@@ -25,8 +25,10 @@
 
 void eeprom_init(void) {
     // enable writing to eeprom
+    /*  moved to eeprom_write to do it only temporary
     FLASH_DUKR = 0xAE;
     FLASH_DUKR = 0x56;
+    */
 }
 
 
@@ -56,6 +58,9 @@ void eeprom_read_model(u8 model) {
 // write to eeprom
 
 static void eeprom_write(u8 *ee_addr, u8 *ram_addr, u16 length) {
+    // enable write to eeprom
+    FLASH_DUKR = 0xAE;
+    FLASH_DUKR = 0x56;
     // write only values, which are different
     do {
 	if (*ee_addr != *ram_addr) {
@@ -64,6 +69,9 @@ static void eeprom_write(u8 *ee_addr, u8 *ram_addr, u16 length) {
 	ee_addr++;
 	ram_addr++;
     } while (--length);
+    // wait to end of write and disable write to eeprom
+    while (!BCHK(FLASH_IAPSR, 2))  pause();
+    BRES(FLASH_IAPSR, 3);
 }
 
 
