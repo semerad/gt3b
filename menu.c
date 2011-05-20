@@ -446,7 +446,7 @@ static void menu_model(u8 saveas) {
 	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
 	    model = (u8)menu_change_val((s16)model, 0, CONFIG_MODEL_MAX - 1,
-	                            MODEL_FAST, 1);
+					MODEL_FAST, 1);
 	    show_model_number(model);
 	    lcd_set_blink(L7SEG, LB_SPC);
 	    lcd_chars(config_model_name(model));
