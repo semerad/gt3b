@@ -84,7 +84,7 @@ static void apply_model_settings(void) {
 
 
 // load model config from eeprom and set model settings
-static void load_model(void) {
+void menu_load_model(void) {
     config_model_read();
     apply_model_settings();
     ch3_state = 0;
@@ -458,7 +458,7 @@ static void menu_model(u8 saveas) {
 	}
 	else {
 	    // load selected model
-	    load_model();
+	    menu_load_model();
 	}
     }
     if (saveas)  lcd_set_blink(LMENU, LB_OFF);
@@ -799,7 +799,7 @@ void menu_init(void) {
     apply_global_config();
 
     // read model config from eeprom, but now awake CALC yet
-    load_model();
+    menu_load_model();
     awake_calc_allowed = 1;
 
     // and main loop

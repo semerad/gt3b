@@ -230,6 +230,43 @@ static void gs_dr_autorepeat(u8 change) {
 }
 
 
+static _Bool gs_reset_flag;
+static void gs_reset_all(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	if (gs_reset_flag) {
+	    gs_reset_flag = 0;
+	    config_global_set_default();
+	    config_global_save();
+	    eeprom_empty_models();
+	    menu_load_model();
+	}
+	return;
+    }
+    if (change)  gs_reset_flag ^= 1;
+    lcd_7seg(L7_R);
+    if (gs_reset_flag)	lcd_chars("YES");
+    else		lcd_chars("ALL");
+}
+
+static void gs_reset_model_all(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	if (gs_reset_flag) {
+	    gs_reset_flag = 0;
+	    cg.model = 0;
+	    config_global_save();
+	    eeprom_empty_models();
+	    menu_load_model();
+	}
+	return;
+    }
+    if (change)  gs_reset_flag ^= 1;
+    lcd_7seg(L7_R);
+    if (gs_reset_flag)	lcd_chars("YES");
+    else		lcd_chars("MOD");
+}
+
 
 
 
@@ -245,7 +282,9 @@ static const global_setup_t gs_config[] = {
     gs_ch3_momentary,
     gs_key_beep,
     gs_trim_autorepeat,
-    gs_dr_autorepeat
+    gs_dr_autorepeat,
+    gs_reset_all,
+    gs_reset_model_all,
 };
 #define GS_CONFIG_SIZE  (sizeof(gs_config) / sizeof(u8 *))
 
@@ -315,6 +354,7 @@ void menu_global_setup(void) {
 	}
     }
 
+    func(0xff);		// un-show labels, apply resets
     beep(60);
     lcd_clear();
     config_global_save();
