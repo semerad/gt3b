@@ -104,17 +104,8 @@ void apply_global_config(void) {
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
     lcd_7seg((u8)(model % 10));
-    if (model >= 40) {
-	// too much, set blinking arrows
-	lcd_segment(LS_SYM_RIGHT, LS_ON);
-	lcd_segment(LS_SYM_LEFT,  LS_ON);
-	lcd_segment_blink(LS_SYM_RIGHT, LB_SPC);
-	lcd_segment_blink(LS_SYM_LEFT,  LB_SPC);
-    }
-    else {
-	lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
-	lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
-    }
+    lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
+    lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
 }
 
 
@@ -433,6 +424,7 @@ static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
 // *************************** MODEL MENUS *******************************
 
 // select model/save model as (to selected model position)
+#define MIN(a, b)  (a < b ? a : b)
 static void menu_model(u8 saveas) {
     u8 model = cg.model;
 
@@ -445,7 +437,8 @@ static void menu_model(u8 saveas) {
 
 	if (btn(BTN_ENTER | BTN_BACK))  break;
 	if (btn(BTN_ROT_ALL)) {
-	    model = (u8)menu_change_val((s16)model, 0, CONFIG_MODEL_MAX - 1,
+	    model = (u8)menu_change_val((s16)model, 0,
+					MIN(CONFIG_MODEL_MAX, 40) - 1,
 					MODEL_FAST, 1);
 	    show_model_number(model);
 	    lcd_set_blink(L7SEG, LB_SPC);
