@@ -98,9 +98,13 @@ Global setup menu:
 	1		dead zone for steering		0..50
 	2		dead zone for throttle		0..50
 	3		CH3 buttons is momentary	OFF/ON
-	k		key beep			OFF/ON
+	k(cripled)	key beep			OFF/ON
 	TRIM + A	autorepeat for trim buttons	OFF/ON
 	D/R + A		autorepeat for dualrate buttons	OFF/ON
+	r + ALL		global reset - change to YES to set global configuration
+				       and all models to default values
+	r + MOD		all models reset - change to YES to set all models
+					   to default values
 
 
 
