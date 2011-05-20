@@ -57,9 +57,10 @@
 extern volatile u16 buttons_state;	// actual state of buttons
 extern volatile u16 buttons;		// pressed buttons (must be cleared by SW)
 extern volatile u16 buttons_long;	// >1s presses buttons
-#define btn(mask)  (buttons & (mask))
-#define btns(mask)  (buttons_state & (mask))
-#define btnl(mask)  (buttons_long & (mask))
+#define btn(mask)	(buttons & (mask))
+#define btns(mask)	(buttons_state & (mask))
+#define btns_all(mask)	((buttons_state & (mask)) == (mask))
+#define btnl(mask)	(buttons_long & (mask))
 #define btnl_all(mask)  ((buttons_long & (mask)) == (mask))
 // variables for ADC values
 extern volatile u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more

@@ -372,7 +372,7 @@ static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
 
     while (1) {
 	// check value left/right
-	if (btnl_all(btn_lr)) {
+	if (btnl_all(btn_lr) && btns_all(btn_lr)) {
 	    // reset to given reset value
 	    key_beep();
 	    val = reset;
