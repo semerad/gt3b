@@ -50,33 +50,51 @@ void calc_init(void) {
 
 
 // limit adc value to -5000..5000 (standard servo signal * 10)
-// also apply trim
-static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr,
-                         u16 dead, s16 trim) {
+static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr, u16 dead) {
     s16 val;
     if (adc_ovs < calm) {
 	// left part
 	if (adc_ovs < call) adc_ovs = call;		// limit to calib left
 	val = (s16)adc_ovs - (s16)(calm - dead);
-	if (val >= 0)  return trim;			// in dead zone
-	return (s16)((s32)val * (5000 + trim) / ((calm - dead) - call)) + trim;
+	if (val >= 0)  return 0;			// in dead zone
+	return (s16)((s32)val * 5000 / ((calm - dead) - call));
     }
     else {
 	// right part
 	if (adc_ovs > calr) adc_ovs = calr;		// limit to calib right
 	val = (s16)adc_ovs - (s16)(calm + dead);
-	if (val <= 0)  return trim;			// in dead zone
-	return (s16)((s32)val * (5000 - trim) / (calr - (calm + dead))) + trim;
+	if (val <= 0)  return 0;			// in dead zone
+	return (s16)((s32)val * 5000 / (calr - (calm + dead)));
     }
 }
 
-// apply reverse, endpoint, subtrim
+// apply reverse, endpoint, subtrim, trim (for channel 1-2)
 // set value to ppm channel
-static void rev_epo_subtrim(u8 channel, s16 inval) {
-    s16 val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)]
-                     + 50) / 100);
-    val += cm.subtrim[channel-1] * 10;
+static void channel_params(u8 channel, s16 inval) {
+    s8 trim = 0;
+    s16 val;
+    s32 trim32 = 0;
+    
+    // check limits -5000..5000
+    if (inval < -5000)       inval = -5000;
+    else if (inval > 5000)   inval = 5000;
+
+    // read trims for channels 1-2 and compute inval offset
+    if (channel < 3) {
+	trim = cm.trim[channel-1];
+	if (trim && inval)	// abs(inval) * (trim * 10) / 5000 -> 100x more
+	    trim32 = ((s32)(inval < 0 ? -inval : inval) * trim + 2) / 5;
+    }
+
+    // apply endpoint and trim32
+    val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)] -
+		 trim32 + 50) / 100);
+
+    // add subtrim, trim and reverse
+    val += (cm.subtrim[channel-1] + trim) * 10;
     if (cm.reverse & (u8)(1 << (channel - 1)))  val = -val;
+
+    // set value for this ppm channel
     ppm_set_value(channel, (u16)(15000 + val));
 }
 
@@ -125,10 +143,9 @@ static void calc_loop(void) {
 			    cg.calib_steering_left << ADC_OVS_SHIFT,
 			    cg.calib_steering_mid << ADC_OVS_SHIFT,
 			    cg.calib_steering_right << ADC_OVS_SHIFT,
-			    cg.steering_dead_zone << ADC_OVS_SHIFT,
-			    cm.trim[0] * 10);
+			    cg.steering_dead_zone << ADC_OVS_SHIFT);
 	val = expo(val, cm.expo_steering);
-	rev_epo_subtrim(1, dualrate(val, cm.dr_steering));
+	channel_params(1, dualrate(val, cm.dr_steering));
 
 
 
@@ -138,10 +155,8 @@ static void calc_loop(void) {
 			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
 			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
 			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
-			    cg.throttle_dead_zone << ADC_OVS_SHIFT,
-			    cm.trim[1] * 10);
-	if (val < 0)  val = expo(val, cm.expo_forward);
-	else          val = expo(val, cm.expo_back);
+			    cg.throttle_dead_zone << ADC_OVS_SHIFT);
+	val = expo(val, (u8)(val < 0 ? cm.expo_forward : cm.expo_back));
 	if (cm.abs_type) {
 	    // apply selected ABS
 	    static u8    abs_cnt;
@@ -166,8 +181,8 @@ static void calc_loop(void) {
 		abs_state = 0;
 	    }
 	}
-	rev_epo_subtrim(2, dualrate(val,
-	                (u8)(val < 0 ? cm.dr_forward : cm.dr_back)));
+	channel_params(2, dualrate(val,
+	               (u8)(val < 0 ? cm.dr_forward : cm.dr_back)));
 
 
 
@@ -175,7 +190,7 @@ static void calc_loop(void) {
 	// channel 3
 	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? 5000 : -5000;
 	else                   val = ch3_state ? 5000 : -5000;
-	rev_epo_subtrim(3, val);
+	channel_params(3, val);
 
 
 
