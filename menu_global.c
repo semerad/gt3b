@@ -200,7 +200,11 @@ static void gs_trim_autorepeat(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  cg.autorepeat ^= BTN_TRIM_LEFT | BTN_TRIM_RIGHT | BTN_TRIM_FWD | BTN_TRIM_BCK;
+    if (change) {
+	if (cg.autorepeat & BTN_TRIM_LEFT)
+		cg.autorepeat &= (u8)(~BTN_TRIM_ALL);
+	else	cg.autorepeat |= BTN_TRIM_ALL;
+    }
     lcd_segment(LS_MENU_TRIM, LS_ON);
     lcd_7seg(L7_A);
     if (cg.autorepeat & BTN_TRIM_LEFT)  lcd_chars("ON ");
@@ -214,7 +218,11 @@ static void gs_dr_autorepeat(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change)  cg.autorepeat ^= BTN_DR_L | BTN_DR_R;
+    if (change) {
+	if (cg.autorepeat & BTN_DR_L)
+		cg.autorepeat &= (u8)(~BTN_DR_ALL);
+	else	cg.autorepeat |= BTN_DR_ALL;
+    }
     lcd_segment(LS_MENU_DR, LS_ON);
     lcd_7seg(L7_A);
     if (cg.autorepeat & BTN_DR_L)  lcd_chars("ON ");
