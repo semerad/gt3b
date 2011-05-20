@@ -34,7 +34,6 @@ Buttons:
 
 
 Standard menu:
-    - can be ended also by ENTER-long
     - Trims are now only for steering and throttle
     - Expo
 	- value for channel 2 is splitted to forward and back and

@@ -651,8 +651,8 @@ static void select_menu(void) {
 	btnra();
 	menu_stop();
 
-	// Back or Enter-long key to end this menu
-	if (btn(BTN_BACK) || btnl(BTN_ENTER))  break;
+	// Back key to end this menu
+	if (btn(BTN_BACK))  break;
 
 	// Enter key - goto submenu
 	if (btn(BTN_ENTER)) {
@@ -672,8 +672,8 @@ static void select_menu(void) {
 	    else if (menu == LM_EXP)	menu_expo();
 	    else 			menu_abs();
 	    main_screen(MS_NAME);	// show model number and name
-	    // exit when BACK or ENTER-long
-	    if (btn(BTN_BACK) || btnl(BTN_ENTER))  break;
+	    // exit when BACK
+	    if (btn(BTN_BACK))  break;
 	}
 
 	// rotate keys
