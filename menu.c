@@ -205,6 +205,12 @@ static void menu_set_adc_direction(u8 channel) {
 	    lcd_segment(LS_SYM_RIGHT, LS_ON);
 	}
     }
+    else if (channel > 2 && btn(BTN_CH3)) {
+	// use CH3 button to toggle also
+	menu_adc_direction ^= 1;
+	lcd_segment(LS_SYM_LEFT, (u8)(menu_adc_direction ? LS_OFF : LS_ON));
+	lcd_segment(LS_SYM_RIGHT, (u8)(menu_adc_direction ? LS_ON : LS_OFF));
+    }
 }
 static _Bool menu_set_adc(u8 channel, u8 use_adc) {
     if ((u8)(use_adc & (1 << (channel - 1)))) {
