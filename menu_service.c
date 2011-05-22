@@ -55,7 +55,7 @@ void menu_calibrate(void) {
     // show intro text
     lcd_chars("CAL");
     lcd_update();
-    delay_menu(200);
+    delay_menu_always(2);
 
     // show channel number and not-yet calibrated values
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
@@ -210,7 +210,7 @@ void menu_key_test(void) {
 
     // do full screen blink
     lcd_set_full_on();
-    delay_menu(200);
+    delay_menu_always(2);
     lcd_clear();
 
     btnra();
