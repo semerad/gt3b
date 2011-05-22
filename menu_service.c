@@ -220,7 +220,7 @@ void menu_key_test(void) {
     lcd_update_stop();		// wait for key
 
     while (1) {
-	if (btnl(BTN_BACK))  break;
+	if (btnl(BTN_BACK | BTN_ENTER))  break;
 
 	for (i = 0, bit = 1; i < 14; i++, bit <<= 1) {
 	    if (btn(bit)) {
