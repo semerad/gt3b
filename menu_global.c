@@ -34,9 +34,8 @@
 
 // steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
 static const u16 bl_steps[] = {
-    15, 30, 45,
-    60, 2*60, 5*60, 10*60, 20*60, 30*60,
-    3600, 2*3600, 5*3600,
+    5, 10, 15, 20, 30, 45,
+    60, 2*60, 5*60, 10*60,
     BACKLIGHT_MAX
 };
 #define BL_STEPS_SIZE  (sizeof(bl_steps) / sizeof(u16))
@@ -76,7 +75,7 @@ static void gs_backlight_time(u8 change) {
 		*addr = bl_steps[0];
 	}
     }
-    lcd_7seg(L7_B);
+    lcd_7seg(L7_L);
     if (*addr < 60) {
 	// seconds
 	bl_num2((u8)*addr);
@@ -149,7 +148,7 @@ static void gs_key_beep(u8 change) {
 	return;
     }
     if (change)  cg.key_beep ^= 1;
-    lcd_7seg(L7_K);
+    lcd_7seg(L7_B);
     if (cg.key_beep)  lcd_chars("ON ");
     else              lcd_chars("OFF");
 }
