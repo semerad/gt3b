@@ -34,6 +34,8 @@ extern void ppm_set_channels(u8 n);
 
 // set channel value to microsec01 (in 0.1 microseconds)
 extern void ppm_set_value(u8 channel, u16 microsec01);
+// macro for converting microseconds to ppm_set_value() microsec01
+#define PPM(val)  ((val) * 10)
 
 // after setting each actual channel value, call this to calculate
 //   length of sync signal

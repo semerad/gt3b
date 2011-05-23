@@ -138,13 +138,13 @@ void ppm_set_value(u8 channel, u16 microsec01) {
     // ARR must be set to computed value - 1, that is why we are substracting
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
     *(u16 *)(&ppm_values[(u8)(channel << 1)]) =
-	(u16)(((u32)microsec01 * PPM_MUL_SERVO - 5000) / 10000);
+	(u16)(((u32)microsec01 * PPM_MUL_SERVO - PPM(500)) / PPM(1000));
     // for first channel, when we are still in HW SYNC generate, update
     //   new ARR values to get it applied now
     if (channel == 1) {
 	sim();
 	if (ppm_channel2 == 4) {
-	    // next will channel2, so we have channel1 in ARR now
+	    // next will be channel2, so we have channel1 in ARR now
 	    TIM3_ARRH = ppm_values[2];
 	    TIM3_ARRL = ppm_values[3];
 	}
@@ -161,7 +161,7 @@ void ppm_calc_sync(void) {
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
     *(u16 *)(&ppm_values[0]) =
 	(u16)(((10 * (u32)PPM_FRAME_LENGTH - ppm_microsecs01) * PPM_MUL_SYNC
-	       - 5000) / 10000);
+	       - PPM(500)) / PPM(1000));
     ppm_microsecs01 = 0;
     // for first ppm values, enable timer
     if (ppm_enabled)  return;
