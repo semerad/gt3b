@@ -227,7 +227,7 @@ void menu_key_test(void) {
 	    if (btn(bit)) {
 		key_beep();
 		lcd_chars(key_ids[i]);
-		if (btnl(bit))  lcd_7seg(1);
+		if (btnl(bit))  lcd_7seg(L7_L);
 		else lcd_set(L7SEG, LB_EMPTY);
 		lcd_update();
 		break;
