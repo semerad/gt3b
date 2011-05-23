@@ -26,7 +26,9 @@
 
 
 // variables to be used in CALC task
-extern _Bool ch3_state;		// state of channel 3 button
+extern _Bool ch3_state;			// state of channel 3 button
+extern u8  menu_force_value_channel;	// set PPM value for this channel
+extern s16 menu_force_value;		//   to this value (-500..500)
 
 
 

@@ -52,6 +52,8 @@
 
 // variables to be used in CALC task
 _Bool ch3_state;		// state of channel 3 button
+u8  menu_force_value_channel;	// set PPM value for this channel
+s16 menu_force_value;		//   to this value (-500..500)
 
 
 
@@ -190,6 +192,7 @@ static void menu_set_adc_direction(u8 channel) {
 	adc = adc_steering_ovs;
 	calm = cg.calib_steering_mid;
     }
+
     // if over threshold to one side, set menu_adc_direction
     if (adc < ((calm - 40) << ADC_OVS_SHIFT)) {
 	if (menu_adc_direction) {
@@ -211,8 +214,20 @@ static void menu_set_adc_direction(u8 channel) {
 	lcd_segment(LS_SYM_LEFT, (u8)(menu_adc_direction ? LS_OFF : LS_ON));
 	lcd_segment(LS_SYM_RIGHT, (u8)(menu_adc_direction ? LS_ON : LS_OFF));
     }
+
+    // if this channel is using forced values, set it to left/right
+    if (menu_force_value_channel)
+	menu_force_value = menu_adc_direction ? PPM(500) : PPM(-500);
 }
-static _Bool menu_set_adc(u8 channel, u8 use_adc) {
+static _Bool menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
+    // check if force servos to positions (left/center/right)
+    if ((u8)(force_values & (1 << (channel - 1)))) {
+	menu_force_value_channel = channel;
+	menu_force_value = 0;	// to center by default
+    }
+    else menu_force_value_channel = 0;
+
+    // check use of ADC
     if ((u8)(use_adc & (1 << (channel - 1)))) {
 	// use ADC
 	if (menu_adc_direction) {
@@ -235,7 +250,8 @@ static _Bool menu_set_adc(u8 channel, u8 use_adc) {
 	return 0;
     }
 }
-static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
+static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
+			 void (*subfunc)(u8, u8)) {
     u8 channel = 1;
     _Bool chan_val = 0;			// now in channel
     _Bool adc_active;
@@ -249,7 +265,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     menu_adc_direction = 0;
     lcd_7seg(channel);
     lcd_set_blink(L7SEG, LB_SPC);
-    adc_active = menu_set_adc(channel, use_adc);
+    adc_active = menu_set_adc(channel, use_adc, forced_values);
     subfunc((u8)(channel - 1), 0);	// show current value
     lcd_update();
 
@@ -278,7 +294,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
 		}
 		lcd_7seg(channel);
 		lcd_set_blink(L7SEG, LB_SPC);
-		adc_active = menu_set_adc(channel, use_adc);
+		adc_active = menu_set_adc(channel, use_adc, forced_values);
 		subfunc((u8)(channel - 1), 0);
 	    }
 	    lcd_update();
@@ -312,6 +328,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, void (*subfunc)(u8, u8)) {
     }
 
     menu_wants_adc = 0;
+    menu_force_value_channel = 0;
     key_beep();
     config_model_save();
     apply_model_settings();
@@ -534,7 +551,7 @@ void sf_reverse(u8 channel, u8 change) {
     else                   lcd_chars("NOR");
 }
 @inline static void menu_reverse(void) {
-    menu_channel(MAX_CHANNELS, 0, sf_reverse);
+    menu_channel(MAX_CHANNELS, 0, 0, sf_reverse);
 }
 
 
@@ -547,7 +564,7 @@ void sf_endpoint(u8 channel, u8 change) {
 }
 static void menu_endpoint(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(MAX_CHANNELS, 0xff, sf_endpoint);
+    menu_channel(MAX_CHANNELS, 0xff, 0xfc, sf_endpoint);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
@@ -561,7 +578,7 @@ static void sf_trim(u8 channel, u8 change) {
     else               lcd_char_num2_lbl(*addr, "FNB");
 }
 @inline static void menu_trim(void) {
-    menu_channel(2, 0, sf_trim);
+    menu_channel(2, 0, 0, sf_trim);
 }
 
 
@@ -575,7 +592,7 @@ static void sf_subtrim(u8 channel, u8 change) {
 }
 static void menu_subtrim(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_channel(MAX_CHANNELS, 0, sf_subtrim);
+    menu_channel(MAX_CHANNELS, 0, 0xfc, sf_subtrim);
     lcd_set_blink(LMENU, LB_OFF);
 }
 
@@ -589,7 +606,7 @@ static void sf_dualrate(u8 channel, u8 change) {
 }
 static void menu_dualrate(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(2, 0x2, sf_dualrate);
+    menu_channel(2, 0x2, 0, sf_dualrate);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
@@ -603,7 +620,7 @@ static void sf_expo(u8 channel, u8 change) {
 }
 static void menu_expo(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(2, 0x2, sf_expo);
+    menu_channel(2, 0x2, 0, sf_expo);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 

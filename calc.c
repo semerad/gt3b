@@ -74,6 +74,10 @@ static void channel_params(u8 channel, s16 inval) {
     s8 trim = 0;
     s16 val;
     s32 trim32 = 0;
+
+    // if value forced from menu (settting endpoints, subtrims, ...), set it
+    if (menu_force_value_channel == channel)
+	inval = menu_force_value;
     
     // check limits -5000..5000
     if (inval < -5000)       inval = -5000;
@@ -98,13 +102,13 @@ static void channel_params(u8 channel, s16 inval) {
     ppm_set_value(channel, (u16)(15000 + val));
 }
 
-// expo only for plus values
+// expo only for plus values: x: 0..5000, exp: 1..99
 static s16 expou(u16 x, u8 exp) {
     // (x * x * x * exp / (5000 * 5000) + x * (100 - exp) + 50) / 100
     return (s16)(((u32)x * x / 5000 * x * exp / 5000
                   + x * (100 - exp) + 50) / 100);
 }
-// apply expo
+// apply expo: inval: -5000..5000, exp: -99..99
 static s16 expo(s16 inval, s8 exp) {
     u8  neg;
     s16 val;
