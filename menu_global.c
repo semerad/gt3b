@@ -32,7 +32,18 @@
 
 
 
-// steps: 15s 30s 1m 2m 5m 10m 20m 30m 1h 2h 5h MAX
+// show firmware version
+static void gs_firmware(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    lcd_7seg(L7_F);
+    lcd_chars("000");
+}
+
+
+// steps in seconds and minutes
 static const u16 bl_steps[] = {
     5, 10, 15, 20, 30, 45,
     60, 2*60, 5*60, 10*60,
@@ -278,6 +289,7 @@ static void gs_reset_model_all(u8 change) {
 // array of functions for global setup items
 typedef void (*global_setup_t)(u8 change);
 static const global_setup_t gs_config[] = {
+    gs_firmware,
     gs_backlight_time,
     gs_battery_low,
     gs_endpoint_max,
@@ -324,15 +336,17 @@ void menu_global_setup(void) {
 	if (btnl(BTN_BACK | BTN_ENTER))  break;
 
 	if (btn(BTN_ENTER)) {
-	    key_beep();
-	    item_val = (u8)(1 - item_val);
-	    if (item_val) {
-		// changing value
-		lcd_chars_blink(LB_SPC);
-	    }
-	    else {
-		// selecting item
-		lcd_chars_blink(LB_OFF);
+	    if (item > 0) {		// not for firmware version
+		key_beep();
+		item_val = (u8)(1 - item_val);
+		if (item_val) {
+		    // changing value
+		    lcd_chars_blink(LB_SPC);
+		}
+		else {
+		    // selecting item
+		    lcd_chars_blink(LB_OFF);
+		}
 	    }
 	}
 
