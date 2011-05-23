@@ -27,7 +27,7 @@
 
 
 
-#define ABS_THRESHOLD  500
+#define ABS_THRESHOLD  PPM(50)
 
 
 
@@ -57,14 +57,14 @@ static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr, u16 dead) {
 	if (adc_ovs < call) adc_ovs = call;		// limit to calib left
 	val = (s16)adc_ovs - (s16)(calm - dead);
 	if (val >= 0)  return 0;			// in dead zone
-	return (s16)((s32)val * 5000 / ((calm - dead) - call));
+	return (s16)((s32)val * PPM(500) / ((calm - dead) - call));
     }
     else {
 	// right part
 	if (adc_ovs > calr) adc_ovs = calr;		// limit to calib right
 	val = (s16)adc_ovs - (s16)(calm + dead);
 	if (val <= 0)  return 0;			// in dead zone
-	return (s16)((s32)val * 5000 / (calr - (calm + dead)));
+	return (s16)((s32)val * PPM(500) / (calr - (calm + dead)));
     }
 }
 
@@ -80,8 +80,8 @@ static void channel_params(u8 channel, s16 inval) {
 	inval = menu_force_value;
     
     // check limits -5000..5000
-    if (inval < -5000)       inval = -5000;
-    else if (inval > 5000)   inval = 5000;
+    if (inval < PPM(-500))       inval = PPM(-500);
+    else if (inval > PPM(500))   inval = PPM(500);
 
     // read trims for channels 1-2 and compute inval offset
     if (channel < 3) {
@@ -95,17 +95,17 @@ static void channel_params(u8 channel, s16 inval) {
 		 trim32 + 50) / 100);
 
     // add subtrim, trim and reverse
-    val += (cm.subtrim[channel-1] + trim) * 10;
+    val += (cm.subtrim[channel-1] + trim) * PPM(1);
     if (cm.reverse & (u8)(1 << (channel - 1)))  val = -val;
 
     // set value for this ppm channel
-    ppm_set_value(channel, (u16)(15000 + val));
+    ppm_set_value(channel, (u16)(PPM(1500) + val));
 }
 
 // expo only for plus values: x: 0..5000, exp: 1..99
 static s16 expou(u16 x, u8 exp) {
     // (x * x * x * exp / (5000 * 5000) + x * (100 - exp) + 50) / 100
-    return (s16)(((u32)x * x / 5000 * x * exp / 5000
+    return (s16)(((u32)x * x / PPM(500) * x * exp / PPM(500)
                   + x * (100 - exp) + 50) / 100);
 }
 // apply expo: inval: -5000..5000, exp: -99..99
@@ -119,7 +119,7 @@ static s16 expo(s16 inval, s8 exp) {
     if (neg)  inval = -inval;
 
     if (exp > 0)  val = expou(inval, exp);
-    else          val = 5000 - expou(5000 - inval, (u8)-exp);
+    else          val = PPM(500) - expou(PPM(500) - inval, (u8)-exp);
 
     return  neg ? -val : val;
 }
@@ -192,8 +192,8 @@ static void calc_loop(void) {
 
 
 	// channel 3
-	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? 5000 : -5000;
-	else                   val = ch3_state ? 5000 : -5000;
+	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? PPM(500) : PPM(-500);
+	else                   val = ch3_state ? PPM(500) : PPM(-500);
 	channel_params(3, val);
 
 
