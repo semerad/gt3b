@@ -106,7 +106,7 @@ static void channel_params(u8 channel, s16 inval) {
 static s16 expou(u16 x, u8 exp) {
     // (x * x * x * exp / (5000 * 5000) + x * (100 - exp) + 50) / 100
     return (s16)(((u32)x * x / PPM(500) * x * exp / PPM(500)
-                  + x * (100 - exp) + 50) / 100);
+                  + (u32)x * (u8)(100 - exp) + 50) / 100);
 }
 // apply expo: inval: -5000..5000, exp: -99..99
 static s16 expo(s16 inval, s8 exp) {
