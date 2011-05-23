@@ -211,6 +211,7 @@ void menu_key_test(void) {
     // do full screen blink
     lcd_set_full_on();
     delay_menu_always(2);
+    while (btns(BTN_ENTER))  stop();  // wait for release of ENTER
     lcd_clear();
 
     btnra();
