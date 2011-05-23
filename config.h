@@ -33,18 +33,18 @@
 // 29 bytes
 #define CONFIG_GLOBAL_MAGIC  0xfd02
 typedef struct {
-    u16 magic_global;
-    u16 magic_model;
-    u8  model;			// selected model
+    u8  steering_dead_zone;
+    u8  throttle_dead_zone;
     u16 calib_steering_left;
     u16 calib_steering_mid;
     u16 calib_steering_right;
     u16 calib_throttle_fwd;
     u16 calib_throttle_mid;
     u16 calib_throttle_bck;
-    u8  steering_dead_zone;
-    u8  throttle_dead_zone;
     u16 backlight_time;
+    u16 magic_global;		// it is here because of problems when flashing
+    u16 magic_model;		//  original fw back (1.byte was not overwrited)
+    u8  model;			// selected model
     u16 battery_calib;		// raw ADC value for 10 Volts
     u8  battery_low;		// low battery threshold in .1 Volts
     u8  trim_step;
