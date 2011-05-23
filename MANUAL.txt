@@ -109,7 +109,7 @@ Global setup menu:
 
 
 Return to original (and modified) firmware:
-    - delete whole eeprom (tab DATA MEMORY in STVP and write those empty zeroes
     - flash original firmware
+    - delete whole eeprom (tab DATA MEMORY in STVP and write those empty zeroes)
     - calibrate steering and throttle
 
