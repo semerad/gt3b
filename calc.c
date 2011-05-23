@@ -113,7 +113,8 @@ static s16 expo(s16 inval, s8 exp) {
     u8  neg;
     s16 val;
 
-    if (exp == 0)  return inval;	// no expo
+    if (exp == 0)    return inval;	// no expo
+    if (inval == 0)  return inval;	// 0 don't change
 
     neg = (u8)(inval < 0 ? 1 : 0);
     if (neg)  inval = -inval;
