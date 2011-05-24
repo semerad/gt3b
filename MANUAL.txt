@@ -1,115 +1,143 @@
+****************************
+*                          *
+*  Flysky GT3B-PSX manual  *
+*                          *
+****************************
 
-This is manual for alternative firmware for FlySky FS-GT3B and clones.
-
-It will be written as changes to original firmware.
+Date: May 24rd 2011
 
 
+This is a preliminary manual for alternative firmware for FlySky FS-GT3B radio
+and clones. This manual is written as differences to original firmware.
+
+This firmware is completely written from scratch and is not compatible with the
+original Flysky firmware.
+All of the model setups saved by original firmware will be erased!!!
+You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
+"DATA MEMORY" in STVP to read it from radio a save it to disk.
 
 
-Global:
-    - up to 40 models for 3 (default) channel code
-	- numbers 10-19 will show Right-Arrow
-	- numbers 20-29 will show Left-Arrow
-	- numbers 30-39 will show both arrows
-	- but all your model setups from original firmware will be destroyed
-    - added Subtrims
-    - added SaveAs to save model config to another memory location
-    - added Global Setup menu to change backlight_time, ...
-    - dead zone for steering and throttle
-    - calibrate menu will be automatically invoked after first power-on with
-      this firmware, so 6 menu items will start to blink
+
+Global characteristics:
+=======================
+- up to 40 models memory (will be less at the future after adding more
+	functions and more channels)
+    > numbers 10-19 will show with Right-Arrow
+    > numbers 20-29 will show with Left-Arrow
+    > numbers 30-39 will show with both arrows
+- added Subtrims
+- added SaveAs to save model config to another memory location
+- added Global Setup menu to change function features, including backlight time,
+    CH3 behavior, etc. 
+- dead zone for steering and throttle
+- calibrate menu will be automatically invoked after first power-on with
+  this firmware, so 6 menu items will start to blink
 
 
 Buttons:
-    - it is now possible to differentiate long press (>1 second) to
-      normal button press and it will be written like "ENTER-long"
-    - buttons of CH3.TRIMs are now also used for steering trim
-    - Trims and DualRate
-	- now shows changed value only temporaly (5 seconds or till another
-	  key press), values are saved to EEPROm automatically when it
-	  disappears
-	- when autorepeat disabled on trims (default), reset trim to 0
-	  by pressing both trim keys together for long
-	  (eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
+========
+- it is now possible to differentiate between long press (>1 second) to
+  normal button press (short) and it will be recognized like "ENTER-long"
+- buttons of CH3 trims are now also used for steering trim
+- Trims and DualRate
+    > now shows changed value only temporaly (5 seconds or till another
+	key press), values are saved to EEPROm automatically when it disappears
+    > when autorepeat disabled on trims (default), reset trim to 0
+	by pressing both trim keys together for long
+	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
 
 
 Standard menu:
-    - Trims are now only for steering and throttle
-    - Expo
-	- value for channel 2 is splitted to forward and back and
-          is indicated by arrows
-    - DualRate
-	- value for channel 2 is splitted to forward and back and
-	  is indicated by arrows
-    - SaveAs
-	- choose menu MODEL and press ENTER-long
-	- menu MODEL will blink
-	- choose memory position where to save model config
-	- press ENTER/BACK to save it
-    - Model reset
-	- choose menu NAME and press ENTER-long
-    - Subtrims
-	- choose menu TRIM and press ENTER-long
-	- menu TRIM will blink
-	- set subtrims for each channel
-	- press ENTER/BACK to end this submenu
+==============
+- Trims are now only for steering and throttle
+- Expo
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+- DualRate
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+- SaveAs
+    > choose menu MODEL and press ENTER-long
+    > menu MODEL will blink
+    > choose memory position where to save model config
+    > press ENTER/BACK to save it
+- Model reset
+    > choose menu NAME and press ENTER-long
+- Subtrims
+    > choose menu TRIM and press ENTER-long
+    > menu TRIM will blink
+    > set subtrims for each channel
+    > press ENTER/BACK to end this submenu
 
 
 Calibrate menu:
-    - enter it by right-turn and ENTER-long
-    - 6 menu items starts to blink
-    - use END or ROTATE to change channels
-	- there is also channel 3 representing CH3 button
-	- there is also channal 4 representing battery voltage
-    - calibrate as usual (for channel 1/2 left+mid+right and ENTER)
-	- calibrated value will disappear from menu
-	- it is not needed to calibrate all values
-    - calibrate battery
-	- select channel 4
-	- press ENTER
-	- set Your current battery voltage (measure it by voltmeter)
-	- press ENTER to save it or END to no-save
-    - press BACK-long or ENTER-long to end calibrate menu
+===============
+- enter it by wheel right-turn and ENTER-long
+- 6 menu items starts to blink
+- use END or ROTATE to change channels
+- there is also channel 3 representing CH3 button (for those who will do
+    some 3-position switch/potentiometer modification)
+- there is also channal 4 representing battery voltage
+- calibrate as usual (for channel 1/2 left+mid+right and ENTER)
+    > calibrated value will disappear from menu
+    > it is not needed to calibrate all values
+- calibrate battery (it will not be probably needed to use this)
+    > select channel 4
+    > press ENTER
+    > set your current battery voltage (measure it by voltmeter)
+    > press ENTER to save it or END to no-save
+- press BACK-long or ENTER-long to end calibrate menu and save values
 
 
 Key-test menu:
-    - enter it by left-turn and ENTER-long
-    - now check keys by pressing them short or long
-    - press BACK-long to end calibrate menu
+==============
+- enter it by wheel left-turn and ENTER-long
+- if ENTER-long keep pressed, all segments on display will stay on till
+    ENTER is released
+- now check keys by pressing them short or long
+- if keys long pressed, an "L" symbol will appear left to displayed key symbols
+- press BACK-long or ENTER-long to end key-test menu
 
 
 Global setup menu:
-    - enter it by ENTER-long
-    - now menu items MODEL and NAME will start blinking
-    - select requested item by ROTATE and press ENTER
-    - use ROTATE to change value and press ENTER to end value changing
-    - press BACK-long or ENTER-long to end global setup menu,
-      values will be saved to eeprom
-    - selected menu items are indicated by following symbols:
-	L		backlight time			5s..10m..MAX
-	LOW POWER	battery low voltage		7.5..10.5V
-	E.POINT		maximum allowed endpoint value	100..150%
-			DANGER - values greater than 120% can damage
-				 your servo or will not be possible
-				 to transmit to receiver because of
-				 2.4GHz modules limitation
-	TRIM + S	trim step for trim buttons	1..20
-	1		dead zone for steering		0..50
-	2		dead zone for throttle		0..50
-	3		CH3 buttons is momentary	OFF/ON
-	b		key beep			OFF/ON
-	TRIM + A	autorepeat for trim buttons	OFF/ON
-	D/R + A		autorepeat for dualrate buttons	OFF/ON
-	r + ALL		global reset - change to YES to set global configuration
-				       and all models to default values
-	r + MOD		all models reset - change to YES to set all models
-					   to default values
-
+==================
+- enter it by ENTER-long
+- now menu items MODEL and NAME will start blinking
+- select requested item by ROTATE and press ENTER
+- use ROTATE to change value and press ENTER to end value changing
+- press BACK-long or ENTER-long to end global setup menu,
+    values will be saved to EEPROM
+- selected menu items are indicated by following symbols:
+    F		firmware version (this of course cannot be changed :-)
+    L		backlight time			5s,10s...10m...MAX
+    LOW POWER!	battery low voltage		7.5...10.5V
+    E.POINT	maximum allowed endpoint value	100...150%
+		DANGER - values greater than 120% can damage
+			    your servo or will not be possible
+			    to transmit to receiver because of
+			    2.4GHz HF module limitation
+		This danger zone will be indicated with a flashing "d" symbol
+		  for values greater than 120%
+    TRIM + S	trim step for trim buttons	1...20
+    1		dead zone for steering		0...50
+    2		dead zone for throttle		0...50
+    3		CH3 buttons is momentary	OFF/ON
+    b		key beep			OFF/ON
+    TRIM + A	autorepeat for trim buttons	OFF/ON
+    D/R + A	autorepeat for dualrate buttons	OFF/ON
+    r + ALL	global reset - change to YES to set global configuration
+			       and all models to default values
+    r + MOD	all models reset - change to YES to set all models
+				   to default values
 
 
 
 Return to original (and modified) firmware:
+===========================================
     - flash original firmware
-    - delete whole eeprom (tab DATA MEMORY in STVP and write those empty zeroes)
-    - calibrate steering and throttle
+    - delete whole EEPROM (tab DATA MEMORY in STVP and write those empty zeroes)
+      or return back your saved config (also tab DATA MEMORY in STVP, read
+      your saved config from disk and write it to radio)
+    - calibrate steering and throttle (not needed when You returned back saved
+      config)
 
