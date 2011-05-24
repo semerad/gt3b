@@ -11,7 +11,7 @@ This is a preliminary manual for alternative firmware for FlySky FS-GT3B radio
 and clones. This manual is written as differences to original firmware.
 
 This firmware is completely written from scratch and is not compatible with the
-original Flysky firmware.
+original Flysky firmware. It is distributed with NO-WARRANTY.
 All of the model setups saved by original firmware will be erased!!!
 You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 "DATA MEMORY" in STVP to read it from radio a save it to disk.
