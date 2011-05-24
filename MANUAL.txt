@@ -53,6 +53,7 @@ Standard menu:
 - Expo
     > value for channel 2 is splitted to forward and back and is indicated
 	by arrows
+    > positive values are those You want to use like at Spektrum radios
 - DualRate
     > value for channel 2 is splitted to forward and back and is indicated
 	by arrows
