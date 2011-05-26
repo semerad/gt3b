@@ -3,6 +3,7 @@
 
     added special chars "-1" and "10" to be able to display values -199...1099
     both trims-long now only resets, before there was 1 press of first button
+    changed EEPROM init to eliminate broken initialization
 
 
 *0.0.0 (25 May 2011)
