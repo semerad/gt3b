@@ -386,7 +386,7 @@ static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
 
     while (1) {
 	// check value left/right
-	if (btnl_all(btn_lr) && btns_all(btn_lr)) {
+	if (btnl_all(btn_lr)) {
 	    // reset to given reset value
 	    key_beep();
 	    val = reset;
@@ -394,17 +394,21 @@ static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
 	    btnr(btn_lr);
 	}
 	else if (btn(btn_lr)) {
-	    key_beep();
-	    if (btn(btn_l)) {
-		val -= step;
-		if (val < min)  val = min;
+	    if (!btns_all(btn_lr)) {
+		// only when both are not pressed together
+		key_beep();
+		if (btn(btn_l)) {
+		    val -= step;
+		    if (val < min)  val = min;
+		}
+		else {
+		    val += step;
+		    if (val > max)  val = max;
+		}
+		*aval = (s8)val;
+		btnr(btn_lr);
 	    }
-	    else {
-		val += step;
-		if (val > max)  val = max;
-	    }
-	    *aval = (s8)val;
-	    btnr_nolong(btn_lr);  // waiting for possible both long presses
+	    else btnr_nolong(btn_lr);  // keep long-presses for testing-both
 	}
 	else if (btn(BTN_ROT_ALL)) {
 	    val = menu_change_val(val, min, max, rot_fast, 0);
