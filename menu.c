@@ -31,23 +31,6 @@
 
 
 
-// trims/subtrims limits
-#define TRIM_MAX	99
-#define SUBTRIM_MAX	99
-
-// amount of step when fast encoder rotate
-#define MODEL_FAST	2
-#define ENDPOINT_FAST	5
-#define TRIM_FAST	5
-#define SUBTRIM_FAST	5
-#define DUALRATE_FAST	5
-#define EXPO_FAST	5
-
-// delay in seconds of popup menu (trim, dualrate, ...)
-#define POPUP_DELAY	5
-
-
-
 
 
 // variables to be used in CALC task
@@ -359,89 +342,6 @@ s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate) {
 }
 
 
-// temporary show popup value (trim, subtrim, dualrate, ...)
-// if another key pressed, return
-static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
-		       u8 channel, s8 *aval,
-		       s16 min, s16 max, s16 reset, u8 step,
-		       u8 rot_fast, u8 *labels) {
-    u16 btn_lr = btn_l | btn_r;
-    u16 to_time;
-    s16 val;
-
-    if (min >= 0)  val = *(u8 *)aval;	// *aval is unsigned
-    else           val = *aval;		// *aval is signed
-
-    // show MENU and CHANNEL
-    lcd_segment(menu, LS_ON);
-    if (blink) lcd_segment_blink(menu, LB_SPC);
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_DOT, LS_OFF);
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_segment(LS_SYM_CHANNEL, LS_ON);
-    lcd_7seg(channel);
-
-    while (1) {
-	// check value left/right
-	if (btnl_all(btn_lr)) {
-	    // reset to given reset value
-	    key_beep();
-	    val = reset;
-	    *aval = (s8)val;
-	    btnr(btn_lr);
-	}
-	else if (btn(btn_lr)) {
-	    if (!btns_all(btn_lr)) {
-		// only when both are not pressed together
-		key_beep();
-		if (btn(btn_l)) {
-		    val -= step;
-		    if (val < min)  val = min;
-		}
-		else {
-		    val += step;
-		    if (val > max)  val = max;
-		}
-		*aval = (s8)val;
-		btnr(btn_lr);
-	    }
-	    else btnr_nolong(btn_lr);  // keep long-presses for testing-both
-	}
-	else if (btn(BTN_ROT_ALL)) {
-	    val = menu_change_val(val, min, max, rot_fast, 0);
-	    *aval = (s8)val;
-	}
-	btnr(BTN_ROT_ALL);
-
-	// if another button was pressed, leave this screen
-	if (buttons)  break;
-
-	// show current value
-	if (labels)		lcd_char_num2_lbl((s8)val, labels);
-	else			lcd_char_num3(val);
-	lcd_update();
-
-	// sleep 5s, and if no button was pressed during, end this screen
-	to_time = time_sec + POPUP_DELAY;
-	while (time_sec < to_time && !buttons)
-	    delay_menu((to_time - time_sec) * 200);
-
-	if (!buttons)  break;  // timeouted without button press
-    }
-
-    btnr(btn_lr);  // reset also long values
-
-    // set selected MENU off
-    lcd_segment(menu, LS_OFF);
-
-    // save model config
-    config_model_save();
-}
-
-
 
 
 
@@ -745,7 +645,7 @@ static void menu_loop(void) {
 	menu_wants_adc = 0;
 
     check_keys:
-	// Enter long key
+	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
 	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
 		menu_calibrate();
@@ -754,50 +654,19 @@ static void menu_loop(void) {
 	    else menu_global_setup();
 	}
 
-	// Enter key
+	// Enter key - menu
 	else if (btn(BTN_ENTER)) {
 	    key_beep();
 	    select_menu();
 	}
 
-	// trims
-	else if (btn(BTN_TRIM_LEFT | BTN_TRIM_RIGHT)) {
-	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_LEFT, BTN_TRIM_RIGHT,
-		       1, &cm.trim[0],
-	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
-		       TRIM_FAST, "LNR");
+	// electronic trims
+	else if (menu_electronic_trims())
 	    goto check_keys;
-	}
-	else if (btn(BTN_TRIM_CH3_L | BTN_TRIM_CH3_R)) {
-	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_CH3_L, BTN_TRIM_CH3_R,
-		       1, &cm.trim[0],
-	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
-		       TRIM_FAST, "LNR");
-	    goto check_keys;
-	}
-	else if (btn(BTN_TRIM_FWD | BTN_TRIM_BCK)) {
-	    menu_popup(LS_MENU_TRIM, 0, BTN_TRIM_FWD, BTN_TRIM_BCK,
-		       2, &cm.trim[1],
-	               -TRIM_MAX, TRIM_MAX, 0, cg.trim_step,
-		       SUBTRIM_FAST, "FNB");
-	    goto check_keys;
-	}
 
-	// dualrate
-	else if (btn(BTN_DR_L | BTN_DR_R)) {
-	    menu_popup(LS_MENU_DR, 0, BTN_DR_L, BTN_DR_R,
-		       1, (s8 *)&cm.dr_steering,
-		       0, 100, 100, 1,
-		       DUALRATE_FAST, NULL);
+	// buttons (CH3, Back, End)
+	else if (menu_buttons())
 	    goto check_keys;
-	}
-	
-
-	// channel 3 button
-	else if (!cg.ch3_momentary && btn(BTN_CH3)) {
-	    key_beep();
-	    ch3_state = ~ch3_state;
-	}
 
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {

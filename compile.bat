@@ -15,6 +15,7 @@
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_service.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_global.c
+%TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_popup.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% vector.c
 %TOOLSET%/clnk -l%TOOLSET%/Lib -o gt3b.sm8 -mgt3b.map compile.lkf
 %TOOLSET%/cvdwarf gt3b.sm8

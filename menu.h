@@ -25,6 +25,24 @@
 
 
 
+// trims/subtrims limits
+#define TRIM_MAX	99
+#define SUBTRIM_MAX	99
+
+// amount of step when fast encoder rotate
+#define MODEL_FAST	2
+#define ENDPOINT_FAST	5
+#define TRIM_FAST	5
+#define SUBTRIM_FAST	5
+#define DUALRATE_FAST	5
+#define EXPO_FAST	5
+
+// delay in seconds of popup menu (trim, dualrate, ...)
+#define POPUP_DELAY	5
+
+
+
+
 // variables to be used in CALC task
 extern _Bool ch3_state;			// state of channel 3 button
 extern u8  menu_force_value_channel;	// set PPM value for this channel
@@ -55,6 +73,8 @@ extern void menu_global_setup(void);
 extern s16  menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate);
 extern void apply_global_config(void);
 extern void menu_load_model(void);
+extern u8 menu_electronic_trims(void);
+extern u8 menu_buttons(void);
 
 
 #endif
