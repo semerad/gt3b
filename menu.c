@@ -421,8 +421,7 @@ static void menu_popup(u8 menu, u8 blink, u16 btn_l, u16 btn_r,
 
 	// show current value
 	if (labels)		lcd_char_num2_lbl((s8)val, labels);
-	else if (min < 0)	lcd_char_num2((s8)val);
-	else			lcd_char_num3((u16)val);
+	else			lcd_char_num3(val);
 	lcd_update();
 
 	// sleep 5s, and if no button was pressed during, end this screen
@@ -592,7 +591,7 @@ static void sf_subtrim(u8 channel, u8 change) {
     if (change)
 	*addr = (s8)menu_change_val(*addr, -SUBTRIM_MAX, SUBTRIM_MAX,
 	                            SUBTRIM_FAST, 0);
-    lcd_char_num2(*addr);
+    lcd_char_num3(*addr);
 }
 static void menu_subtrim(void) {
     lcd_set_blink(LMENU, LB_SPC);
@@ -619,8 +618,8 @@ static void menu_dualrate(void) {
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
     if (channel == 1 && menu_adc_direction)  addr = &cm.expo[2];
-    if (change)  *addr = (s8)menu_change_val(*addr, -99, 99, EXPO_FAST, 0);
-    lcd_char_num2(*addr);
+    if (change)  *addr = (s8)menu_change_val(*addr, -100, 100, EXPO_FAST, 0);
+    lcd_char_num3(*addr);
 }
 static void menu_expo(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
