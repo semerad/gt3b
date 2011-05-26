@@ -28,6 +28,7 @@
 // trims/subtrims limits
 #define TRIM_MAX	99
 #define SUBTRIM_MAX	99
+#define EXPO_MAX	100
 
 // amount of step when fast encoder rotate
 #define MODEL_FAST	2
@@ -36,6 +37,7 @@
 #define SUBTRIM_FAST	5
 #define DUALRATE_FAST	5
 #define EXPO_FAST	5
+#define CHANNEL_FAST	5
 
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5

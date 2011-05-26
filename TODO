@@ -1,14 +1,17 @@
 
 mapping of Electronic Trims:
     - function
-    - autorepeat/long-press (off/reset/end_values)
-    - step
+    - step (1 2 5 10 20 30 40 50 100 200)
     - reverse
+    - buttons - momentary/autorpt/long_off/long_reset/long_end_val
+    ---
     - both long -> reset, but handle one-long now and both currently pressed
+    - possible additional flags in table to select special handling
 mapping of buttons:
     - function
-    - momentary (+reversed)/switch
-    - long-press another action
+    - reversed (not used for switch)
+    - buttons - momentary/switch
+    - long-press - another action switch (when not momentary)
 
 
 

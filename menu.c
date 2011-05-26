@@ -520,7 +520,8 @@ static void menu_dualrate(void) {
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
     if (channel == 1 && menu_adc_direction)  addr = &cm.expo[2];
-    if (change)  *addr = (s8)menu_change_val(*addr, -100, 100, EXPO_FAST, 0);
+    if (change)  *addr = (s8)menu_change_val(*addr, -EXPO_MAX, EXPO_MAX,
+                                             EXPO_FAST, 0);
     lcd_char_num3(*addr);
 }
 static void menu_expo(void) {

@@ -33,18 +33,24 @@
 
 
 
-// XXX temporary, will be in model config
+// XXX temporary, will be in model config, default button mappings
 static struct {
-    config_et_map_s  et_map[4];
-//    config_key_map_s key_map[3];
-//    config_key_map_s key_map_long[3];
+    config_et_map_s   et_map[4];
+    config_key_map_s  key_map[3];
+    config_key_map2_s key_map_flags;
 } cml = {
     {
 	{ 1, 0, 1, 0 },
 	{ 2, 0, 1, 0 },
 	{ 1, 0, 1, 0 },
-	{ 3, 1, 1, 0 }
+	{ 3, 0, 1, 1 }
     },
+    {
+	{ 0, 0 },
+	{ 0, 0 },
+	{ 0, 0 }
+    },
+    { 0, 0 }
 };
 
 
@@ -69,27 +75,53 @@ typedef struct {
     u8 idx;		// will be showed sorted by this
     u8 *name;		// showed identification
     u8 menu;		// which menu item(s) show
-    u8 flags;		// bits: arrow_l, arrow_r, percent, ....., blink
+    u8 flags;		// bits: arrow_l, arrow_r, percent, .., moemntary, blink
     u8 channel;		// show this channel
     void *aval;		// address of variable
     s16 min, max, reset; // limits of variable
     u8 rot_fast_step;	// step for fast encoder rotate
     u8 *labels;		// labels for trims
 } et_functions_s;
+#define EF_RIGHT	0b00000001
+#define EF_LEFT		0b00000010
+#define EF_PERCENT	0b00000100
+#define EF_BLINK	0b10000000
+
 static const et_functions_s et_functions[] = {
-    { 0, "OFF", 0, 0,  0, NULL, 0, 0, 0, 0, NULL },
+    { 0, "OFF", 0, 0, 0, NULL, 0, 0, 0, 0, NULL },
     { 1, "TR1", LM_TRIM, 0, 1, &cm.trim[0], -TRIM_MAX, TRIM_MAX, 0,
       TRIM_FAST, "LNR" },
     { 2, "TR2", LM_TRIM, 0, 2, &cm.trim[1], -TRIM_MAX, TRIM_MAX, 0,
       TRIM_FAST, "FNB" },
-    { 3, "DRS", LM_DR, 0b00000100, 1, &cm.dr_steering, 0, 100, 100,
+    { 3, "DRS", LM_DR, EF_PERCENT, 1, &cm.dr_steering, 0, 100, 100,
       DUALRATE_FAST, NULL },
-    { 4, "DRF", LM_DR, 0b00000110, 2, &cm.dr_forward, 0, 100, 100,
+    { 4, "DRF", LM_DR, EF_PERCENT | EF_LEFT, 2, &cm.dr_forward, 0, 100, 100,
       DUALRATE_FAST, NULL },
-    { 5, "DRF", LM_DR, 0b00000101, 2, &cm.dr_back, 0, 100, 100,
+    { 5, "DRB", LM_DR, EF_PERCENT | EF_RIGHT, 2, &cm.dr_back, 0, 100, 100,
       DUALRATE_FAST, NULL },
+    { 6, "EXS", LM_EXP, EF_PERCENT, 1, &cm.expo_steering, -EXPO_MAX, EXPO_MAX,
+      0, EXPO_FAST, NULL },
+    { 7, "EXF", LM_EXP, EF_PERCENT | EF_LEFT, 2, &cm.expo_forward,
+      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL },
+    { 8, "EXB", LM_EXP, EF_PERCENT | EF_RIGHT, 2, &cm.expo_back,
+      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL },
+    { 9, "CH3", 0, 0, 3, &menu_channel3, -100, 100, 0, CHANNEL_FAST, NULL },
+    { 10, "ST1", LM_TRIM, EF_BLINK, 1, &cm.subtrim[0], -SUBTRIM_MAX,
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+    { 11, "ST2", LM_TRIM, EF_BLINK, 2, &cm.subtrim[1], -SUBTRIM_MAX,
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+    { 12, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_cunctions) / sizeof(et_cunctions_s))
+
+
+
+
+static const u8 steps_map[] = {
+    1, 2, 5, 10, 20, 30, 40, 50, 67, 100, 200,
+};
+#define STEPS_MAP_SIZE  sizeof(steps_map)
 
 
 
@@ -97,21 +129,43 @@ static const et_functions_s et_functions[] = {
 
 // temporary show popup value (trim, subtrim, dualrate, ...)
 // if another key pressed, return
+#define AVAL(x)  *(s8 *)etf->aval = (s8)(x)
 static u8 menu_popup(u8 trim_id) {
-    config_et_map_s *etm;
-    et_functions_s *etf;
     u16 to_time;
     s16 val;
+    u8  step;
     u16 btn_l = ETB_L(trim_id);
     u16 btn_r = ETB_R(trim_id);
     u16 btn_lr = btn_l | btn_r;
+    config_et_map_s *etm = &cml.et_map[trim_id];  // XXX change to model config
+    et_functions_s *etf = &et_functions[etm->function];
 
-    if (!btn(btn_lr))	 return 0;	// no key pressed
-    etm = &cml.et_map[trim_id];		// XXX change to model config
-    if (!etm->function)  return 0;	// do nothing for OFF
+    // do nothing when set to OFF
+    if (!etm->function)  return 0;
 
-    etm->step = cg.trim_step;		// XXX delete when in model config
-    etf = &et_functions[etm->function];
+    // if keys are momentary, show nothing, but set value
+    if (etm->buttons == ETB_MOMENTARY) {
+	if (btns(btn_l)) {
+	    // left
+	    AVAL(etm->reverse ? etf->max : etf->min);
+	}
+	else if (btns(btn_r)) {
+	    // right
+	    AVAL(etm->reverse ? etf->min : etf->max);
+	}
+	else {
+	    // center
+	    AVAL(etf->reset);
+	}
+	return 0;
+    }
+
+    // return when key was not pressed
+    if (!btn(btn_lr))	 return 0;
+
+    // convert steps
+    step = steps_map[etm->step];
+    step = cg.trim_step;		// XXX delete when in model config
 
     // read value
     if (etf->min >= 0)  val = *(u8 *)etf->aval;	// *aval is unsigned
@@ -119,13 +173,13 @@ static u8 menu_popup(u8 trim_id) {
 
     // show MENU and CHANNEL
     lcd_menu(etf->menu);
-    if (etf->flags & 0x80) lcd_set_blink(LMENU, LB_SPC);
+    if (etf->flags & EF_BLINK) lcd_set_blink(LMENU, LB_SPC);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_DOT, LS_OFF);
     lcd_segment(LS_SYM_VOLTS, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, (u8)((etf->flags >> 2) & 1));
-    lcd_segment(LS_SYM_LEFT, (u8)((etf->flags >> 1) & 1));
-    lcd_segment(LS_SYM_RIGHT, (u8)(etf->flags & 1));
+    lcd_segment(LS_SYM_PERCENT, (u8)(etf->flags & EF_PERCENT ? LS_ON : LS_OFF));
+    lcd_segment(LS_SYM_LEFT, (u8)(etf->flags & EF_LEFT ? LS_ON : LS_OFF));
+    lcd_segment(LS_SYM_RIGHT, (u8)(etf->flags & EF_RIGHT ? LS_ON : LS_OFF));
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg(etf->channel);
 
@@ -135,23 +189,38 @@ static u8 menu_popup(u8 trim_id) {
 	    // reset to given reset value
 	    key_beep();
 	    val = etf->reset;
-	    *(s8 *)etf->aval = (s8)val;
+	    AVAL(val);
 	    btnr(btn_lr);
 	}
 	else if (btn(btn_lr)) {
 	    if (!btns_all(btn_lr)) {
 		// only when both are not pressed together
-		// XXX add code for long key press
 		key_beep();
-		if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
-		    val -= etm->step;
-		    if (val < etf->min)  val = etf->min;
+		if ((etm->buttons == ETB_LONG_RESET ||
+		     etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
+		    // handle long key press
+		    if (etm->buttons == ETB_LONG_RESET)
+			val = etf->reset;
+		    else {
+			// send side value
+			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
+			    val = etf->min;
+			else
+			    val = etf->max;
+		    }
 		}
 		else {
-		    val += etm->step;
-		    if (val > etf->max)  val = etf->max;
+		    // handle short key press
+		    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
+			val -= step;
+			if (val < etf->min)  val = etf->min;
+		    }
+		    else {
+			val += step;
+			if (val > etf->max)  val = etf->max;
+		    }
 		}
-		*(s8 *)etf->aval = (s8)val;
+		AVAL(val);
 		btnr(btn_lr);
 	    }
 	    else btnr_nolong(btn_lr);  // keep long-presses for testing-both
@@ -159,7 +228,7 @@ static u8 menu_popup(u8 trim_id) {
 	else if (btn(BTN_ROT_ALL)) {
 	    val = menu_change_val(val, etf->min, etf->max, etf->rot_fast_step,
 	                          0);
-	    *(s8 *)etf->aval = (s8)val;
+	    AVAL(val);
 	}
 	btnr(BTN_ROT_ALL);
 

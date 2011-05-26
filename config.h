@@ -69,21 +69,31 @@ extern config_global_s config_global;
 
 // model config
 
+typedef struct {
+    u8 function:7;
+    u8 reverse:1;
+    u8 step:5;
+    u8 buttons:3;
+} config_et_map_s;
+#define ETB_LONG_OFF	0
+#define ETB_AUTORPT	1
+#define ETB_MOMENTARY	2
+#define ETB_LONG_RESET	3
+#define ETB_LONG_ENDVAL	4
+
+typedef struct {
+    u8 function:4;
+    u8 function_long:4;
+} config_key_map_s;
+typedef struct {
+    u8 momentary:4;	// bit for each of 3 buttons
+    u8 reversed:4;	// bit for each of 3 buttons
+} config_key_map2_s;
+
 // change MAGIC number when changing model config
 // also add code to setting default values
 // 14 + channels * 3 bytes
 #define CONFIG_MODEL_MAGIC  (0xff20 | (MAX_CHANNELS - 1))
-typedef struct {
-    u8 function:6;
-    u8 long_press:2;
-    u8 step:7;
-    u8 reverse:1;
-} config_et_map_s;
-typedef struct {
-    u8 function:6;
-    u8 momentary:1;
-    u8 reversed:1;
-} config_key_map_s;
 typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
