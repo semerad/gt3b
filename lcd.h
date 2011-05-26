@@ -85,13 +85,14 @@ extern void lcd_set_blink(u8 id, u8 on_off);
 
 
 // high level functions to write chracters and numbers
+#define LCHAR_MINUS_ONE ('Z' + 1)
+#define LCHAR_ONE_ZERO  ('Z' + 2)
 #define LCHAR_MIN ' '
-#define LCHAR_MAX 'Z'
+#define LCHAR_MAX LCHAR_ONE_ZERO
 #define L7SEG_MAX 15
 extern void lcd_char(u8 id, u8 c);  // id the same as in lcd_set()
 extern void lcd_chars(u8 *chars);   // 3 chars
-extern void lcd_char_num3(u16 num); // num 0-... to 3 chars
-extern void lcd_char_num2(s8 num);  // num -99..99
+extern void lcd_char_num3(s16 num); // num -199...1099 to 3 chars
 extern void lcd_char_num2_lbl(s8 num, u8 *labels);  // num -99..99 with labels for <0, =0, >0
 extern void lcd_7seg(u8 number);    // num 0-15 (>=10 as hexa numbers)
 extern void lcd_menu(u8 menus);     // OR-ed selected menus

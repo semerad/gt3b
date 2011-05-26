@@ -542,6 +542,8 @@ static const u8 lcd_charmap[] = {
     0b1100011, 0b0010100, 0b0001000, 0b0010100, 0b1100011,	// X
     0b1110000, 0b0001000, 0b0000111, 0b0001000, 0b1110000,	// Y
     0b1000011, 0b1000101, 0b1001001, 0b1010001, 0b1100001,	// Z
+    0b0001000, 0b0001000, 0b0100001, 0b1111111, 0b0000001,	// -1
+    0b1111111, 0b0000000, 0b0111110, 0b1000001, 0b0111110,	// 10
 };
 
 // 7seg map, numbers 0-9,a-f(10-15)
@@ -605,36 +607,27 @@ static void lcd_num2char(u8 num) {
 }
 
 
-// write unsigned number to 3 chars (>=1000 as 'AB...')
-void lcd_char_num3(u16 num) {
-    chr[0] = (u8)('0' + num / 100);
-    lcd_num2char((u8)(num % 100));
-    // if more than 999, go to letters
-    if (chr[0] > '9')  chr[0] += 'A' - '0' - 10;
-    // remove leading spaces
-    if (chr[0] == '0') {
-	chr[0] = ' ';
-	if (chr[1] == '0')  chr[1] = ' ';
-    }
-    lcd_chars(chr);
-}
-
-
-// write signed number, max -99..99
-void lcd_char_num2(s8 num) {
+// write unsigned number to 3 chars, max -199...1099
+void lcd_char_num3(s16 num) {
     // check signum
     u8 sig = ' ';
     if (num < 0) {
 	sig = '-';
-	num = (u8)-num;
+	num = -num;
     }
-    lcd_num2char(num);
-    // remove leading spaces
-    if (chr[1] == '0') {
-	chr[1] = sig;
-	chr[0] = ' ';
+    chr[0] = (u8)('0' + num / 100);
+    lcd_num2char((u8)(num % 100));
+    // if more than 999, go to special char 10
+    if (chr[0] > '9')  chr[0] = LCHAR_ONE_ZERO;
+    // remove leading spaces and add signum
+    if (chr[0] == '0') {
+	chr[0] = sig;
+	if (chr[1] == '0') {
+	    chr[1] = sig;
+	    chr[0] = ' ';
+	}
     }
-    else  chr[0] = sig;
+    else if (sig == '-')  chr[0] = LCHAR_MINUS_ONE;
     lcd_chars(chr);
 }
 
