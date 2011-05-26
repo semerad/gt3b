@@ -24,6 +24,7 @@
 #include "lcd.h"
 #include "buzzer.h"
 #include "input.h"
+#include "version.h"
 
 
 
@@ -39,7 +40,7 @@ static void gs_firmware(u8 change) {
 	return;
     }
     lcd_7seg(L7_F);
-    lcd_chars("000");
+    lcd_chars(VERSION);
 }
 
 
