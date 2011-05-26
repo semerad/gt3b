@@ -1,6 +1,15 @@
 
-? CH3 button momentary model specific
-? use also flash memory to store model configs
+mapping of Electronic Trims:
+    - function
+    - autorepeat/long-press (off/reset/end_values)
+    - step
+    - reverse
+    - both long -> reset, but handle one-long now and both currently pressed
+mapping of buttons:
+    - function
+    - momentary (+reversed)/switch
+    - long-press another action
+
 
 
 Some suggestions taken from manuals of other radios:
@@ -58,4 +67,5 @@ other:
 CH3 3(or more) positions
 lights, winch, transmission, horn
 modes - onroad+offroad/expedition/crawler/ship
+? use also flash memory to store model configs
 
