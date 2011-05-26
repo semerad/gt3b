@@ -126,17 +126,25 @@ u8 config_global_read(void) {
     eeprom_read_global();
     if (config_global.magic_global != CONFIG_GLOBAL_MAGIC) {
 	// global config changed, initialize whole eeprom
-	calib_changed = config_global_set_default();
-	eeprom_write_global();
 	eeprom_empty_models();
+	calib_changed = config_global_set_default();
+	// do not write magic_global yet to eliminate interrupted initialization
+	//   (for example flash-verify after flash-write in STVP)
+	config_global.magic_global = 0;
+	config_global_save();
+	// and now as last set magic_global
+	config_global.magic_global = CONFIG_GLOBAL_MAGIC;
+	config_global_save();
     }
     else if (config_global.magic_model != CONFIG_MODEL_MAGIC) {
-	// set new model magic
-	config_global.magic_model = CONFIG_MODEL_MAGIC;
-	config_global.model = 0;
-	config_global_save();
 	// model config changed, empty all models
 	eeprom_empty_models();
+	// set model number to 0
+	config_global.model = 0;
+	config_global_save();
+	// set new model magic
+	config_global.magic_model = CONFIG_MODEL_MAGIC;
+	config_global_save();
     }
 
     return calib_changed;
