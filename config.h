@@ -74,6 +74,17 @@ extern config_global_s config_global;
 // 14 + channels * 3 bytes
 #define CONFIG_MODEL_MAGIC  (0xff20 | (MAX_CHANNELS - 1))
 typedef struct {
+    u8 function:6;
+    u8 long_press:2;
+    u8 step:7;
+    u8 reverse:1;
+} config_et_map_s;
+typedef struct {
+    u8 function:6;
+    u8 momentary:1;
+    u8 reversed:1;
+} config_key_map_s;
+typedef struct {
     u8 channels;		// number of channels for this model
     u8 name[3];
     u8 reverse;			// bit for each channel
