@@ -177,10 +177,7 @@ static void gs_ch3_momentary(u8 change) {
 	lcd_set(L7SEG, LB_EMPTY);
 	return;
     }
-    if (change) {
-	cg.ch3_momentary ^= 1;
-	ch3_state = 0;
-    }
+    if (change)  cg.ch3_momentary ^= 1;
     lcd_7seg(3);
     if (cg.ch3_momentary)  lcd_chars("ON ");
     else                   lcd_chars("OFF");

@@ -163,10 +163,16 @@ u8 menu_electronic_trims(void) {
 // check buttons CH3, BACK, END, invoke popup to show value
 // return 1 when popup was activated
 u8 menu_buttons(void) {
-    if (!cg.ch3_momentary && btn(BTN_CH3)) {
-	key_beep();
-	ch3_state = ~ch3_state;
+    // CH3 button
+    if (cg.ch3_momentary)
+	menu_channel3 = (s8)(btns(BTN_CH3) ? 100 : -100);
+    else {
+	if (btn(BTN_CH3)) {
+	    key_beep();
+	    menu_channel3 = (s8)(-menu_channel3);
+	}
     }
+
     return 0;
 }
 

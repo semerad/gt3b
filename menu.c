@@ -34,9 +34,9 @@
 
 
 // variables to be used in CALC task
-_Bool ch3_state;		// state of channel 3 button
 u8  menu_force_value_channel;	// set PPM value for this channel
 s16 menu_force_value;		//   to this value (-500..500)
+s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >=3
 
 
 
@@ -70,9 +70,11 @@ static void apply_model_settings(void) {
 
 // load model config from eeprom and set model settings
 void menu_load_model(void) {
+    u8 i;
     config_model_read();
     apply_model_settings();
-    ch3_state = 0;
+    for (i = 0; i <= MAX_CHANNELS - 3; i++)
+	menu_channel3_8[i] = -100;
 }
 
 

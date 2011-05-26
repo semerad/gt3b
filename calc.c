@@ -140,6 +140,7 @@ static s16 expo(s16 inval, s8 exp) {
 // called for each PPM cycle
 static void calc_loop(void) {
     s16 val;
+    u8  i;
 
     while (1) {
 
@@ -192,10 +193,9 @@ static void calc_loop(void) {
 
 
 
-	// channel 3
-	if (cg.ch3_momentary)  val = btns(BTN_CH3) ? PPM(500) : PPM(-500);
-	else                   val = ch3_state ? PPM(500) : PPM(-500);
-	channel_params(3, val);
+	// channels 3-8, exclude mixed channels in the future
+	for (i = 3; i <= MAX_CHANNELS; i++)
+	    channel_params(i, menu_channel3_8[i - 3] * PPM(5));
 
 
 
