@@ -161,10 +161,11 @@ static const u8 steps_map[] = {
 // temporary show popup value (trim, subtrim, dualrate, ...)
 // if another key pressed, return
 #define AVAL(x)  *(s8 *)etf->aval = (s8)(x)
-static u8 menu_popup(u8 trim_id) {
+static u8 menu_popup_et(u8 trim_id) {
     u16 to_time;
     s16 val;
     u8  step;
+    u16 buttons_state_last;
     u16 btn_l = ETB_L(trim_id);
     u16 btn_r = ETB_R(trim_id);
     u16 btn_lr = btn_l | btn_r;
@@ -193,6 +194,9 @@ static u8 menu_popup(u8 trim_id) {
 
     // return when key was not pressed
     if (!btn(btn_lr))	 return 0;
+
+    // remember buttons state
+    buttons_state_last = buttons_state & ~btn_lr;
 
     // convert steps
     step = steps_map[etm->step];
@@ -265,15 +269,17 @@ static u8 menu_popup(u8 trim_id) {
 
 	// if another button was pressed, leave this screen
 	if (buttons)  break;
+	if ((buttons_state & ~btn_lr) != buttons_state_last)  break;
 
 	// show current value
 	if (etf->labels)	lcd_char_num2_lbl((s8)val, etf->labels);
 	else			lcd_char_num3(val);
 	lcd_update();
 
-	// sleep 5s, and if no button was pressed during, end this screen
+	// sleep 5s, and if no button was changed during, end this screen
 	to_time = time_sec + POPUP_DELAY;
-	while (time_sec < to_time && !buttons)
+	while (time_sec < to_time && !buttons &&
+	       ((buttons_state & ~btn_lr) == buttons_state_last))
 	    delay_menu((to_time - time_sec) * 200);
 
 	if (!buttons)  break;  // timeouted without button press
@@ -300,7 +306,7 @@ u8 menu_electronic_trims(void) {
 
     // for each trim, call function
     for (i = 0; i < ET_BUTTONS_SIZE; i++)
-	if (menu_popup(i))  return 1;
+	if (menu_popup_et(i))  return 1;
 
     return 0;
 }
