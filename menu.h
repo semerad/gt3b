@@ -83,6 +83,8 @@ extern void apply_global_config(void);
 extern void menu_load_model(void);
 extern u8 menu_electronic_trims(void);
 extern u8 menu_buttons(void);
+extern u8 *menu_et_function_name(u8 n);
+extern s8 menu_et_function_idx(u8 n);
 
 
 #endif
