@@ -87,7 +87,7 @@ typedef struct {
 } config_key_map_s;
 typedef struct {
     u8 momentary:4;	// bit for each of 3 buttons
-    u8 reversed:4;	// bit for each of 3 buttons
+    u8 reverse:4;	// bit for each of 3 buttons
 } config_key_map2_s;
 
 // change MAGIC number when changing model config

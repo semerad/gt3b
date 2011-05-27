@@ -46,14 +46,18 @@ static struct {
 	{ 3, 0, 1, 1 }
     },
     {
+	{ 1, 0 },
 	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 }
+	{ 0, 1 }
     },
     { 0, 0 }
 };
 
 
+
+
+
+// ********************* TRIMS ****************************
 
 
 // mapping of keys to trims
@@ -315,18 +319,200 @@ u8 menu_electronic_trims(void) {
 
 
 
+
+// ************************* KEYS *************************
+
+
+// mapping of keys to no-trims
+static const u16 key_buttons[] = {
+    BTN_CH3,
+    BTN_BACK,
+    BTN_END,
+};
+#define KEY_BUTTONS_SIZE  (sizeof(key_buttons) / sizeof(u16))
+
+
+
+
+// functions assignable to trims
+typedef struct {
+    u8 idx;		// will be showed sorted by this
+    u8 *name;		// showed identification
+    u8 flags;		// bits below
+    void (*func)(s16 param, u8 flags);	// function to process key, flags below
+    s16 param;		// param given to function
+} key_functions_s;
+// flags bits
+#define KF_NONE		0
+#define KF_2STATE	0b00000001
+// func flags bits
+#define FF_SET		0b00000001
+#define FF_STATE	0b00000010
+#define FF_REVERSE	0b00000100
+#define FF_CH3		0b00001000
+#define FF_SHOW		0b10000000
+
+
+
+
+// set channel value
+static void kf_channel(s16 channel, u8 flags) {
+    s8 *aval = &menu_channel3_8[channel - 3];
+
+    if (flags & FF_SET) {
+	// set value based on state
+	if (flags & FF_STATE)
+	    *aval = (s8)(flags & FF_REVERSE ? -100 : 100);
+	else
+	    *aval = (s8)(flags & FF_REVERSE ? 100 : -100);
+	// check CH3 midle position
+	if ((flags & FF_CH3) && adc_ch3_last > 256 && adc_ch3_last < 768)
+	    *aval = 0;
+    }
+    else {
+	// switch to opposite value
+	if (*aval > 0)  *aval = -100;
+	else		*aval = 100;
+    }
+    if (flags & FF_SHOW) {
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_7seg((u8)channel);
+	lcd_char_num3(*aval);
+    }
+}
+
+
+
+
+// table of key functions
+static const key_functions_s key_functions[] = {
+    { 0, "OFF", KF_NONE, 0 },
+    { 1, "CH3", KF_2STATE, kf_channel, 3 },
+#if MAX_CHANNELS >= 4
+    { 2, "CH4", KF_2STATE, kf_channel, 4 },
+#if MAX_CHANNELS >= 5
+    { 3, "CH5", KF_2STATE, kf_channel, 5 },
+#if MAX_CHANNELS >= 6
+    { 4, "CH6", KF_2STATE, kf_channel, 6 },
+#endif
+#endif
+#endif
+};
+#define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
+
+
+// return name of given line
+u8 *menu_key_function_name(u8 n) {
+    return key_functions[n].name;
+}
+
+// return sort idx of given line
+s8 menu_key_function_idx(u8 n) {
+    if (n >= KEY_FUNCTIONS_SIZE)  return -1;
+    return key_functions[n].idx;
+}
+
+
+
+
+// change val, temporary show new value (not always)
+// end when another key pressed
+static u8 menu_popup_key(u8 key_id) {
+    u16 to_time;
+    u16 buttons_state_last;
+    u16 btnx;
+    config_key_map_s *km = &cml.key_map[key_id];  // XXX change to model config
+    config_key_map2_s *kmf;
+    key_functions_s *kf;
+    key_functions_s *kfl;
+    u8 key_bit = 1;
+    u8 flags;
+
+    // do nothing when both short and long set to OFF
+    if (!km->function && !km->function_long)  return 0;
+
+    // prepare more variables
+    if (key_id > 0) {
+	key_bit <<= 1;
+	if (key_id > 1)  key_bit <<= 1;
+    }
+    kf = &key_functions[km->function];
+    kmf = &cml.key_map_flags;			// XXX change to model config
+    btnx = key_buttons[key_id];
+
+    // check momentary setting
+    if (km->function && (kf->flags & KF_2STATE) && (kmf->momentary & key_bit)) {
+	flags = FF_SET;
+	if (btns(btnx))			flags |= FF_STATE;
+	if (kmf->reverse & key_bit)	flags |= FF_REVERSE;
+	if (key_id == 0)		flags |= FF_CH3;
+	kf->func(kf->param, flags);	// set value to state
+	return 0;
+    }
+
+    // return when key was not pressed
+    if (!btn(btnx))	 return 0;
+
+    kfl = &key_functions[km->function_long];
+
+    // remember buttons state
+    buttons_state_last = buttons_state & ~btnx;
+
+    // clear some lcd segments
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_DOT, LS_OFF);
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+    lcd_set(L7SEG, LB_EMPTY);
+
+    while (1) {
+	if (km->function_long && btnl(btnx)) {
+	    // long key press
+	    key_beep();
+	    kfl->func(kfl->param, FF_SHOW);	// switch value
+	    lcd_update();
+	}
+	else if (km->function && btn(btnx)) {
+	    // short key press
+	    key_beep();
+	    kf->func(kf->param, FF_SHOW);	// switch value
+	    lcd_update();
+	}
+	btnr(btnx);
+
+	// if another button was pressed, leave this screen
+	if (buttons)  break;
+	if ((buttons_state & ~btnx) != buttons_state_last)  break;
+
+	// sleep 5s, and if no button was changed during, end this screen
+	to_time = time_sec + POPUP_DELAY;
+	while (time_sec < to_time && !buttons &&
+	       ((buttons_state & ~btnx) == buttons_state_last))
+	    delay_menu((to_time - time_sec) * 200);
+
+	if (!buttons)  break;  // timeouted without button press
+    }
+
+    // set MENU off
+    lcd_menu(0);
+
+    return 1;  // popup was showed
+}
+
+
+
+
 // check buttons CH3, BACK, END, invoke popup to show value
 // return 1 when popup was activated
 u8 menu_buttons(void) {
-    // CH3 button
-    if (cg.ch3_momentary)
-	menu_channel3 = (s8)(btns(BTN_CH3) ? 100 : -100);
-    else {
-	if (btn(BTN_CH3)) {
-	    key_beep();
-	    menu_channel3 = (s8)(-menu_channel3);
-	}
-    }
+    u8 i;
+
+    // for each key, call function
+    for (i = 0; i < KEY_BUTTONS_SIZE; i++)
+	if (menu_popup_key(i))  return 1;
 
     return 0;
 }

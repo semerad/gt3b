@@ -85,6 +85,8 @@ extern u8 menu_electronic_trims(void);
 extern u8 menu_buttons(void);
 extern u8 *menu_et_function_name(u8 n);
 extern s8 menu_et_function_idx(u8 n);
+extern u8 *menu_key_function_name(u8 n);
+extern s8 menu_key_function_idx(u8 n);
 
 
 #endif
