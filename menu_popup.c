@@ -34,11 +34,11 @@
 
 
 // XXX temporary, will be in model config, default button mappings
-static config_key_mapping_s ck = {
+config_key_mapping_s config_key_mapping = {
     {
 	{ 1, 0 },
 	{ 0, 0 },
-	{ 0, 1 }
+	{ 0, 0 }
     },
     {
 	{ 1, 0, 1, 0 },
@@ -49,7 +49,6 @@ static config_key_mapping_s ck = {
     0,
     0
 };
-//#define ck cm.key_mapping
 
 
 
@@ -174,9 +173,6 @@ static u8 menu_popup_et(u8 trim_id) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     et_functions_s *etf = &et_functions[etm->function];
 
-    // do nothing when set to OFF
-    if (!etm->function)  return 0;
-
     // if keys are momentary, show nothing, but set value
     if (etm->buttons == ETB_MOMENTARY) {
 	if (btns(btn_l)) {
@@ -202,7 +198,8 @@ static u8 menu_popup_et(u8 trim_id) {
 
     // convert steps
     step = steps_map[etm->step];
-    step = cg.trim_step;		// XXX delete when in model config
+    if (trim_id < 3)
+	step = cg.trim_step;		// XXX delete when in model config
 
     // read value
     if (etf->min >= 0)  val = *(u8 *)etf->aval;	// *aval is unsigned
@@ -307,8 +304,10 @@ u8 menu_electronic_trims(void) {
     u8 i;
 
     // for each trim, call function
-    for (i = 0; i < ET_BUTTONS_SIZE; i++)
+    for (i = 0; i < ET_BUTTONS_SIZE; i++) {
+	if (ck.et_off & (u8)(1 << i))  continue;  // trim is off
 	if (menu_popup_et(i))  return 1;
+    }
 
     return 0;
 }
@@ -326,6 +325,10 @@ static const u16 key_buttons[] = {
     BTN_CH3,
     BTN_BACK,
     BTN_END,
+    BTN_TRIM_LEFT,  BTN_TRIM_RIGHT,
+    BTN_TRIM_FWD,   BTN_TRIM_BCK,
+    BTN_TRIM_CH3_L, BTN_TRIM_CH3_R,
+    BTN_DR_L,       BTN_DR_R,
 };
 #define KEY_BUTTONS_SIZE  (sizeof(key_buttons) / sizeof(u16))
 
@@ -432,6 +435,8 @@ static u8 menu_popup_key(u8 key_id) {
     key_bit = 1 << key_id;
     kf = &key_functions[km->function];
     btnx = key_buttons[key_id];
+    if ((kf->flags & KF_2STATE) && !key_id)
+	ck.momentary |= key_bit;	// XXX delete when in model config
 
     // check momentary setting
     if (km->function && (kf->flags & KF_2STATE) && (ck.momentary & key_bit)) {
@@ -504,8 +509,11 @@ u8 menu_buttons(void) {
     u8 i;
 
     // for each key, call function
-    for (i = 0; i < KEY_BUTTONS_SIZE; i++)
+    for (i = 0; i < KEY_BUTTONS_SIZE; i++) {
+	if (i >= 3 && !(ck.et_off & (u8)(1 << ((i - 3) >> 1))))
+	    continue;	// trim is enabled for this key
 	if (menu_popup_key(i))  return 1;
+    }
 
     return 0;
 }

@@ -108,6 +108,9 @@ typedef struct {
     s8 expo[3];			// steering/forward/back
     u8 abs_type;
 } config_model_s;
+extern config_key_mapping_s config_key_mapping; // XXX temporary
+#define ck  config_key_mapping
+//#define ck  cm.key_mapping
 
 extern config_model_s config_model;
 #define cm config_model

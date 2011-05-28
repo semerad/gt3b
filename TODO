@@ -5,7 +5,7 @@ mapping of Electronic Trims:
 		OFF
 		other -> step -> reverse (NOR/REV) -> buttons (NOR/ARP/MOM/RES/END)
 		         both      left arrow           right arrow
-    - ? if not used, use it as buttons, flags instead of keys reverse
+    - if not used, use it as buttons
 mapping of buttons:
     - 7seg:  C b E
     - chars: function
