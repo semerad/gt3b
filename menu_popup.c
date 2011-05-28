@@ -34,24 +34,22 @@
 
 
 // XXX temporary, will be in model config, default button mappings
-static struct {
-    config_et_map_s   et_map[4];
-    config_key_map_s  key_map[3];
-    config_key_map2_s key_map_flags;
-} cml = {
+static config_key_mapping_s ck = {
+    {
+	{ 1, 0 },
+	{ 0, 0 },
+	{ 0, 1 }
+    },
     {
 	{ 1, 0, 1, 0 },
 	{ 2, 0, 1, 0 },
 	{ 1, 0, 1, 0 },
 	{ 3, 0, 1, 1 }
     },
-    {
-	{ 1, 0 },
-	{ 0, 0 },
-	{ 0, 1 }
-    },
-    { 0, 0 }
+    0,
+    0
 };
+//#define ck cm.key_mapping
 
 
 
@@ -173,7 +171,7 @@ static u8 menu_popup_et(u8 trim_id) {
     u16 btn_l = ETB_L(trim_id);
     u16 btn_r = ETB_R(trim_id);
     u16 btn_lr = btn_l | btn_r;
-    config_et_map_s *etm = &cml.et_map[trim_id];  // XXX change to model config
+    config_et_map_s *etm = &ck.et_map[trim_id];
     et_functions_s *etf = &et_functions[etm->function];
 
     // do nothing when set to OFF
@@ -421,27 +419,22 @@ static u8 menu_popup_key(u8 key_id) {
     u16 to_time;
     u16 buttons_state_last;
     u16 btnx;
-    config_key_map_s *km = &cml.key_map[key_id];  // XXX change to model config
-    config_key_map2_s *kmf;
+    config_key_map_s *km = &ck.key_map[key_id];
     key_functions_s *kf;
     key_functions_s *kfl;
-    u8 key_bit = 1;
+    u16 key_bit;
     u8 flags;
 
     // do nothing when both short and long set to OFF
     if (!km->function && !km->function_long)  return 0;
 
     // prepare more variables
-    if (key_id > 0) {
-	key_bit <<= 1;
-	if (key_id > 1)  key_bit <<= 1;
-    }
+    key_bit = 1 << key_id;
     kf = &key_functions[km->function];
-    kmf = &cml.key_map_flags;			// XXX change to model config
     btnx = key_buttons[key_id];
 
     // check momentary setting
-    if (km->function && (kf->flags & KF_2STATE) && (kmf->momentary & key_bit)) {
+    if (km->function && (kf->flags & KF_2STATE) && (ck.momentary & key_bit)) {
 	flags = FF_SET;
 	if (btns(btnx))			flags |= FF_STATE;
 	if (km->function_long)		flags |= FF_REVERSE;
