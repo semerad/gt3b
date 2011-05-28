@@ -5,13 +5,14 @@ mapping of Electronic Trims:
 		OFF
 		other -> step -> reverse (NOR/REV) -> buttons (NOR/ARP/MOM/RES/END)
 		         both      left arrow           right arrow
+    - ? if not used, use it as buttons, flags instead of keys reverse
 mapping of buttons:
     - 7seg:  C b E
     - chars: function
 		OFF
 		2STATE -> momentary (right arrow)
-			    NOR -> function_long (both arrows)
-			    MON -> reverse (NOR/REV left arrow)
+			    SWI -> function_long (both arrows)
+			    MON -> reverse (NOR/REV left arrow, in function_long)
 		other -> function_long (both arrows)
 
 

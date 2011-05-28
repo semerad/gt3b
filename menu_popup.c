@@ -444,7 +444,7 @@ static u8 menu_popup_key(u8 key_id) {
     if (km->function && (kf->flags & KF_2STATE) && (kmf->momentary & key_bit)) {
 	flags = FF_SET;
 	if (btns(btnx))			flags |= FF_STATE;
-	if (kmf->reverse & key_bit)	flags |= FF_REVERSE;
+	if (km->function_long)		flags |= FF_REVERSE;
 	if (key_id == 0)		flags |= FF_CH3;
 	kf->func(kf->param, flags);	// set value to state
 	return 0;
