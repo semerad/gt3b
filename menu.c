@@ -258,7 +258,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 	btnra();
 	menu_stop();
 
-	if (btn(BTN_BACK | BTN_ENTER))  break;
+	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
 
 	last_direction = menu_adc_direction;
 	if (adc_active)  menu_set_adc_direction(channel);
@@ -286,7 +286,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 	    last_direction = menu_adc_direction;  // was already showed
 	}
 
-	else if (btn(BTN_END)) {
+	else if (btn(BTN_ENTER)) {
 	    // switch channel/value
 	    if (chan_val) {
 		// switch to channel number
@@ -363,7 +363,7 @@ static void menu_model(u8 saveas) {
 	btnra();
 	menu_stop();
 
-	if (btn(BTN_ENTER | BTN_BACK))  break;
+	if (btn(BTN_BACK | BTN_END | BTN_ENTER))  break;
 	if (btn(BTN_ROT_ALL)) {
 	    model = (u8)menu_change_val((s16)model, 0,
 					MIN(CONFIG_MODEL_MAX, 40) - 1,
@@ -404,8 +404,8 @@ static void menu_name(void) {
 	btnra();
 	menu_stop();
 
-	if (btn(BTN_ENTER | BTN_BACK))  break;
-	if (btn(BTN_END)) {
+	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
+	if (btn(BTN_ENTER)) {
 	    key_beep();
 	    // to next char
 	    lcd_set_blink(pos, LB_OFF);
@@ -551,7 +551,7 @@ static void menu_abs(void) {
 	btnra();
 	menu_stop();
 
-	if (btn(BTN_BACK | BTN_ENTER))  break;
+	if (btn(BTN_BACK | BTN_END | BTN_ENTER))  break;
 
 	if (btn(BTN_ROT_ALL)) {
 	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_SIZE-1,
@@ -579,8 +579,8 @@ static void select_menu(void) {
 	btnra();
 	menu_stop();
 
-	// Back key to end this menu
-	if (btn(BTN_BACK))  break;
+	// Back/End key to end this menu
+	if (btn(BTN_BACK | BTN_END))  break;
 
 	// Enter key - goto submenu
 	if (btn(BTN_ENTER)) {
@@ -598,7 +598,10 @@ static void select_menu(void) {
 	    }
 	    else if (menu == LM_DR)	menu_dualrate();
 	    else if (menu == LM_EXP)	menu_expo();
-	    else 			menu_abs();
+	    else {
+		if (btnl(BTN_ENTER))	break;
+		else			menu_abs();
+	    }
 	    main_screen(MS_NAME);	// show model number and name
 	    // exit when BACK
 	    if (btn(BTN_BACK))  break;
