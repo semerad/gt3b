@@ -87,6 +87,10 @@ extern u8 *menu_et_function_name(u8 n);
 extern s8 menu_et_function_idx(u8 n);
 extern u8 *menu_key_function_name(u8 n);
 extern s8 menu_key_function_idx(u8 n);
+extern u8 menu_key_function_2state(u8 n);
+extern const u8 steps_map[];
+#define STEPS_MAP_SIZE  11
+extern const u16 et_buttons[][2];
 
 
 #endif

@@ -58,7 +58,7 @@ config_key_mapping_s config_key_mapping = {
 
 
 // mapping of keys to trims
-static const u16 et_buttons[][2] = {
+const u16 et_buttons[][2] = {
     { BTN_TRIM_LEFT,  BTN_TRIM_RIGHT },
     { BTN_TRIM_FWD,   BTN_TRIM_BCK },
     { BTN_TRIM_CH3_L, BTN_TRIM_CH3_R },
@@ -150,10 +150,9 @@ s8 menu_et_function_idx(u8 n) {
 
 
 
-static const u8 steps_map[] = {
+const u8 steps_map[STEPS_MAP_SIZE] = {
     1, 2, 5, 10, 20, 30, 40, 50, 67, 100, 200,
 };
-#define STEPS_MAP_SIZE  sizeof(steps_map)
 
 
 
@@ -411,6 +410,11 @@ u8 *menu_key_function_name(u8 n) {
 s8 menu_key_function_idx(u8 n) {
     if (n >= KEY_FUNCTIONS_SIZE)  return -1;
     return key_functions[n].idx;
+}
+
+// return if it is 2-state function
+u8 menu_key_function_2state(u8 n) {
+    return (u8)(key_functions[n].flags & KF_2STATE);
 }
 
 

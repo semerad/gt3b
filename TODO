@@ -1,25 +1,7 @@
 
-mapping of Electronic Trims:
-    - 7seg:  1 2 3 d
-    - chars: function
-		OFF
-		other -> step -> reverse (NOR/REV) -> buttons (NOR/ARP/MOM/RES/END)
-		         % V       V                    %
-    - if not used, use it as buttons
-mapping of buttons:
-    - 7seg:  C b E 1l 1r 2l 2r 3l 3r dl dr
-    - chars: function
-		OFF
-		2STATE -> momentary (%)
-			    SWI -> function_long (% V)
-			    MOM -> reverse (NOR/REV V, in function_long)
-		other -> function_long (% V)
 key mapping to model config:
     - add config_key_mapping to model config
     - remove trim_step, autorepeat, ch3_momentary from global config
-    - add autorepeat as alone global var
-	- add autorepeat generation to apply_model_config()
-	    - from ck.et_map[].buttons == ETB_AUTORPT when not ck.et_off
 
 
 
