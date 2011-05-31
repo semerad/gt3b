@@ -40,13 +40,13 @@ OBJ	= $(SRCC:.c=.o) $(INTRS:.c=.o)
 
 # common compile
 
-%o: %c
+%.o: %.c
 	$(CC) $(CFLAGS) $<
 
-%s: %c
+%.s: %.c
 	$(CC) -s $(CFLAGS) $<
 
-%o: %s
+%.o: %.s
 	$(AS) $(AFLAGS) $<
 	
 
