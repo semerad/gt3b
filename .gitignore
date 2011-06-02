@@ -1,9 +1,9 @@
 .*.sw?
-*.s19
 *.o
 *.ls
-*.elf
-*.lkf
-*.map
-*.sm8
+gt3b.s19
+gt3b.elf
+gt3b.lkf
+gt3b.map
+gt3b.sm8
 Makefile.toolset
