@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# build firmwares for version
+
+
+R=Releases
+
+V=$(grep '#define VERSION' version.h | cut -d\" -f2 | \
+    sed 's/^\(.\)\(.\)\(.\)$/\1.\2.\3/')
+
+
+# manual
+cp -p MANUAL.txt $R/MANUAL-$V.txt
+git add $R/MANUAL-$V.txt
+
+
+# firmwares for more max channels
+for N in 3 6; do
+    make clean
+    make CHANNELS=$N
+    cp -p gt3b.s19 $R/gt3b-ch$N-$V.s19
+    git add $R/gt3b-ch$N-$V.s19
+done
+
+
+# commit generated firmwares
+git ci -am "version-$V release"
+
+
+# tag this release
+git tag version-$V
+
