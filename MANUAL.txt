@@ -52,6 +52,7 @@ Standard menu:
 ==============
 - swapped behaviour of ENTER and END when editing items, ENTER now select
     next value and END (+ ENTER-long) will end editing items
+- ENTER-long on ABS will leave menu also (as BACK)
 - Trims are now only for steering and throttle
 - Expo
     > value for channel 2 is splitted to forward and back and is indicated
