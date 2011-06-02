@@ -68,18 +68,22 @@ u8 config_global_set_default(void) {
 
 // default model key mapping
 static const config_key_mapping_s default_key_mapping = {
+    // keys: function, function_long
     {
-       { 1, 0 },		// CH3 to channel 3
-       { 0, 0 },
-       { 0, 0 }
+	{ 1, 0 },		// CH3 to channel 3
+	{ 0, 0 },
+	{ 0, 0 }
     },
+    // trims: function, reverse, step, buttons, opposite_reset
     {
-       { 1, 0, 0, 0, 0 },	// trim1 to steering trim
-       { 2, 0, 0, 0, 0 },	// trim2 to throttle trim
-       { 1, 0, 0, 0, 0 },	// trim3 to steering trim
-       { 3, 0, 0, 1, 0 }	// trim4(DR) to steering dualrate, autorepeat
+	{ 1, 0, 0, 0, 0 },	// trim1 to steering trim
+	{ 2, 0, 0, 0, 0 },	// trim2 to throttle trim
+	{ 1, 0, 0, 0, 0 },	// trim3 to steering trim
+	{ 3, 0, 0, 1, 0 }	// trim4(DR) to steering dualrate, autorepeat
     },
+    // momentary
     0,
+    // et_off
     0
 };
 
