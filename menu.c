@@ -301,6 +301,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 
 	else if (btn(BTN_ENTER)) {
 	    // switch channel/value
+	    key_beep();
 	    if (chan_val) {
 		// switch to channel number
 		lcd_set_blink(L7SEG, LB_SPC);
@@ -600,11 +601,11 @@ static const u8 *trim_buttons[] = {
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))
 // 7seg:  1 2 3 d
 // chars: function
-//          OFF
-//          other -> step -> reverse(NOR/REV) -> buttons (%)
-// id:               % V     V                     MOM		      (NOR/RES)
-// 						   NOL/RPT/RES/END -> opp_reset
-// 						   		      % blink
+//          OFF					  (NOR/REV)  (NOO/RES)
+//          other -> buttons
+//                     MOM	       -> 	  reverse
+// 		       NOL/RPT/RES/END -> step -> reverse -> opp_reset
+// id:                 %                  % V     V          V blink
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 trim_bit = (u8)(1 << trim_id);
@@ -650,13 +651,6 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		}
 		break;
 	    case 2:
-		etm->step = (u8)menu_change_val(etm->step, 0,
-						STEPS_MAP_SIZE - 1, 1, 0);
-		break;
-	    case 3:
-		etm->reverse ^= 1;
-		break;
-	    case 4:
 		if (ck.momentary & momentary_bit)  idx = 4;
 		else				   idx = etm->buttons;
 		idx = (u8)menu_change_val(idx, 0, TRIM_BUTTONS_SIZE, 1, 1);
@@ -669,6 +663,13 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    ck.momentary &= ~momentary_bit;
 		}
 		break;
+	    case 3:
+		etm->step = (u8)menu_change_val(etm->step, 0,
+						STEPS_MAP_SIZE - 1, 1, 0);
+		break;
+	    case 4:
+		etm->reverse ^= 1;
+		break;
 	    case 5:
 		etm->opposite_reset ^= 1;
 		break;
@@ -679,10 +680,11 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	// switch to next setting
 	if (!(id == 1 && (ck.et_off & trim_bit))) {
 	    if (ck.momentary & momentary_bit) {
-		if (++id > 5)  id = 1;
+		if (++id > 4)  id = 1;
+		if (id == 3)   id = 4;  // skip "step"
 	    }
 	    else {
-		if (++id > 4)  id = 1;
+		if (++id > 5)  id = 1;
 	    }
 	    show = 1;
 	}
@@ -698,31 +700,31 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		break;
 	    case 2:
-		lcd_char_num3(steps_map[etm->step]);
-		lcd_segment(LS_SYM_PERCENT, LS_ON);
-		lcd_segment(LS_SYM_VOLTS, LS_ON);
-		break;
-	    case 3:
-		lcd_chars(etm->reverse ? "REV" : "NOR");
-		lcd_segment(LS_SYM_PERCENT, LS_OFF);
-		lcd_segment(LS_SYM_VOLTS, LS_ON);
-		break;
-	    case 4:
 		if (ck.momentary & momentary_bit)
 			lcd_chars("MOM");
 		else	lcd_chars(trim_buttons[etm->buttons]);
 		lcd_segment(LS_SYM_PERCENT, LS_ON);
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		break;
-	    case 5:
-		lcd_chars(etm->opposite_reset ? "RES" : "NOR");
+	    case 3:
+		lcd_char_num3(steps_map[etm->step]);
 		lcd_segment(LS_SYM_PERCENT, LS_ON);
-		lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
-		lcd_segment(LS_SYM_VOLTS, LS_OFF);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		break;
+	    case 4:
+		lcd_chars(etm->reverse ? "REV" : "NOR");
+		lcd_segment(LS_SYM_PERCENT, LS_OFF);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		break;
+	    case 5:
+		lcd_chars(etm->opposite_reset ? "RES" : "NOO");
+		lcd_segment(LS_SYM_PERCENT, LS_OFF);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
 		break;
 	}
     }
-    return (u8)(id != 1);
+    return id;
 }
 
 #define KEY_FUNCTIONS_SIZE  32
@@ -820,16 +822,16 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
     }
-    return (u8)(id != 1);
+    return id;
 }
 
-@inline static u8 km_trim_key(u8 key_id, u8 val_id, u8 action) {
+static u8 km_trim_key(u8 key_id, u8 val_id, u8 action) {
     if (key_id < NUM_TRIMS)  return km_trim(key_id, val_id, action);
     else  return km_key((u8)(key_id - NUM_TRIMS), val_id, action);
 }
 static void menu_key_mapping(void) {
     u8 key_id = 0;			// trims, keys, trim-keys
-    _Bool id_val = 0;			// now in key_id
+    u8 id_val = 0;			// now in key_id
     u8 trim_id;
     static const u8 key_ids[] = {
 	1, 2, 3, L7_D, L7_C, L7_B, L7_E
@@ -852,6 +854,7 @@ static void menu_key_mapping(void) {
 	    if (id_val) {
 		// change selected key setting
 		km_trim_key(key_id, id_val, 1);
+		lcd_chars_blink(LB_SPC);
 		lcd_update();
 	    }
 	    else {
@@ -882,7 +885,7 @@ static void menu_key_mapping(void) {
 			lcd_segment(LS_SYM_RIGHT, LS_ON);
 			lcd_segment(LS_SYM_LEFT, LS_OFF);
 		    }
-		    {
+		    else {
 			// left trim key
 			lcd_segment(LS_SYM_RIGHT, LS_OFF);
 			lcd_segment(LS_SYM_LEFT, LS_ON);
@@ -899,8 +902,8 @@ static void menu_key_mapping(void) {
 	    // switch key-id/key-setting1/key-setting2/...
 	    if (id_val) {
 		// what to do depends on what was selected in this item
-		if (km_trim_key(key_id, id_val, 2)) {
-		    id_val++;
+		id_val = km_trim_key(key_id, id_val, 2);
+		if (id_val != 1) {
 		    lcd_chars_blink(LB_SPC);
 		}
 		else {
@@ -976,7 +979,7 @@ static void select_menu(void) {
 		else			menu_name();
 	    }
 	    else if (menu == LM_REV) {
-		if (btnl(LM_REV))	menu_key_mapping();
+		if (btnl(BTN_ENTER))	menu_key_mapping();
 		else			menu_reverse();
 	    }
 	    else if (menu == LM_EPO)	menu_endpoint();

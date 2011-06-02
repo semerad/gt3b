@@ -41,10 +41,10 @@ config_key_mapping_s config_key_mapping = {
 	{ 0, 0 }
     },
     {
-	{ 1, 0, 1, 0, 0 },
-	{ 2, 0, 1, 0, 0 },
-	{ 1, 0, 1, 0, 0 },
-	{ 3, 0, 1, 1, 0 }
+	{ 1, 0, 0, 0, 0 },
+	{ 2, 0, 0, 0, 0 },
+	{ 1, 0, 0, 0, 0 },
+	{ 3, 0, 0, 1, 0 }
     },
     0,
     0
@@ -197,8 +197,6 @@ static u8 menu_popup_et(u8 trim_id) {
 
     // convert steps
     step = steps_map[etm->step];
-    if (trim_id < 3)
-	step = cg.trim_step;		// XXX delete when in model config
 
     // read value
     if (etf->min >= 0)  val = *(u8 *)etf->aval;	// *aval is unsigned
@@ -444,8 +442,6 @@ static u8 menu_popup_key(u8 key_id) {
     key_bit = 1 << key_id;
     kf = &key_functions[km->function];
     btnx = key_buttons[key_id];
-    if ((kf->flags & KF_2STATE) && !key_id)
-	ck.momentary |= key_bit;	// XXX delete when in model config
 
     // check momentary setting
     if (km->function && (kf->flags & KF_2STATE) && (ck.momentary & key_bit)) {
