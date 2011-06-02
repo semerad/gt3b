@@ -22,6 +22,10 @@ cp -p MANUAL.txt $R/MANUAL-$V.txt
 git add $R/MANUAL-$V.txt
 
 
+# ChangeLog - only copy to have it in the Release directory
+cp -p ChangeLog $R/
+
+
 # firmwares for more max channels
 for N in 3 6; do
     make clean
