@@ -326,7 +326,7 @@ static void read_ADC(void) {
 	}
 	else {
 	    // bat OK, but apply some hysteresis to not switch quickly ON/OFF
-	    if (menu_battery_low && adc_battery > battery_low_raw + 5) {
+	    if (menu_battery_low && adc_battery > battery_low_raw + 100) {
 		menu_battery_low = 0;
 		awake(MENU);
 	    }
