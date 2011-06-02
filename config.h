@@ -30,8 +30,8 @@
 
 // change MAGIC number when changing global config
 // also add code to setting default values
-// 29 bytes
-#define CONFIG_GLOBAL_MAGIC  0xfd02
+// 28 bytes
+#define CONFIG_GLOBAL_MAGIC  0xfc03
 typedef struct {
     u8  steering_dead_zone;
     u8  throttle_dead_zone;
@@ -47,11 +47,9 @@ typedef struct {
     u8  model;			// selected model
     u16 battery_calib;		// raw ADC value for 10 Volts
     u8  battery_low;		// low battery threshold in .1 Volts
-    u8  trim_step;
     u8  endpoint_max;
-    u8  autorepeat;		// at what TRIM+DR is autorepeat on
+    u16 inactivity_alarm;	// time (sec) of inactivity warning
     u8	key_beep:1;
-    u8  ch3_momentary:1;
 } config_global_s;
 
 extern config_global_s config_global;
@@ -97,10 +95,9 @@ typedef struct {
 
 // change MAGIC number when changing model config
 // also add code to setting default values
-// 14 + channels * 3 bytes
-#define CONFIG_MODEL_MAGIC  (0xff20 | (MAX_CHANNELS - 1))
+// 13 + 13 + channels * 3 bytes
+#define CONFIG_MODEL_MAGIC  (0xfe20 | (MAX_CHANNELS - 1))
 typedef struct {
-    u8 channels;		// number of channels for this model
     u8 name[3];
     u8 reverse;			// bit for each channel
     s8 subtrim[MAX_CHANNELS];
@@ -109,8 +106,8 @@ typedef struct {
     u8 dualrate[3];		// for steering and throttle
     s8 expo[3];			// steering/forward/back
     u8 abs_type;
+    config_key_mapping_s key_mapping;
 } config_model_s;
-extern config_key_mapping_s config_key_mapping; // XXX temporary
 
 extern config_model_s config_model;
 #define cm config_model
@@ -121,8 +118,7 @@ extern config_model_s config_model;
 #define expo_forward	expo[1]
 #define expo_back	expo[2]
 
-#define ck		config_key_mapping
-//#define ck		cm.key_mapping
+#define ck		cm.key_mapping
 
 
 

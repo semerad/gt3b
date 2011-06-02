@@ -126,20 +126,6 @@ static void gs_battery_low(u8 change) {
 }
 
 
-static void gs_trim_step(u8 change) {
-    u8 *addr = &cg.trim_step;
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_TRIM, LS_OFF);
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 20, 2, 0);
-    lcd_segment(LS_MENU_TRIM, LS_ON);
-    lcd_7seg(5);
-    lcd_char_num3(*addr);
-}
-
-
 static void gs_endpoint_max(u8 change) {
     u8 *addr = &cg.endpoint_max;
     if (change == 0xff) {
@@ -172,18 +158,6 @@ static void gs_key_beep(u8 change) {
 }
 
 
-static void gs_ch3_momentary(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.ch3_momentary ^= 1;
-    lcd_7seg(3);
-    if (cg.ch3_momentary)  lcd_chars("ON ");
-    else                   lcd_chars("OFF");
-}
-
-
 static void gs_steering_dead(u8 change) {
     u8 *addr = &cg.steering_dead_zone;
     if (change == 0xff) {
@@ -205,42 +179,6 @@ static void gs_throttle_dead(u8 change) {
     if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
     lcd_7seg(2);
     lcd_char_num3(*addr);
-}
-
-
-static void gs_trim_autorepeat(u8 change) {
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_TRIM, LS_OFF);
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
-	if (cg.autorepeat & BTN_TRIM_LEFT)
-		cg.autorepeat &= (u8)(~BTN_TRIM_ALL);
-	else	cg.autorepeat |= BTN_TRIM_ALL;
-    }
-    lcd_segment(LS_MENU_TRIM, LS_ON);
-    lcd_7seg(L7_A);
-    if (cg.autorepeat & BTN_TRIM_LEFT)  lcd_chars("ON ");
-    else				lcd_chars("OFF");
-}
-
-
-static void gs_dr_autorepeat(u8 change) {
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_DR, LS_OFF);
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
-	if (cg.autorepeat & BTN_DR_L)
-		cg.autorepeat &= (u8)(~BTN_DR_ALL);
-	else	cg.autorepeat |= BTN_DR_ALL;
-    }
-    lcd_segment(LS_MENU_DR, LS_ON);
-    lcd_7seg(L7_A);
-    if (cg.autorepeat & BTN_DR_L)  lcd_chars("ON ");
-    else			   lcd_chars("OFF");
 }
 
 
@@ -291,13 +229,9 @@ static const global_setup_t gs_config[] = {
     gs_backlight_time,
     gs_battery_low,
     gs_endpoint_max,
-    gs_trim_step,
     gs_steering_dead,
     gs_throttle_dead,
-    gs_ch3_momentary,
     gs_key_beep,
-    gs_trim_autorepeat,
-    gs_dr_autorepeat,
     gs_reset_all,
     gs_reset_model_all,
 };

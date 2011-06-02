@@ -33,27 +33,6 @@
 
 
 
-// XXX temporary, will be in model config, default button mappings
-config_key_mapping_s config_key_mapping = {
-    {
-	{ 1, 0 },
-	{ 0, 0 },
-	{ 0, 0 }
-    },
-    {
-	{ 1, 0, 0, 0, 0 },
-	{ 2, 0, 0, 0, 0 },
-	{ 1, 0, 0, 0, 0 },
-	{ 3, 0, 0, 1, 0 }
-    },
-    0,
-    0
-};
-
-
-
-
-
 // ********************* TRIMS ****************************
 
 
@@ -109,27 +88,39 @@ static const et_functions_s et_functions[] = {
       -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL },
     { 13, "CH3", 0, EF_NONE, 3, &menu_channel3, -100, 100, 0, CHANNEL_FAST,
       NULL },
-    { 17, "ST1", LM_TRIM, EF_BLINK, 1, &cm.subtrim[0], -SUBTRIM_MAX,
+    { 19, "ST1", LM_TRIM, EF_BLINK, 1, &cm.subtrim[0], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
-    { 18, "ST2", LM_TRIM, EF_BLINK, 2, &cm.subtrim[1], -SUBTRIM_MAX,
+    { 20, "ST2", LM_TRIM, EF_BLINK, 2, &cm.subtrim[1], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
-    { 19, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
+    { 21, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
 #if MAX_CHANNELS >= 4
     { 14, "CH4", 0, EF_NONE, 4, &menu_channel4, -100, 100, 0, CHANNEL_FAST,
       NULL },
-    { 20, "ST4", LM_TRIM, EF_BLINK, 4, &cm.subtrim[3], -SUBTRIM_MAX,
+    { 22, "ST4", LM_TRIM, EF_BLINK, 4, &cm.subtrim[3], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
 #if MAX_CHANNELS >= 5
     { 15, "CH5", 0, EF_NONE, 5, &menu_channel5, -100, 100, 0, CHANNEL_FAST,
       NULL },
-    { 21, "ST5", LM_TRIM, EF_BLINK, 5, &cm.subtrim[4], -SUBTRIM_MAX,
+    { 23, "ST5", LM_TRIM, EF_BLINK, 5, &cm.subtrim[4], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
 #if MAX_CHANNELS >= 6
     { 16, "CH6", 0, EF_NONE, 6, &menu_channel6, -100, 100, 0, CHANNEL_FAST,
       NULL },
-    { 22, "ST6", LM_TRIM, EF_BLINK, 6, &cm.subtrim[5], -SUBTRIM_MAX,
+    { 24, "ST6", LM_TRIM, EF_BLINK, 6, &cm.subtrim[5], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+#if MAX_CHANNELS >= 7
+    { 17, "CH7", 0, EF_NONE, 7, &menu_channel7, -100, 100, 0, CHANNEL_FAST,
+      NULL },
+    { 25, "ST7", LM_TRIM, EF_BLINK, 7, &cm.subtrim[6], -SUBTRIM_MAX,
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+#if MAX_CHANNELS >= 8
+    { 18, "CH8", 0, EF_NONE, 8, &menu_channel8, -100, 100, 0, CHANNEL_FAST,
+      NULL },
+    { 26, "ST8", LM_TRIM, EF_BLINK, 8, &cm.subtrim[7], -SUBTRIM_MAX,
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -396,6 +387,12 @@ static const key_functions_s key_functions[] = {
     { 3, "CH5", KF_2STATE, kf_channel, 5 },
 #if MAX_CHANNELS >= 6
     { 4, "CH6", KF_2STATE, kf_channel, 6 },
+#if MAX_CHANNELS >= 7
+    { 5, "CH7", KF_2STATE, kf_channel, 7 },
+#if MAX_CHANNELS >= 8
+    { 6, "CH8", KF_2STATE, kf_channel, 8 },
+#endif
+#endif
 #endif
 #endif
 #endif

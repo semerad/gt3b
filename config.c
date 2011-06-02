@@ -49,11 +49,9 @@ u8 config_global_set_default(void) {
     cg.backlight_time	= 30;
     cg.battery_calib	= 672;
     cg.battery_low	= 92;		// 9.2 V
-    cg.trim_step	= 1;
     cg.endpoint_max	= 120;
-    cg.autorepeat	= BTN_DR_ALL;
+    cg.inactivity_alarm	= 0;
     cg.key_beep		= 1;
-    cg.ch3_momentary	= 0;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
@@ -68,6 +66,23 @@ u8 config_global_set_default(void) {
 
 
 
+// default model key mapping
+static const config_key_mapping_s default_key_mapping = {
+    {
+       { 1, 0 },		// CH3 to channel 3
+       { 0, 0 },
+       { 0, 0 }
+    },
+    {
+       { 1, 0, 0, 0, 0 },	// trim1 to steering trim
+       { 2, 0, 0, 0, 0 },	// trim2 to throttle trim
+       { 1, 0, 0, 0, 0 },	// trim3 to steering trim
+       { 3, 0, 0, 1, 0 }	// trim4(DR) to steering dualrate, autorepeat
+    },
+    0,
+    0
+};
+
 // set default name to given pointer
 static void default_model_name(u8 model, u8 *name) {
     *name++ = 'M';
@@ -78,7 +93,6 @@ static void default_model_name(u8 model, u8 *name) {
 
 // set model configuration to default
 void config_model_set_default(void) {
-    cm.channels		= 3;
     default_model_name(cg.model, cm.name);
     cm.reverse		= 0;
     memset(cm.subtrim, 0, MAX_CHANNELS);
@@ -92,6 +106,7 @@ void config_model_set_default(void) {
     cm.expo_forward	= 0;
     cm.expo_back	= 0;
     cm.abs_type		= 0;
+    memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
 }
 
 
@@ -108,7 +123,7 @@ void config_model_read(void) {
 // return model name for given model number
 u8 *config_model_name(u8 model) {
     @near static u8 fake_name[3];
-    u8 *addr = EEPROM_CONFIG_MODEL + 1 + sizeof(config_model_s) * model;
+    u8 *addr = EEPROM_CONFIG_MODEL + sizeof(config_model_s) * model;
     if (*addr == CONFIG_MODEL_EMPTY) {
 	default_model_name(model, fake_name);
 	addr = fake_name;

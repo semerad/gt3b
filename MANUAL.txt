@@ -20,16 +20,16 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Global characteristics:
 =======================
-- up to 40 models memory (will be less at the future after adding more
+- up to 22 models memory (will be less at the future after adding more
 	functions and more channels)
     > numbers 10-19 will show with Right-Arrow
-    > numbers 20-29 will show with Left-Arrow
-    > numbers 30-39 will show with both arrows
+    > numbers 20-21 will show with Left-Arrow
 - added Subtrims
 - added SaveAs to save model config to another memory location
 - added Global Setup menu to change function features, including backlight time,
-    CH3 behavior, etc. 
+    battery low voltage, etc. 
 - dead zone for steering and throttle
+- added key mapping specific for each model memory
 - calibrate menu will be automatically invoked after first power-on with
   this firmware, so 6 menu items will start to blink
 
@@ -38,17 +38,20 @@ Buttons:
 ========
 - it is now possible to differentiate between long press (>1 second) to
   normal button press (short) and it will be recognized like "ENTER-long"
-- buttons of CH3 trims are now also used for steering trim
 - Trims and DualRate
     > now shows changed value only temporaly (5 seconds or till another
 	key press), values are saved to EEPROm automatically when it disappears
     > when autorepeat disabled on trims (default), reset trim to 0
 	by pressing both trim keys together for long
 	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
+    > while value is showed, it is possible to change it with rotate
+        encoder also
 
 
 Standard menu:
 ==============
+- swapped behaviour of ENTER and END when editing items, ENTER now select
+    next value and END (+ ENTER-long) will end editing items
 - Trims are now only for steering and throttle
 - Expo
     > value for channel 2 is splitted to forward and back and is indicated
@@ -69,6 +72,49 @@ Standard menu:
     > menu TRIM will blink
     > set subtrims for each channel
     > press ENTER/BACK to end this submenu
+- Key mapping specific for each model:
+    > choose menu REV and press ENTER-long
+    > menu REV will blink
+    > choose trims (id 1 2 3 d) or other keys (CH3-C, Back-b, End-E) or
+        if trim is OFF, then also trim keys (id 1 2 3 d with left/right arrow)
+    > press ENTER and modify first setting
+    > press ENTER and modify next setting
+    > ....
+    -----
+    steps of settings of trims (1 2 3 and D/R):
+	- sequence: function -> buttons -> step -> reverse -> opposite_reset
+	        id:              %         % V      V          V blinking
+	- function: selected function listed at the end of manual
+	- buttons: MOM - momentary, hold left/right trim key to get end values,
+			 when nothing pressed, servo is at centre
+		   NOL - no long keys, long press is the same as short press
+		   RPT - autorepeat is on
+		   RES - long press of one of trim keys will reset to
+			 centre/reset value
+		   END - long press of trim key will set to coresponding end
+			 value
+	- step: select trim step for one trim key press (1, 2, ... 100, 200),
+		not available when buttons MOM
+	- reverse: NOR - no change
+		   REV - swap left/right trim keys - NOR/REV
+	- opposite_reset: when trim key is pressed and value is at opposite
+			  side of centre/reset, set value to centre/reset,
+			  not available when buttons MOM
+    -----
+    steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
+	- sequence: function -> momentary -> reverse -> function_long
+	        id:              %            V          % V
+	- function: selected function listed at the end of manual
+	- momentary: only available for 2-state functions (channel, ...)
+		     SWI - press will switch something (channel value, ...)
+		     MOM - value change will be active only while pressed
+	- reverse: only available when momentary MOM
+		   NOR - no change
+		   REV - swap press/no-press behaviour
+	- function_long: function applied when long press of key happens,
+	                 choose from the same list as function
+		   
+
 
 
 Calibrate menu:
@@ -119,13 +165,9 @@ Global setup menu:
 			    2.4GHz HF module limitation
 		This danger zone will be indicated with a flashing "d" symbol
 		  for values greater than 120%
-    TRIM + S	trim step for trim buttons	1...20
     1		dead zone for steering		0...50
     2		dead zone for throttle		0...50
-    3		CH3 buttons is momentary	OFF/ON
     b		key beep			OFF/ON
-    TRIM + A	autorepeat for trim buttons	OFF/ON
-    D/R + A	autorepeat for dualrate buttons	OFF/ON
     r + ALL	global reset - change to YES to set global configuration
 			       and all models to default values
     r + MOD	all models reset - change to YES to set all models
@@ -135,10 +177,35 @@ Global setup menu:
 
 Return to original (and modified) firmware:
 ===========================================
-    - flash original firmware
-    - delete whole EEPROM (tab DATA MEMORY in STVP and write those empty zeroes)
-      or return back your saved config (also tab DATA MEMORY in STVP, read
-      your saved config from disk and write it to radio)
-    - calibrate steering and throttle (not needed when You returned back saved
-      config)
+- flash original firmware
+- delete whole EEPROM (tab DATA MEMORY in STVP and write those empty zeroes)
+    or return back your saved config (also tab DATA MEMORY in STVP, read
+    your saved config from disk and write it to radio)
+- calibrate steering and throttle (not needed when You returned back saved
+    config)
+
+
+
+
+
+Functions assignable to trims:
+==============================
+OFF		- nothing, it is possible to assign each button as keys
+TR1, TR2	- trim of channel 1/2
+DRS, DRF, DRB	- dualrate of steering/forward/back
+EXS, EXF, EXB	- expo of steering/forward/back
+CHn		- change channel "n" value in range -100...100
+STn		- subtrim of channel "n"
+
+
+
+Functions assignable to keys:
+=============================
+OFF		- nothing
+CHn		- switch channel "n" value from one end value to opposite end
+		  value. There is special handling for CH3 button. When using
+		  3-position switch instead of CH3 button and momentary is
+		  selected for this button, then centre 3-pos value will also
+		  be detected and set to servo (but this was not tested yet,
+		  I wouldn't do this modification to my radio).
 

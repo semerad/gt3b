@@ -93,7 +93,6 @@ void menu_load_model(void) {
 
 // apply global setting to variables
 void apply_global_config(void) {
-    button_autorepeat(cg.autorepeat);
     backlight_set_default(cg.backlight_time);
     backlight_on();
     // compute raw value for battery low voltage
@@ -839,6 +838,8 @@ static void menu_key_mapping(void) {
 
     lcd_set_blink(LMENU, LB_SPC);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_7seg(key_ids[0]);
     lcd_set_blink(L7SEG, LB_SPC);
     km_trim_key(0, 1, 0);		// show first setting for first trim
