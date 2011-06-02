@@ -1,4 +1,4 @@
 compile.bat -crlf
-README -crlf
+README* -crlf
 MANUAL.txt -crlf
 Releases/* -crlf
