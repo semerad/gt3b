@@ -73,23 +73,25 @@ typedef struct {
     u8 function:7;
     u8 reverse:1;
     u8 step:5;
-    u8 buttons:3;
+    u8 buttons:2;
+    u8 opposite_reset:1;
 } config_et_map_s;
 #define ETB_LONG_OFF	0
 #define ETB_AUTORPT	1
-#define ETB_MOMENTARY	2
-#define ETB_LONG_RESET	3
-#define ETB_LONG_ENDVAL	4
+#define ETB_LONG_RESET	2
+#define ETB_LONG_ENDVAL	3
 
 typedef struct {
     u8 function:4;
     u8 function_long:4;
 } config_key_map_s;
 
+#define NUM_TRIMS  4
+#define NUM_KEYS   3
 typedef struct {
-    config_key_map_s	key_map[3];	// will expand to following et_map
-    config_et_map_s	et_map[4];
-    u16			momentary:11;	// bit for each button
+    config_key_map_s	key_map[NUM_KEYS];  // will expand to following et_map
+    config_et_map_s	et_map[NUM_TRIMS];
+    u16			momentary:11;	// bit for each button (and trims)
     u16			et_off:5;	// bit for each trim (1 = off)
 } config_key_mapping_s;
 

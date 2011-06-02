@@ -41,10 +41,10 @@ config_key_mapping_s config_key_mapping = {
 	{ 0, 0 }
     },
     {
-	{ 1, 0, 1, 0 },
-	{ 2, 0, 1, 0 },
-	{ 1, 0, 1, 0 },
-	{ 3, 0, 1, 1 }
+	{ 1, 0, 1, 0, 0 },
+	{ 2, 0, 1, 0, 0 },
+	{ 1, 0, 1, 0, 0 },
+	{ 3, 0, 1, 1, 0 }
     },
     0,
     0
@@ -173,7 +173,7 @@ static u8 menu_popup_et(u8 trim_id) {
     et_functions_s *etf = &et_functions[etm->function];
 
     // if keys are momentary, show nothing, but set value
-    if (etm->buttons == ETB_MOMENTARY) {
+    if (ck.momentary & (1 << (u8)(trim_id * 2 + NUM_KEYS))) {
 	if (btns(btn_l)) {
 	    // left
 	    AVAL(etm->reverse ? etf->max : etf->min);
@@ -247,10 +247,14 @@ static u8 menu_popup_et(u8 trim_id) {
 		    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
 			val -= step;
 			if (val < etf->min)  val = etf->min;
+			if (etm->opposite_reset && val > etf->reset)
+			    val = etf->reset;
 		    }
 		    else {
 			val += step;
 			if (val > etf->max)  val = etf->max;
+			if (etm->opposite_reset && val < etf->reset)
+			    val = etf->reset;
 		    }
 		}
 		AVAL(val);
@@ -485,6 +489,11 @@ static u8 menu_popup_key(u8 key_id) {
 	    kf->func(kf->param, FF_SHOW);	// switch value
 	    lcd_update();
 	}
+	else {
+	    // nothink to do
+	    btnr(btnx);
+	    break;
+	}
 	btnr(btnx);
 
 	// if another button was pressed, leave this screen
@@ -525,7 +534,7 @@ u8 menu_buttons(void) {
 
     // for each key, call function
     for (i = 0; i < KEY_BUTTONS_SIZE; i++) {
-	if (i >= 3 && !(ck.et_off & (u8)(1 << ((i - 3) >> 1))))
+	if (i >= NUM_KEYS && !(ck.et_off & (u8)(1 << ((i - NUM_KEYS) >> 1))))
 	    continue;	// trim is enabled for this key
 	if (menu_popup_key(i))  return 1;
     }

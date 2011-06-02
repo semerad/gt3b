@@ -581,6 +581,11 @@ static void menu_abs(void) {
 }
 
 
+
+
+
+
+
 // set mapping of keys
 // key_id is: 4 trims, 3 buttons, 8 individual buttons of trims
 // individual buttons of trims are available only when corresponding trim
@@ -590,17 +595,20 @@ static void menu_abs(void) {
 @near static u8 trim_functions[TRIM_FUNCTIONS_SIZE];
 @near static u8 trim_functions_max;
 static const u8 *trim_buttons[] = {
-    "NOR", "ARP", "MOM", "RES", "END"
+    "NOL", "RPT", "RES", "END"
 };
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))
 // 7seg:  1 2 3 d
 // chars: function
 //          OFF
-//          other -> step -> reverse(NOR/REV) -> buttons(NOR/ARP/MOM/RES/END)
-// id:               % V     V                   %
+//          other -> step -> reverse(NOR/REV) -> buttons (%)
+// id:               % V     V                     MOM		      (NOR/RES)
+// 						   NOL/RPT/RES/END -> opp_reset
+// 						   		      % blink
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 trim_bit = (u8)(1 << trim_id);
+    u16 momentary_bit = 3 << (u8)(trim_id * 2 + NUM_KEYS);
     u8 show = 0;
     u8 id = val_id;
     u8 idx;
@@ -617,6 +625,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    etm->reverse = 0;
 		    etm->buttons = 0;
 		    etm->function = 0;
+		    ck.momentary &= ~momentary_bit;
 		}
 		// select new function, map through trim_functions
 		idx = menu_et_function_idx(etm->function);
@@ -637,6 +646,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    etm->reverse = 0;
 		    etm->buttons = 0;
 		    ck.et_off |= trim_bit;
+		    ck.momentary &= ~momentary_bit;
 		}
 		break;
 	    case 2:
@@ -647,8 +657,20 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		etm->reverse ^= 1;
 		break;
 	    case 4:
-		etm->buttons = (u8)menu_change_val(etm->buttons, 0,
-						   TRIM_BUTTONS_SIZE - 1, 1, 1);
+		if (ck.momentary & momentary_bit)  idx = 4;
+		else				   idx = etm->buttons;
+		idx = (u8)menu_change_val(idx, 0, TRIM_BUTTONS_SIZE, 1, 1);
+		if (idx == 4) {
+		    ck.momentary |= momentary_bit;
+		    etm->buttons = ETB_LONG_OFF;
+		}
+		else {
+		    etm->buttons = idx;
+		    ck.momentary &= ~momentary_bit;
+		}
+		break;
+	    case 5:
+		etm->opposite_reset ^= 1;
 		break;
 	}
 	show = 1;
@@ -656,7 +678,12 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     else {
 	// switch to next setting
 	if (!(id == 1 && (ck.et_off & trim_bit))) {
-	    if (++id > 4)  id = 1;
+	    if (ck.momentary & momentary_bit) {
+		if (++id > 5)  id = 1;
+	    }
+	    else {
+		if (++id > 4)  id = 1;
+	    }
 	    show = 1;
 	}
     }
@@ -681,8 +708,16 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		lcd_segment(LS_SYM_VOLTS, LS_ON);
 		break;
 	    case 4:
-		lcd_chars(trim_buttons[etm->buttons]);
+		if (ck.momentary & momentary_bit)
+			lcd_chars("MOM");
+		else	lcd_chars(trim_buttons[etm->buttons]);
 		lcd_segment(LS_SYM_PERCENT, LS_ON);
+		lcd_segment(LS_SYM_VOLTS, LS_OFF);
+		break;
+	    case 5:
+		lcd_chars(etm->opposite_reset ? "RES" : "NOR");
+		lcd_segment(LS_SYM_PERCENT, LS_ON);
+		lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		break;
 	}
@@ -747,7 +782,7 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	}
 	else {
 	    // reverse
-	    km->function_long ^= 1;
+	    km->function_long = (u8)(km->function_long ? 0 : 1);
 	}
     }
     else if (action == 2) {
@@ -789,11 +824,11 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 }
 
 @inline static u8 km_trim_key(u8 key_id, u8 val_id, u8 action) {
-    if (key_id < 4)	return km_trim(key_id, val_id, action);
-    else		return km_key((u8)(key_id - 4), val_id, action);
+    if (key_id < NUM_TRIMS)  return km_trim(key_id, val_id, action);
+    else  return km_key((u8)(key_id - NUM_TRIMS), val_id, action);
 }
 static void menu_key_mapping(void) {
-    u8 key_id = 0;
+    u8 key_id = 0;			// trims, keys, trim-keys
     _Bool id_val = 0;			// now in key_id
     u8 trim_id;
     static const u8 key_ids[] = {
@@ -823,13 +858,13 @@ static void menu_key_mapping(void) {
 		// change key-id
 		while (1) {
 		    if (btn(BTN_ROT_L)) {
-			if (key_id)		key_id--;
-			else			key_id = 14;
+			if (key_id)	key_id--;
+			else		key_id = 3 * NUM_TRIMS + NUM_KEYS - 1;
 		    }
 		    else {
-			if (++key_id >= 15)	key_id = 0;
+			if (++key_id >= 3 * NUM_TRIMS + NUM_KEYS)  key_id = 0;
 		    }
-		    if (key_id < 7) {
+		    if (key_id < NUM_TRIMS + NUM_KEYS) {
 			// trims and 3keys (CH3/BACK/END) always
 			lcd_7seg(key_ids[key_id]);
 			lcd_segment(LS_SYM_LEFT, LS_OFF);
@@ -838,11 +873,11 @@ static void menu_key_mapping(void) {
 		    }
 		    // check trim keys and use them only when corresponding
 		    //   trim is off
-		    trim_id = (u8)((u8)(key_id - 7) >> 1);
+		    trim_id = (u8)((u8)(key_id - NUM_TRIMS - NUM_KEYS) >> 1);
 		    if (!(ck.et_off & (u8)(1 <<trim_id)))  continue;
 
 		    lcd_7seg(key_ids[trim_id]);
-		    if ((u8)(key_id - 7) & 1) {
+		    if ((u8)(key_id - NUM_TRIMS - NUM_KEYS) & 1) {
 			// right trim key
 			lcd_segment(LS_SYM_RIGHT, LS_ON);
 			lcd_segment(LS_SYM_LEFT, LS_OFF);
@@ -912,6 +947,10 @@ static void menu_key_mapping_prepare(void) {
 	key_functions[n] = (u8)(i + 1);   // + 1 to be able to find non-empty
     }
 }
+
+
+
+
 
 
 
