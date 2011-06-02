@@ -9,6 +9,14 @@ V=$(grep '#define VERSION' version.h | cut -d\" -f2 | \
     sed 's/^\(.\)\(.\)\(.\)$/\1.\2.\3/')
 
 
+
+# check, if not already released
+if [ -f $R/MANUAL-$V.txt -a x"$1" != "x--force" ]; then
+    echo "Version '$V' already released !!!" >&2
+    exit 1
+fi
+
+
 # manual
 cp -p MANUAL.txt $R/MANUAL-$V.txt
 git add $R/MANUAL-$V.txt
@@ -24,7 +32,7 @@ done
 
 
 # commit generated firmwares
-git ci -am "version-$V release"
+git ci -am "Release: version-$V"
 
 
 # tag this release
