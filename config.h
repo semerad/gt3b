@@ -87,7 +87,7 @@ typedef struct {
 } config_key_map_s;
 
 typedef struct {
-    config_key_map_s	key_map[3];
+    config_key_map_s	key_map[3];	// will expand to following et_map
     config_et_map_s	et_map[4];
     u16			momentary:11;	// bit for each button
     u16			et_off:5;	// bit for each trim (1 = off)
@@ -109,8 +109,6 @@ typedef struct {
     u8 abs_type;
 } config_model_s;
 extern config_key_mapping_s config_key_mapping; // XXX temporary
-#define ck  config_key_mapping
-//#define ck  cm.key_mapping
 
 extern config_model_s config_model;
 #define cm config_model
@@ -120,6 +118,9 @@ extern config_model_s config_model;
 #define expo_steering	expo[0]
 #define expo_forward	expo[1]
 #define expo_back	expo[2]
+
+#define ck		config_key_mapping
+//#define ck		cm.key_mapping
 
 
 

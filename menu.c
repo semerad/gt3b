@@ -65,7 +65,7 @@ static void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
     // set number of channels for this model
-    ppm_set_channels(cm.channels);
+    ppm_set_channels(MAX_CHANNELS);  // mozna nekdy cm.channels
 
     // set autorepeat
     for (i = 0; i < 4; i++) {

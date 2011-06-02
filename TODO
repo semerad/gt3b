@@ -1,8 +1,12 @@
 
 key mapping to model config:
     - add config_key_mapping to model config
+    - remove channels from model config
     - remove trim_step, autorepeat, ch3_momentary from global config
+    - add alarm 10min when radio not used to global config
+    - merge model/key_beep in global config
 
+more hysteresis on low-power check
 
 
 Some suggestions taken from manuals of other radios:

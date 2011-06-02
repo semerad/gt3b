@@ -431,6 +431,7 @@ static u8 menu_popup_key(u8 key_id) {
     key_functions_s *kfl;
     u16 key_bit;
     u8 flags;
+    u8 is_long = 0;
 
     // do nothing when both short and long set to OFF
     if (!km->function && !km->function_long)  return 0;
@@ -476,6 +477,7 @@ static u8 menu_popup_key(u8 key_id) {
 	    key_beep();
 	    kfl->func(kfl->param, FF_SHOW);	// switch value
 	    lcd_update();
+	    is_long = 1;
 	}
 	else if (km->function && btn(btnx)) {
 	    // short key press
@@ -496,6 +498,15 @@ static u8 menu_popup_key(u8 key_id) {
 	    delay_menu((to_time - time_sec) * 200);
 
 	if (!buttons)  break;  // timeouted without button press
+	if (is_long) {
+	    // if long required but short pressed, end
+	    if (!btnl(btnx))  break;
+	}
+	else {
+	    // if short required, but long pressed with function_long
+	    //   specified, end
+	    if (km->function_long && btnl(btnx))  break;
+	}
     }
 
     // set MENU off
