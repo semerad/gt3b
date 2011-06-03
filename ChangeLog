@@ -1,5 +1,5 @@
 
-*0.1.0
+*0.1.0 (2 Jun 2011)
 
     added special chars "-1" and "10" to be able to display values -199...1099
     both trims-long now only resets, before there was 1 press of first button

@@ -1,0 +1,15 @@
+
+Versions are numbering as:  X.Y.Z
+
+X - major version number
+  - will be changed when decided to do
+  - it will be stated if it will have model configs compatible with
+    some previous version or if all model configs will be deleted
+
+Y - config version number
+  - will be increased, when change in model configs will be introduced and
+    all models configs will be erased after this change
+
+Z - will be increased when changes which will not modify
+    model configs will be applied
+

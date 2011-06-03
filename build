@@ -23,7 +23,7 @@ git add $R/MANUAL-$V.txt
 
 
 # ChangeLog - only copy to have it in the Release directory
-cp -p ChangeLog $R/
+cp -p ChangeLog $R/ChangeLog.txt
 
 
 # firmwares for more max channels
