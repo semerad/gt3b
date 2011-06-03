@@ -65,7 +65,11 @@ static void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
     // set number of channels for this model
-    ppm_set_channels(MAX_CHANNELS);  // mozna nekdy cm.channels
+    if (channels != MAX_CHANNELS) {
+	ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
+	// task CALC must be awaked to do first PPM calculation
+	if (awake_calc_allowed)  awake(CALC);
+    }
 
     // set autorepeat
     for (i = 0; i < 4; i++) {
@@ -74,20 +78,23 @@ static void apply_model_config(void) {
 	    autorepeat |= (u8)((u8)et_buttons[i][0] | (u8)et_buttons[i][1]);
     }
     button_autorepeat(autorepeat);
-
-    // task CALC must be awaked to do first PPM calculation
-    if (awake_calc_allowed)  awake(CALC);
 }
 
 
 // load model config from eeprom and set model settings
 void menu_load_model(void) {
     u8 i;
+    // load config
     config_model_read();
-    apply_model_config();
+
     // set values of channels >= 3 to default left state
     for (i = 0; i <= MAX_CHANNELS - 3; i++)
 	menu_channel3_8[i] = -100;
+
+    // set other values: mixers, ...
+
+    // apply config to radio setting
+    apply_model_config();
 }
 
 
@@ -329,7 +336,6 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
     menu_force_value_channel = 0;
     key_beep();
     config_model_save();
-    apply_model_config();
 }
 
 
