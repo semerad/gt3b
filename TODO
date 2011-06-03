@@ -1,13 +1,26 @@
 
 Some suggestions taken from manuals of other radios:
 
-steering 4WS mixes
-dig steering
-timer - up/down/lap/lap navigate
+steering 4WS mixes - steering to 2 channels
+    choose channel
+    ? type OFF/2TYP/3TYP/4TYP - how many following states to cycle
+    OFF (front side only)/reverse phase/same phase/rear side only
+	front/mix/crab/rear
+    rear side travel adjustment 0-100% (? 200%)
+    ? mix mode: use EXP of steering
+dig steering - throttle to 2 channels
+    choose channel
+    front only/both/rear only
+    rear mix 0-200%
+timer - up/down/lap/lap navigate - buttons LAP START, LAP RESET
 steering speed TURN/RETURN 1-100%
-throttle speed 1-3 SPEED 1-100%
-programmable mixes
+    - 100% allows end-end change in 1 cycle
+    - 1% allows end-end change in 200 cycles (4.6s)
+throttle speed 1-3 SPEED 1-100%, trigger points 1-100
+alarm 10min when not used
+? multi-speed transmission - ability to set exact positions
 ---
+programmable mixes
 throttle acceleration
 brake acceleration
 throttle curves EXP/VTR/CRV
@@ -25,7 +38,6 @@ boat tilt mixing
 neutral brake
 throttle mode FWD50/BRK50 or FWD70/BRK30
 throttle Idle-Up 0-50%
-alarm 10min when not used
 throttle ATL function
 
 
@@ -45,7 +57,7 @@ click it will return to 100% mix.
 Also at least one additional channel could be useful. Preferably have them
 support 3 position switches. OR have them as virtual channels since i/o's are
 limited. It be another mix, steering mix for 4 wheel steer.
-
+--
 So its not in a million different places, heres the functions of a rock crawler
 that we use aux channels for
 
@@ -134,7 +146,6 @@ backlight_time in seconds and than bigger steps
 
 
 other:
-CH3 3(or more) positions
 lights, winch, transmission, horn
 modes - onroad+offroad/expedition/crawler/ship
 ? use also flash memory to store model configs
