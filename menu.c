@@ -39,6 +39,9 @@ s16 menu_force_value;		//   to this value (-500..500)
 s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >=3
 u8  menu_channels_mixed;	// channel with 1 here will not be set from
 				//   menu_channel3_8
+s8  menu_4WS_mix;		// mix -100..100
+_Bool menu_4WS_crab;		// when 1, crab steering
+s8  menu_DIG_mix;		// mix -100..100
 
 
 
@@ -99,6 +102,11 @@ void menu_load_model(void) {
     // set values of channels >= 3 to default left state
     for (i = 0; i <= MAX_CHANNELS - 3; i++)
 	menu_channel3_8[i] = -100;
+
+    // set 4WS and DIG to defaults
+    menu_4WS_mix = 100;
+    menu_4WS_crab = 0;
+    menu_DIG_mix = 0;
 
     // set other values: mixers, ...
 

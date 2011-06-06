@@ -125,6 +125,14 @@ static const et_functions_s et_functions[] = {
 #endif
 #endif
 #endif
+    { 27, "4WS", LM_DR, EF_BLINK, 4, &menu_4WS_mix, -100, 100, 0, MIX_FAST,
+      NULL, NULL },
+    { 28, "DIG", LM_DR, EF_BLINK, L7_D, &menu_DIG_mix, -100, 100, 0, MIX_FAST,
+      NULL, NULL },
+    { 29, "SST", LM_DR, EF_BLINK, L7_T, &cm.stspd_turn, 1, 100, 100,
+      STSPEED_FAST, NULL, NULL },
+    { 30, "SSR", LM_DR, EF_BLINK, L7_R, &cm.stspd_return, 1, 100, 100,
+      STSPEED_FAST, NULL, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
 
@@ -390,6 +398,22 @@ static void kf_channel(s16 channel, u8 flags) {
     }
 }
 
+// change 4WS crab/no-crab
+static void kf_4ws(s16 unused, u8 flags) {
+    if (flags & FF_SET) {
+	if (flags & FF_STATE)
+	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 0 : 1);
+	else
+	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 1 : 0);
+    }
+    else
+	menu_4WS_crab ^= 1;
+    if (flags & FF_SHOW) {
+	lcd_7seg(4);
+	lcd_chars(menu_4WS_crab ? "CRB" : "REV");
+    }
+}
+
 
 
 
@@ -412,6 +436,7 @@ static const key_functions_s key_functions[] = {
 #endif
 #endif
 #endif
+    { 7, "4WS", KF_2STATE, kf_4ws, 0 },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

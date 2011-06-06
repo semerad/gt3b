@@ -38,6 +38,8 @@
 #define DUALRATE_FAST	5
 #define EXPO_FAST	5
 #define CHANNEL_FAST	5
+#define MIX_FAST	5
+#define STSPEED_FAST	5
 
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5
@@ -55,8 +57,11 @@ extern s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >
 #define menu_channel6  menu_channel3_8[3]
 #define menu_channel7  menu_channel3_8[4]
 #define menu_channel8  menu_channel3_8[5]
-extern u8  menu_channels_mixed;	// channel with 1 here will not be set from
-				//   menu_channel3_8
+extern u8  menu_channels_mixed;	    // channel with 1 here will not be set from
+					//   menu_channel3_8
+extern s8  menu_4WS_mix;		// mix -100..100
+extern _Bool menu_4WS_crab;		// when 1, crab steering
+extern s8  menu_DIG_mix;		// mix -100..100
 
 
 
