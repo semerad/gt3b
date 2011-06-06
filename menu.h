@@ -55,6 +55,8 @@ extern s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >
 #define menu_channel6  menu_channel3_8[3]
 #define menu_channel7  menu_channel3_8[4]
 #define menu_channel8  menu_channel3_8[5]
+extern u8  menu_channels_mixed;	// channel with 1 here will not be set from
+				//   menu_channel3_8
 
 
 

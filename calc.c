@@ -29,6 +29,8 @@
 
 #define ABS_THRESHOLD  PPM(50)
 
+@near static s16 last_value[MAX_CHANNELS];
+
 
 
 
@@ -83,6 +85,9 @@ static void channel_params(u8 channel, s16 inval) {
     if (inval < PPM(-500))       inval = PPM(-500);
     else if (inval > PPM(500))   inval = PPM(500);
 
+    // save last value
+    last_value[channel - 1] = inval;
+
     // read trims for channels 1-2 and compute inval offset
     if (channel < 3) {
 	trim = cm.trim[channel-1];
@@ -130,6 +135,11 @@ static s16 expo(s16 inval, s8 exp) {
     return (s16)(((s32)val * dr + 50) / 100);
 }
 
+// apply steering speed
+static u16 steering_speed(s16 val, u8 channel) {
+    return val;
+}
+
 
 
 
@@ -140,7 +150,7 @@ static s16 expo(s16 inval, s8 exp) {
 // called for each PPM cycle
 static void calc_loop(void) {
     s16 val;
-    u8  i;
+    u8  i, bit;
 
     while (1) {
 
@@ -151,7 +161,14 @@ static void calc_loop(void) {
 			    cg.calib_steering_right << ADC_OVS_SHIFT,
 			    cg.steering_dead_zone << ADC_OVS_SHIFT);
 	val = expo(val, cm.expo_steering);
-	channel_params(1, dualrate(val, cm.dr_steering));
+	val = dualrate(val, cm.dr_steering);
+	if (!cm.channel_4WS)
+	    channel_params(1, steering_speed(val, 1));
+	else {
+	    // 4WS mixing
+	    channel_params(1, steering_speed(val, 1));
+	    channel_params(cm.channel_4WS, steering_speed(val, cm.channel_4WS));
+	}
 
 
 
@@ -187,15 +204,24 @@ static void calc_loop(void) {
 		abs_state = 0;
 	    }
 	}
-	channel_params(2, dualrate(val,
-	               (u8)(val < 0 ? cm.dr_forward : cm.dr_back)));
+	val = dualrate(val, (u8)(val < 0 ? cm.dr_forward : cm.dr_back));
+	if (!cm.channel_DIG)
+	    channel_params(2, val);
+	else {
+	    // DIG mixing
+	    channel_params(2, val);
+	    channel_params(cm.channel_DIG, val);
+	}
 
 
 
 
 	// channels 3-8, exclude mixed channels in the future
-	for (i = 3; i <= MAX_CHANNELS; i++)
+	for (i = 3, bit = 0b100; i <= MAX_CHANNELS; i++, bit <<= 1) {
+	    // check if channel was already mixed before
+	    if (menu_channels_mixed & bit)  continue;
 	    channel_params(i, menu_channel3_8[i - 3] * PPM(5));
+	}
 
 
 

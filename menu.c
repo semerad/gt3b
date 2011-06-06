@@ -37,6 +37,8 @@
 u8  menu_force_value_channel;	// set PPM value for this channel
 s16 menu_force_value;		//   to this value (-500..500)
 s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >=3
+u8  menu_channels_mixed;	// channel with 1 here will not be set from
+				//   menu_channel3_8
 
 
 
@@ -70,6 +72,13 @@ void apply_model_config(void) {
 	// task CALC must be awaked to do first PPM calculation
 	if (awake_calc_allowed)  awake(CALC);
     }
+
+    // set mixed channels to ignore them from menu_channel3_8
+    menu_channels_mixed = 0;
+    if (cm.channel_4WS)
+	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_4WS - 1));
+    if (cm.channel_DIG)
+	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_DIG - 1));
 
     // set autorepeat
     for (i = 0; i < 4; i++) {
