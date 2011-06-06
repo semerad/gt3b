@@ -97,7 +97,7 @@ static void channel_params(u8 channel, s16 inval) {
 
     // apply endpoint and trim32
     val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)] -
-		 trim32 + 50) / 100);
+		 trim32) / 100);
 
     // add subtrim, trim and reverse
     val += (cm.subtrim[channel-1] + trim) * PPM(1);
@@ -132,7 +132,7 @@ static s16 expo(s16 inval, s8 exp) {
 
 // apply dualrate
 @inline static s16 dualrate(s16 val, u8 dr) {
-    return (s16)(((s32)val * dr + 50) / 100);
+    return (s16)((s32)val * dr / 100);
 }
 
 // apply steering speed
@@ -149,7 +149,7 @@ static u16 steering_speed(s16 val, u8 channel) {
 // calculate new PPM values from ADC and internal variables
 // called for each PPM cycle
 static void calc_loop(void) {
-    s16 val;
+    s16 val, val2;
     u8  i, bit;
 
     while (1) {
@@ -166,8 +166,19 @@ static void calc_loop(void) {
 	    channel_params(1, steering_speed(val, 1));
 	else {
 	    // 4WS mixing
+	    val2 = val;
+	    if (menu_4WS_crab)  val2 = -val2;	// apply crab
+
+	    if (menu_4WS_mix < 0)
+		// reduce front steering
+		val = (s16)((s32)val * (100 + menu_4WS_mix) / 100);
+	    else if (menu_4WS_mix > 0)
+		// reduce rear steering
+		val2 = (s16)((s32)val2 * (100 - menu_4WS_mix) / 100);
+
 	    channel_params(1, steering_speed(val, 1));
-	    channel_params(cm.channel_4WS, steering_speed(val, cm.channel_4WS));
+	    channel_params(cm.channel_4WS,
+			   steering_speed(val2, cm.channel_4WS));
 	}
 
 
@@ -209,8 +220,17 @@ static void calc_loop(void) {
 	    channel_params(2, val);
 	else {
 	    // DIG mixing
+	    val2 = val;
+
+	    if (menu_DIG_mix < 0)
+		// reduce front throttle
+		val = (s16)((s32)val * (100 + menu_DIG_mix) / 100);
+	    else if (menu_DIG_mix > 0)
+		// reduce rear throttle
+		val2 = (s16)((s32)val2 * (100 - menu_DIG_mix) / 100);
+
 	    channel_params(2, val);
-	    channel_params(cm.channel_DIG, val);
+	    channel_params(cm.channel_DIG, val2);
 	}
 
 
