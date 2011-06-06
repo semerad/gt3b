@@ -61,7 +61,7 @@ u16 battery_low_raw;
 
 // apply model settings to variables
 static _Bool awake_calc_allowed;
-static void apply_model_config(void) {
+void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
     // set number of channels for this model

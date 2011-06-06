@@ -81,6 +81,7 @@ extern void menu_global_setup(void);
 extern s16  menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate);
 extern void apply_global_config(void);
 extern void menu_load_model(void);
+extern void apply_model_config(void);
 extern u8 menu_electronic_trims(void);
 extern u8 menu_buttons(void);
 extern u8 *menu_et_function_name(u8 n);

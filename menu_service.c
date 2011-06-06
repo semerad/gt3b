@@ -214,6 +214,7 @@ void menu_key_test(void) {
     while (btns(BTN_ENTER))  stop();  // wait for release of ENTER
     lcd_clear();
 
+    button_autorepeat(0);	// disable autorepeats
     btnra();
 
     // show intro text
@@ -237,5 +238,6 @@ void menu_key_test(void) {
 	stop();
     }
     key_beep();
+    apply_model_config();
 }
 
