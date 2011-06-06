@@ -74,12 +74,15 @@ main.c,h	- initialize all and call MENU task
 
 config.c,h	- global and model configuration
 menu.c,h	- MENU task, handling keys, menus, lcd
+  menu_global.c	- global config menus are here
+  menu_popup.c	- handling of trims/keys, showing value
+  menu_service.c- calibrate and key-test menus
 calc.c,h	- CALC task, calculate PPM values
 
 
-Only last 3 files are used to implement what means what button
-and how it changes signal for servos. Other files are sort of libraries
-(or it can be viewed as a little operating system :-)
+Only last 3 files (more menus counted as one) are used to implement what
+means what button and how it changes signal for servos. Other files are
+sort of libraries (or it can be viewed as a little operating system :-)
 
 
 
