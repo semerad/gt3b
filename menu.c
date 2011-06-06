@@ -601,7 +601,7 @@ static void menu_abs(void) {
 @near static u8 trim_functions[TRIM_FUNCTIONS_SIZE];
 @near static u8 trim_functions_max;
 static const u8 *trim_buttons[] = {
-    "NOL", "RPT", "RES", "END"
+    "NOL", "RPT", "MOM", "RES", "END", "SPC"
 };
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))
 // 7seg:  1 2 3 d
@@ -614,7 +614,7 @@ static const u8 *trim_buttons[] = {
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 trim_bit = (u8)(1 << trim_id);
-    u16 momentary_bit = 3 << (u8)(trim_id * 2 + NUM_KEYS);
+    u16 opposite_reset = 1 << (u8)(trim_id * 2 + NUM_KEYS);
     u8 show = 0;
     u8 id = val_id;
     u8 idx;
@@ -631,7 +631,8 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    etm->reverse = 0;
 		    etm->buttons = 0;
 		    etm->function = 0;
-		    ck.momentary &= ~momentary_bit;
+		    ck.momentary &= ~opposite_reset;
+		    ck.momentary &= ~(opposite_reset << 1);  // not-used bit
 		}
 		// select new function, map through trim_functions
 		idx = menu_et_function_idx(etm->function);
@@ -652,21 +653,17 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    etm->reverse = 0;
 		    etm->buttons = 0;
 		    ck.et_off |= trim_bit;
-		    ck.momentary &= ~momentary_bit;
+		    ck.momentary &= ~opposite_reset;
+		    ck.momentary &= ~(opposite_reset << 1);  // not-used bit
 		}
 		break;
 	    case 2:
-		if (ck.momentary & momentary_bit)  idx = 4;
-		else				   idx = etm->buttons;
-		idx = (u8)menu_change_val(idx, 0, TRIM_BUTTONS_SIZE, 1, 1);
-		if (idx == 4) {
-		    ck.momentary |= momentary_bit;
-		    etm->buttons = ETB_LONG_OFF;
-		}
-		else {
-		    etm->buttons = idx;
-		    ck.momentary &= ~momentary_bit;
-		}
+		// show special ("SPC") only when selected function has it
+		if (menu_et_function_long_special(etm->function))
+			idx = 1;
+		else	idx = 2;
+		etm->buttons = (u8)menu_change_val(etm->buttons, 0,
+						 TRIM_BUTTONS_SIZE - idx, 1, 1);
 		break;
 	    case 3:
 		etm->step = (u8)menu_change_val(etm->step, 0,
@@ -676,7 +673,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		etm->reverse ^= 1;
 		break;
 	    case 5:
-		etm->opposite_reset ^= 1;
+		ck.momentary ^= opposite_reset;
 		break;
 	}
 	show = 1;
@@ -684,9 +681,9 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     else {
 	// switch to next setting
 	if (!(id == 1 && (ck.et_off & trim_bit))) {
-	    if (ck.momentary & momentary_bit) {
+	    if (etm->buttons == ETB_MOMENTARY) {
 		if (++id > 4)  id = 1;
-		if (id == 3)   id = 4;  // skip "step"
+		if (id == 3)   id = 4;  // skip "step" for momentary
 	    }
 	    else {
 		if (++id > 5)  id = 1;
@@ -705,9 +702,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		break;
 	    case 2:
-		if (ck.momentary & momentary_bit)
-			lcd_chars("MOM");
-		else	lcd_chars(trim_buttons[etm->buttons]);
+		lcd_chars(trim_buttons[etm->buttons]);
 		lcd_segment(LS_SYM_PERCENT, LS_ON);
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		break;
@@ -722,7 +717,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		lcd_segment(LS_SYM_VOLTS, LS_ON);
 		break;
 	    case 5:
-		lcd_chars(etm->opposite_reset ? "RES" : "NOO");
+		lcd_chars(ck.momentary & opposite_reset ? "RES" : "NOO");
 		lcd_segment(LS_SYM_PERCENT, LS_OFF);
 		lcd_segment(LS_SYM_VOLTS, LS_ON);
 		lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);

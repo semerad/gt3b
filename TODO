@@ -8,10 +8,12 @@ steering 4WS mixes - steering to 2 channels
 	front/mix/crab/rear
     rear side travel adjustment 0-100% (? 200%)
     ? mix mode: use EXP of steering
+    ? dualrate to both channels
 dig steering - throttle to 2 channels
     choose channel
     front only/both/rear only
     rear mix 0-200%
+    ? dualrate to both channels
 timer - up/down/lap/lap navigate - buttons LAP START, LAP RESET
 steering speed TURN/RETURN 1-100%
     - 100% allows end-end change in 1 cycle

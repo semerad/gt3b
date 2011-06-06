@@ -61,6 +61,7 @@ typedef struct {
     s16 min, max, reset; // limits of variable
     u8 rot_fast_step;	// step for fast encoder rotate
     u8 *labels;		// labels for trims
+    void (*long_func)(s16 *aval, u16 btn_l, u16 btn_r);  // function for special long-press handling
 } et_functions_s;
 #define EF_NONE		0
 #define EF_RIGHT	0b00000001
@@ -69,56 +70,56 @@ typedef struct {
 #define EF_BLINK	0b10000000
 
 static const et_functions_s et_functions[] = {
-    { 0, "OFF", 0, EF_NONE, 0, NULL, 0, 0, 0, 0, NULL },
+    { 0, "OFF", 0, EF_NONE, 0, NULL, 0, 0, 0, 0, NULL, NULL },
     { 1, "TR1", LM_TRIM, EF_NONE, 1, &cm.trim[0], -TRIM_MAX, TRIM_MAX, 0,
-      TRIM_FAST, "LNR" },
+      TRIM_FAST, "LNR", NULL },
     { 2, "TR2", LM_TRIM, EF_NONE, 2, &cm.trim[1], -TRIM_MAX, TRIM_MAX, 0,
-      TRIM_FAST, "FNB" },
+      TRIM_FAST, "FNB", NULL },
     { 7, "DRS", LM_DR, EF_PERCENT, 1, &cm.dr_steering, 0, 100, 100,
-      DUALRATE_FAST, NULL },
+      DUALRATE_FAST, NULL, NULL },
     { 8, "DRF", LM_DR, EF_PERCENT | EF_LEFT, 2, &cm.dr_forward, 0, 100, 100,
-      DUALRATE_FAST, NULL },
+      DUALRATE_FAST, NULL, NULL },
     { 9, "DRB", LM_DR, EF_PERCENT | EF_RIGHT, 2, &cm.dr_back, 0, 100, 100,
-      DUALRATE_FAST, NULL },
+      DUALRATE_FAST, NULL, NULL },
     { 10, "EXS", LM_EXP, EF_PERCENT, 1, &cm.expo_steering, -EXPO_MAX, EXPO_MAX,
-      0, EXPO_FAST, NULL },
+      0, EXPO_FAST, NULL, NULL },
     { 11, "EXF", LM_EXP, EF_PERCENT | EF_LEFT, 2, &cm.expo_forward,
-      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL },
+      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL, NULL },
     { 12, "EXB", LM_EXP, EF_PERCENT | EF_RIGHT, 2, &cm.expo_back,
-      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL },
+      -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL, NULL },
     { 13, "CH3", 0, EF_NONE, 3, &menu_channel3, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 19, "ST1", LM_TRIM, EF_BLINK, 1, &cm.subtrim[0], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
     { 20, "ST2", LM_TRIM, EF_BLINK, 2, &cm.subtrim[1], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
     { 21, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #if MAX_CHANNELS >= 4
     { 14, "CH4", 0, EF_NONE, 4, &menu_channel4, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 22, "ST4", LM_TRIM, EF_BLINK, 4, &cm.subtrim[3], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #if MAX_CHANNELS >= 5
     { 15, "CH5", 0, EF_NONE, 5, &menu_channel5, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 23, "ST5", LM_TRIM, EF_BLINK, 5, &cm.subtrim[4], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #if MAX_CHANNELS >= 6
     { 16, "CH6", 0, EF_NONE, 6, &menu_channel6, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 24, "ST6", LM_TRIM, EF_BLINK, 6, &cm.subtrim[5], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #if MAX_CHANNELS >= 7
     { 17, "CH7", 0, EF_NONE, 7, &menu_channel7, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 25, "ST7", LM_TRIM, EF_BLINK, 7, &cm.subtrim[6], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #if MAX_CHANNELS >= 8
     { 18, "CH8", 0, EF_NONE, 8, &menu_channel8, -100, 100, 0, CHANNEL_FAST,
-      NULL },
+      NULL, NULL },
     { 26, "ST8", LM_TRIM, EF_BLINK, 8, &cm.subtrim[7], -SUBTRIM_MAX,
-      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL },
+      SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL },
 #endif
 #endif
 #endif
@@ -137,6 +138,11 @@ u8 *menu_et_function_name(u8 n) {
 s8 menu_et_function_idx(u8 n) {
     if (n >= ET_FUNCTIONS_SIZE)  return -1;
     return et_functions[n].idx;
+}
+
+// return if given function has special long-press handling
+u8 menu_et_function_long_special(u8 n) {
+    return (u8)(et_functions[n].long_func ? 1 : 0);
 }
 
 
@@ -162,9 +168,10 @@ static u8 menu_popup_et(u8 trim_id) {
     u16 btn_lr = btn_l | btn_r;
     config_et_map_s *etm = &ck.et_map[trim_id];
     et_functions_s *etf = &et_functions[etm->function];
+    u16 opposite_reset = 1 << (u8)(trim_id * 2 + NUM_KEYS);
 
     // if keys are momentary, show nothing, but set value
-    if (ck.momentary & (1 << (u8)(trim_id * 2 + NUM_KEYS))) {
+    if (etm->buttons == ETB_MOMENTARY) {
 	if (btns(btn_l)) {
 	    // left
 	    AVAL(etm->reverse ? etf->max : etf->min);
@@ -208,42 +215,51 @@ static u8 menu_popup_et(u8 trim_id) {
     while (1) {
 	// check value left/right
 	if (btnl_all(btn_lr)) {
-	    // reset to given reset value
 	    key_beep();
-	    val = etf->reset;
+	    if (etf->long_func && etm->buttons == ETB_SPECIAL)
+		// special handling
+		etf->long_func(&val, btn_l, btn_r);
+	    else
+		// reset to given reset value
+		val = etf->reset;
 	    AVAL(val);
 	    btnr(btn_lr);
 	}
 	else if (btn(btn_lr)) {
 	    if (!btns_all(btn_lr)) {
-		// only when both are not pressed together
 		key_beep();
-		if ((etm->buttons == ETB_LONG_RESET ||
-		     etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
-		    // handle long key press
-		    if (etm->buttons == ETB_LONG_RESET)
-			val = etf->reset;
-		    else {
-			// set side value
-			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
-			    val = etf->min;
-			else
-			    val = etf->max;
-		    }
-		}
+		if (etf->long_func && etm->buttons == ETB_SPECIAL &&
+		    btnl(btn_lr))
+		    // special handling
+		    etf->long_func(&val, btn_l, btn_r);
 		else {
-		    // handle short key press
-		    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
-			val -= step;
-			if (val < etf->min)  val = etf->min;
-			if (etm->opposite_reset && val > etf->reset)
+		    if ((etm->buttons == ETB_LONG_RESET ||
+			etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
+			// handle long key press
+			if (etm->buttons == ETB_LONG_RESET)
 			    val = etf->reset;
+			else {
+			    // set side value
+			    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
+				val = etf->min;
+			    else
+				val = etf->max;
+			}
 		    }
 		    else {
-			val += step;
-			if (val > etf->max)  val = etf->max;
-			if (etm->opposite_reset && val < etf->reset)
-			    val = etf->reset;
+			// handle short key press
+			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
+			    val -= step;
+			    if (val < etf->min)  val = etf->min;
+			    if ((ck.momentary & opposite_reset) &&
+				val > etf->reset)  val = etf->reset;
+			}
+			else {
+			    val += step;
+			    if (val > etf->max)  val = etf->max;
+			    if ((ck.momentary & opposite_reset) &&
+				val < etf->reset)  val = etf->reset;
+			}
 		    }
 		}
 		AVAL(val);

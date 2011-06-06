@@ -74,12 +74,12 @@ static const config_key_mapping_s default_key_mapping = {
 	{ 0, 0 },
 	{ 0, 0 }
     },
-    // trims: function, reverse, step, buttons, opposite_reset
+    // trims: function, reverse, step, buttons
     {
-	{ 1, 0, 0, 0, 0 },	// trim1 to steering trim
-	{ 2, 0, 0, 0, 0 },	// trim2 to throttle trim
-	{ 1, 0, 0, 0, 0 },	// trim3 to steering trim
-	{ 3, 0, 0, 1, 0 }	// trim4(DR) to steering dualrate, autorepeat
+	{ 1, 0, 0, 0 },		// trim1 to steering trim
+	{ 2, 0, 0, 0 },		// trim2 to throttle trim
+	{ 1, 0, 0, 0 },		// trim3 to steering trim
+	{ 3, 0, 0, 1 }		// trim4(DR) to steering dualrate, autorepeat
     },
     // momentary
     0,
@@ -110,6 +110,10 @@ void config_model_set_default(void) {
     cm.expo_forward	= 0;
     cm.expo_back	= 0;
     cm.abs_type		= 0;
+    cm.channel_4WS	= 0;
+    cm.channel_DIG	= 0;
+    cm.stspd_turn	= 100;
+    cm.stspd_return	= 100;
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
 }
 

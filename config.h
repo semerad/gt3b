@@ -71,13 +71,14 @@ typedef struct {
     u8 function:7;
     u8 reverse:1;
     u8 step:5;
-    u8 buttons:2;
-    u8 opposite_reset:1;
+    u8 buttons:3;
 } config_et_map_s;
 #define ETB_LONG_OFF	0
 #define ETB_AUTORPT	1
-#define ETB_LONG_RESET	2
-#define ETB_LONG_ENDVAL	3
+#define ETB_MOMENTARY	2
+#define ETB_LONG_RESET	3
+#define ETB_LONG_ENDVAL	4
+#define ETB_SPECIAL	5
 
 typedef struct {
     u8 function:4;
@@ -96,7 +97,7 @@ typedef struct {
 // change MAGIC number when changing model config
 // also add code to setting default values
 // 13 + 13 + channels * 3 bytes
-#define CONFIG_MODEL_MAGIC  (0xfe20 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xfd20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel
@@ -105,7 +106,11 @@ typedef struct {
     s8 trim[2];			// for steering and throttle
     u8 dualrate[3];		// for steering and throttle
     s8 expo[3];			// steering/forward/back
-    u8 abs_type;
+    u8 abs_type:2;
+    u8 channel_4WS:3;		// channel for 4WS mix or 0 when off
+    u8 channel_DIG:3;		// channel for DIG mix or 0 when off
+    u8 stspd_turn;		// steering speed turn
+    u8 stspd_return;		// steering speed return
     config_key_mapping_s key_mapping;
 } config_model_s;
 

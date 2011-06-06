@@ -98,10 +98,10 @@ void input_init(void) {
 // read keys, change value only when last 3 reads are the same
 
 // internal state variables
-static u16 buttons1, buttons2, buttons3;  // last 3 reads
+@near static u16 buttons1, buttons2, buttons3;  // last 3 reads
 u16 buttons_state;		// actual combined last buttons state
 static u8 buttons_autorepeat;	// autorepeat enable for TRIMs and D/R
-static u8 buttons_timer[12];	// autorepeat/long press buttons timers
+@near static u8 buttons_timer[12];	// autorepeat/long press buttons timers
 static u8 encoder_timer;	// for rotate encoder slow/fast
 
 // variables representing pressed buttons
