@@ -66,7 +66,6 @@ u16 battery_low_raw;
 
 
 // apply model settings to variables
-static _Bool awake_calc_allowed;
 void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
@@ -74,7 +73,7 @@ void apply_model_config(void) {
     if (channels != MAX_CHANNELS) {
 	ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
 	// task CALC must be awaked to do first PPM calculation
-	if (awake_calc_allowed)  awake(CALC);
+	if (input_initialized)  awake(CALC);
     }
 
     // set mixed channels to ignore them from menu_channel3_8
@@ -771,7 +770,6 @@ void menu_init(void) {
 
     // read model config from eeprom, but now awake CALC yet
     menu_load_model();
-    awake_calc_allowed = 1;
 
     // and main loop
     menu_loop();

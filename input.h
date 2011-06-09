@@ -95,6 +95,7 @@ extern void button_autorepeat(u8 btn);
 
 // INPUT task
 E_TASK(INPUT);
+extern _Bool input_initialized;
 
 
 #endif

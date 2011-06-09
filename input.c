@@ -343,6 +343,7 @@ static void read_ADC(void) {
 
 
 // input task, awaked every 5ms
+_Bool input_initialized;
 #define ADC_BUFINIT(id) \
     adc_buffer[1][id] = adc_buffer[2][id] = adc_buffer[3][id] = \
                         adc_buffer[0][id]; \
@@ -363,6 +364,7 @@ static void input_loop(void) {
 
     // task CALC must be awaked to compute values before PPM will take on
     awake(CALC);
+    input_initialized = 1;
 
     while (1) {
 	// read ADC only when EOC flag (only for first it will not be ready)
