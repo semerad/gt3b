@@ -137,6 +137,78 @@ static s16 expo(s16 inval, s8 exp) {
 
 // apply steering speed
 static u16 steering_speed(s16 val, u8 channel) {
+    s16 last = last_value[channel - 1];
+    s16 delta = val - last;
+    s16 delta2 = 0;
+    s16 max_delta;
+    u8 stspd;
+
+    if (!delta)  return val;	// no change from previous val
+    if (cm.stspd_turn == 100 && cm.stspd_return == 100)  return val; // max spd
+
+    if (!last)  stspd = cm.stspd_turn;	// it is always turn from centre
+    else if (last < 0) {
+	// last was left
+	if (val < last)  stspd = cm.stspd_turn;	// more left turn
+	else {
+	    // right from previous
+	    if (val <= 0)  stspd = cm.stspd_return;  // return max to centre
+	    else {
+		// right to right side of centre
+		stspd = cm.stspd_return;
+		delta = -last;
+		delta2 = val;
+	    }
+	}
+    }
+    else {
+	// last was right
+	if (val > last)  stspd = cm.stspd_turn;	// more right turn
+	else {
+	    // left from previous
+	    if (val >= 0)  stspd = cm.stspd_return;  // return max to centre
+	    else {
+		// left to left side of centre
+		stspd = cm.stspd_return;
+		delta = -last;
+		delta2 = val;
+	    }
+	}
+    }
+
+    // calculate max delta
+    if (stspd == 100)  max_delta = PPM(1000);
+    else  max_delta = PPM(1000) / 2 / (100 - stspd);
+
+    // compare delta with max_delta
+    if (delta < 0) {
+	if (max_delta < -delta) {
+	    // over
+	    val = last - max_delta;
+	    delta2 = 0;			// nothing at turn side
+	}
+    }
+    else {
+	if (max_delta < delta) {
+	    // over
+	    val = last + max_delta;
+	    delta2 = 0;			// nothing at turn side
+	}
+    }
+
+    // check if it is moving from return to turn
+    if (delta2) {
+	if (cm.stspd_turn == 100)  max_delta = PPM(1000);
+	else  max_delta = PPM(1000) / 2 / (100 - cm.stspd_turn);
+
+	if (delta2 < 0) {
+	    if (max_delta < -delta2)  val = -max_delta;
+	}
+	else {
+	    if (max_delta < delta2)   val = max_delta;
+	}
+    }
+
     return val;
 }
 
