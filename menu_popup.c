@@ -67,6 +67,7 @@ typedef struct {
 #define EF_RIGHT	0b00000001
 #define EF_LEFT		0b00000010
 #define EF_PERCENT	0b00000100
+#define EF_NOCHANNEL	0b01000000
 #define EF_BLINK	0b10000000
 
 static const et_functions_s et_functions[] = {
@@ -125,10 +126,10 @@ static const et_functions_s et_functions[] = {
 #endif
 #endif
 #endif
-    { 27, "4WS", LM_EPO, EF_BLINK | EF_PERCENT, 4, &menu_4WS_mix, -100, 100,
-      0, MIX_FAST, NULL, NULL },
-    { 28, "DIG", LM_EPO, EF_BLINK | EF_PERCENT, L7_D, &menu_DIG_mix, -100, 100,
-      0, MIX_FAST, NULL, NULL },
+    { 27, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, 4,
+      &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL },
+    { 28, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, L7_D,
+      &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL },
     { 29, "SST", LM_DR, EF_BLINK | EF_LEFT | EF_PERCENT, 1, &cm.stspd_turn,
       1, 100, 100, SPEED_FAST, NULL, NULL },
     { 30, "SSR", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.stspd_return,
@@ -217,7 +218,7 @@ static u8 menu_popup_et(u8 trim_id) {
     lcd_segment(LS_SYM_PERCENT, (u8)(etf->flags & EF_PERCENT ? LS_ON : LS_OFF));
     lcd_segment(LS_SYM_LEFT, (u8)(etf->flags & EF_LEFT ? LS_ON : LS_OFF));
     lcd_segment(LS_SYM_RIGHT, (u8)(etf->flags & EF_RIGHT ? LS_ON : LS_OFF));
-    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    lcd_segment(LS_SYM_CHANNEL, (u8)(etf->flags & EF_NOCHANNEL ? LS_OFF : LS_ON));
     lcd_7seg(etf->channel);
 
     while (1) {
@@ -410,7 +411,7 @@ static void kf_4ws(s16 unused, u8 flags) {
 	menu_4WS_crab ^= 1;
     if (flags & FF_SHOW) {
 	lcd_7seg(4);
-	lcd_chars(menu_4WS_crab ? "CRB" : "REV");
+	lcd_chars(menu_4WS_crab ? "CRB" : "NOC");
     }
 }
 

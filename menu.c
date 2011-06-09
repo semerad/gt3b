@@ -105,7 +105,7 @@ void menu_load_model(void) {
 	menu_channel3_8[i] = -100;
 
     // set 4WS and DIG to defaults
-    menu_4WS_mix = 100;
+    menu_4WS_mix = 0;
     menu_4WS_crab = 0;
     menu_DIG_mix = 0;
 

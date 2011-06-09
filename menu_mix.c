@@ -44,7 +44,7 @@ static u8 mix_4WS(u8 val_id, u8 action) {
 		// channel number/off
 		val = cm.channel_4WS;
 		if (!val)  val = 2;
-		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 0);
+		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
 		if (val == 2)   cm.channel_4WS = 0;
 		else		cm.channel_4WS = val;
 		break;
@@ -101,7 +101,7 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 		// channel number/off
 		val = cm.channel_DIG;
 		if (!val)  val = 2;
-		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 0);
+		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
 		if (val == 2)   cm.channel_DIG = 0;
 		else		cm.channel_DIG = val;
 		break;
@@ -189,7 +189,7 @@ void menu_mix(void) {
 		lcd_7seg(menu_ids[menu_id]);
 		// remove possible showed symbols
 		lcd_segment(LS_SYM_PERCENT, LS_OFF);
-		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		lcd_segment(LS_SYM_VOLTS, LS_OFF);
 		func(1, 0);	// show first setting
 		lcd_set_blink(L7SEG, LB_SPC);
 		lcd_update();
