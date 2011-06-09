@@ -18,11 +18,11 @@ timer - up/down/lap/lap navigate - buttons LAP START, LAP RESET
 steering speed TURN/RETURN 1-100%
     - 100% allows end-end change in 1 cycle
     - 1% allows end-end change in 200 cycles (4.6s)
-throttle speed 1-3 SPEED 1-100%, trigger points 1-100
 alarm 10min when not used
 ? multi-speed transmission - ability to set exact positions
 ---
 programmable mixes
+throttle speed 1-3 SPEED 1-100%, trigger points 1-100
 throttle acceleration
 brake acceleration
 throttle curves EXP/VTR/CRV

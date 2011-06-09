@@ -39,7 +39,7 @@
 #define EXPO_FAST	5
 #define CHANNEL_FAST	5
 #define MIX_FAST	5
-#define STSPEED_FAST	5
+#define SPEED_FAST	5
 
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5

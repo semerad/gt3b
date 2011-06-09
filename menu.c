@@ -552,6 +552,19 @@ static void menu_dualrate(void) {
 }
 
 
+// set servo speed
+static void sf_speed(u8 channel, u8 change) {
+    u8 *addr = menu_adc_direction ? &cm.stspd_return : &cm.stspd_turn;
+    if (change)  *addr = (u8)menu_change_val(*addr, 1, 100, SPEED_FAST, 0);
+    lcd_char_num3(*addr);
+}
+static void menu_speed(void) {
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
+    menu_channel(1, 0x1, 0, sf_speed);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+}
+
+
 // set expos
 static void sf_expo(u8 channel, u8 change) {
     s8 *addr = &cm.expo[channel];
@@ -1006,7 +1019,10 @@ static void select_menu(void) {
 		if (btnl(BTN_ENTER))	menu_subtrim();
 		else			menu_trim();
 	    }
-	    else if (menu == LM_DR)	menu_dualrate();
+	    else if (menu == LM_DR) {
+		if (btnl(BTN_ENTER))	menu_speed();
+		else			menu_dualrate();
+	    }
 	    else if (menu == LM_EXP)	menu_expo();
 	    else {
 		if (btnl(BTN_ENTER))	break;
