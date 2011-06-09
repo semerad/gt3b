@@ -68,7 +68,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		if (ck.et_off & trim_bit) {
 		    // change from OFF, set to defaults
 		    ck.et_off ^= trim_bit;
-		    etm->step = 1;
+		    etm->step = 0;
 		    etm->reverse = 0;
 		    etm->buttons = 0;
 		    etm->function = 0;
