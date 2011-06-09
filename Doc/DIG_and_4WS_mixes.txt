@@ -1,0 +1,100 @@
+
+losikid67:
+
+On mixing for crawling applications will need to be able to mix Throttle to an
+AUX channel (channel 3) and to be able to adjust the mix rate via 3 way switch
+when not programming. So for ex. when the 3 way switch is pushed down it will
+decrease the percentage by 10%. So the slave will be 90% of the master channel.
+If it is pushed up it will increase the the percentage 10% So the slave will be
+110% of the master channel. Also it would need need another 3 position switch
+that in center position the radio uses the above mixing features, but the outer
+positions will connect just the throttle or Aux channel to the trigger, the
+inactive channel will be sent to center.
+As its basic functions. If possible, other functions could include adjustable
+step rate (so not a set 10%) and auto return, so if you change direction of
+click it will return to 100% mix.
+Also at least one additional channel could be useful. Preferably have them
+support 3 position switches. OR have them as virtual channels since i/o's are
+limited. It be another mix, steering mix for 4 wheel steer.
+--
+So its not in a million different places, heres the functions of a rock crawler
+that we use aux channels for
+
+Dig-Locking on axle or the other to achieve tighter turning, and sucks down the
+suspension
+
+4WS- 4 wheel steering, to be able to make the front and rear tires turn.
+
+Lighting-turn lights on and off
+
+Multi speed trannies-Change gears to get different ratios
+
+winch-to use a winch, in, lock, out
+
+And more- There really is a ton of stuff out there.
+
+Now for how each one of these works.
+
+Dig-So there are 5 ways to obtain dig on a crawler. The oldest one in the book
+is a mechanical dig. Which is simple disconnecting the outputs in a tranny and
+sometimes into a slot to lock them. This is done with a servo. trim, EPA's and
+3 positions is required on the aux channel. The next way is more/less a
+homebrew way for a MOA (motor on axle) crawler. This uses two lever switches
+and a servo. What the lever switches do is short out a motor so it'll lock up.
+3 positions are required and epa's would be nice. The next way which is just a
+modern version of the lever switches is a Punkdig (mentioned a few posts
+aboved) the punk dig does the same thing as the two lever switches, except it
+uses relays controlled by a rx to do the switching. 3 postions are required for
+this. Now there are two more ways which envolves two esc's. The first way uses
+a wantAmix which i build and sell (www.overkillrc.com). The wantAmix requires a
+3 position switch for dig functions, and linear control for bias mixing. The
+wAm is an adapter that plugs into and rx for the throttle and aux channel. It
+will then mix thos two channels for dual esc's how ever the aux channel tells
+it too. The last method uses radio mixing...please see below for mixing
+
+4WS-4ws is popular with super crawlers and just bashers. Some people like Front
+only, crab, mix, rear only. Crab is where the wheels turn the same way, it so
+the crawlers tracks diagonally while still facing forward, and mix is like what
+monster trucks do, so the can turn sharper (wheels turn opposition directions).
+This requires mixing or a 4ws computer, see below for mxing. Now the other
+method which pro drivers use is just to have full independent control of each,
+so the aux channel would have to be linear.
+
+Everything else uses a 3 position switch and usually needs trim and epa's.
+
+Ok so basic aux channel functions should be
+3 postion switch
+EPA's
+Trim
+
+Now for more advance stuff, linear and mixing.
+
+Mixing- There are two things we use mixing for. Dual ESC's and 4ws.
+
+Dual ESC's. So for dual esc's the ideal setup would be to have a 3 position
+switch for basic dig functions. This switch will need to act like this
+
+Pos 1-Ch2 controlled by trigger, Ch3 is at neutral
+Pos 2-Ch2 and Ch3 are both evenly controlled by the trigger
+Pos 3-Ch3 is controlled by the trigger, Ch2 is at neutral
+
+Now there needs to be something to bias that mix, or adjust the mix rate. This
+can be achieved with a momentary 3 pos switch, two momentary butons, or a
+rotary switch/encoder, a pot could be used as well. Now what needs to happen is
+each click of some sort will adjust the mix rate, by a pre set step rate. So
+one click up will decrease ch3 by 10 percent of where the trigger is. Another
+click up will decrease the rear again by 10 percent, for a total of 20%. and
+visa versa a click down will decrease ch 2 once ch 3 has obtained 100% mix. A
+nice option to have is so if you change directions or push a different button
+it will even out the mix. This is just a preference though.
+
+Now for 4ws, i explained kind how it'll be mixed above (front, crab, mix, rear)
+This could be achieved a number of ways, one button to cycle through would
+work. Some people may like bias steering as well, but they could just use the
+dual esc features.
+
+Linear-Now linear control can be done a number of ways, easiest would just be
+installing a pot to the ch 3 A/D encoder. How ever the best way to implement
+this is again with a 3 pos switch and a step rate. So each click will increase
+or decrease the ch 10%
+
