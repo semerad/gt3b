@@ -50,8 +50,8 @@ static u8 mix_4WS(u8 val_id, u8 action) {
 		break;
 	    case 2:
 		// mix value
-		menu_DIG_mix = (s8)menu_change_val(menu_4WS_mix, -100, 100,
-						   SPEED_FAST, 0);
+		menu_4WS_mix = (s8)menu_change_val(menu_4WS_mix, -100, 100,
+						   MIX_FAST, 0);
 		break;
 	    case 3:
 		// crab/no-crab
@@ -108,7 +108,7 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 	    case 2:
 		// mix value
 		menu_DIG_mix = (s8)menu_change_val(menu_DIG_mix, -100, 100,
-						   SPEED_FAST, 0);
+						   MIX_FAST, 0);
 		break;
 	}
     }
@@ -160,7 +160,7 @@ void menu_mix(void) {
     lcd_segment(LS_SYM_RIGHT, LS_OFF);
     lcd_7seg(menu_ids[0]);
     lcd_set_blink(L7SEG, LB_SPC);
-    func(1, 0);		// show first setting for first trim
+    func(1, 0);		// show first setting for first menu id
     lcd_update();
 
     while (1) {
@@ -171,7 +171,7 @@ void menu_mix(void) {
 
 	if (btn(BTN_ROT_ALL)) {
 	    if (id_val) {
-		// change selected key setting
+		// change selected setting
 		func(id_val, 1);
 		lcd_chars_blink(LB_SPC);
 		lcd_update();
@@ -185,11 +185,14 @@ void menu_mix(void) {
 		else {
 		    if (++menu_id >= MAX_MENU_IDS)  menu_id = 0;
 		}
+		func = menu_funcs[menu_id];
 		lcd_7seg(menu_ids[menu_id]);
-		func(1, 0);	// show first key setting
+		// remove possible showed symbols
+		lcd_segment(LS_SYM_PERCENT, LS_OFF);
+		lcd_segment(LS_SYM_VOLTS, LS_ON);
+		func(1, 0);	// show first setting
 		lcd_set_blink(L7SEG, LB_SPC);
 		lcd_update();
-		func = menu_funcs[menu_id];
 	    }
 	}
 
