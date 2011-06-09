@@ -20,10 +20,10 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Global characteristics:
 =======================
-- up to 22 models memory (will be less at the future after adding more
-	functions and more channels)
+- up to 21 models memory (for 6-channel firmware,will be less at the future
+	after adding more functions and more channels)
     > numbers 10-19 will show with Right-Arrow
-    > numbers 20-21 will show with Left-Arrow
+    > numbers 20-29 will show with Left-Arrow
 - added Subtrims
 - added SaveAs to save model config to another memory location
 - added Global Setup menu to change function features, including backlight time,
@@ -73,6 +73,24 @@ Standard menu:
     > menu TRIM will blink
     > set subtrims for each channel
     > press ENTER/BACK to end this submenu
+- Steering speed
+    > choose menu D/R and press ENTER-long
+    > menu D/R wil blink
+    > now only channel 1 can be selected
+    > turn wheel left to show left arrow - this represents Turn speed 1-100%
+    > turn wheel right to show right arrow - this represents Return speed 1-100%
+	100% means no delay
+	1%   means above 4s delay end to end
+- 4WS and DIG mixes
+    > choose menu EPOINT and press ENTER-long
+    > menu EPOINT will blink
+    > select one of mixes 4WS (4) or DIG (d)
+    > press ENTER and choose channel for this mix or OFF
+    > press ENTER and set mix in range -100...0...100 %
+	0%   is default and means both channel have same max steering/throttle
+	100% means 100% reduce on rear steering/throttle (eg. no steering)
+       -100% means 100% reduce on front steering/throttle (eg. no steering)
+    > for 4WS press ENTER and select crab (CRB) or no-crab (NOC)
 - Key mapping specific for each model:
     > choose menu REV and press ENTER-long
     > menu REV will blink
@@ -197,6 +215,10 @@ DRS, DRF, DRB	- dualrate of steering/forward/back
 EXS, EXF, EXB	- expo of steering/forward/back
 CHn		- change channel "n" value in range -100...100
 STn		- subtrim of channel "n"
+4WS		- 4 wheel steering mix -100...100%
+DIG		- DIG throttle mix -100...100%
+SST		- steering speed turn 1...100%
+SSR		- steering speed return 1...100%
 
 
 
@@ -209,4 +231,5 @@ CHn		- switch channel "n" value from one end value to opposite end
 		  selected for this button, then centre 3-pos value will also
 		  be detected and set to servo (but this was not tested yet,
 		  I wouldn't do this modification to my radio).
+4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
 
