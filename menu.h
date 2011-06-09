@@ -82,6 +82,7 @@ extern u16 battery_low_raw;
 
 
 // internal functions, used in split menu files
+extern void menu_stop(void);
 extern void menu_calibrate(void);
 extern void menu_key_test(void);
 extern void menu_global_setup(void);
@@ -100,6 +101,9 @@ extern u8 menu_key_function_2state(u8 n);
 extern const u8 steps_map[];
 #define STEPS_MAP_SIZE  11
 extern const u16 et_buttons[][2];
+extern void menu_mix(void);
+extern void menu_key_mapping(void);
+extern void menu_key_mapping_prepare(void);
 
 
 #endif

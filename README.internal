@@ -77,6 +77,8 @@ menu.c,h	- MENU task, handling keys, menus, lcd
   menu_global.c	- global config menus are here
   menu_popup.c	- handling of trims/keys, showing value
   menu_service.c- calibrate and key-test menus
+  menu_key.c	- settings mapping of keys
+  menu_mix.c	- setting of mixes (4WS, DIG, ...)
 calc.c,h	- CALC task, calculate PPM values
 
 
