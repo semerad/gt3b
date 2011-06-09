@@ -137,6 +137,9 @@ static void show_model_number(u8 model) {
 void menu_stop(void) {
     static _Bool battery_low_on;
     stop();
+    // low_bat is disabled in calibrate, key-test and global menus,
+    //   check it by buzzer_running
+    if (menu_battery_low && !buzzer_running)  battery_low_on = 0;
     if (battery_low_on == menu_battery_low)  return;  // no change
 
     // battery low status changed
