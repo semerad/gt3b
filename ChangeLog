@@ -4,6 +4,7 @@
     added DIG mix
     added steering speed (Turn, Return)
     added inactivity alarm
+    added function C3R for keys to reset channel3 value to centre
     internal changes of trims momentary/opposite_reset
 
 *0.1.0 (2 Jun 2011)

@@ -399,6 +399,18 @@ static void kf_channel(s16 channel, u8 flags) {
     }
 }
 
+// reset channel value to 0
+static void kf_channel_reset(s16 channel, u8 flags) {
+    s8 *aval = &menu_channel3_8[channel - 3];
+
+    *aval = 0;
+    if (flags & FF_SHOW) {
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_7seg((u8)channel);
+	lcd_char_num3(*aval);
+    }
+}
+
 // change 4WS crab/no-crab
 static void kf_4ws(s16 unused, u8 flags) {
     if (flags & FF_SET) {
@@ -437,7 +449,8 @@ static const key_functions_s key_functions[] = {
 #endif
 #endif
 #endif
-    { 7, "4WS", KF_2STATE, kf_4ws, 0 },
+    { 8, "4WS", KF_2STATE, kf_4ws, 0 },
+    { 7, "C3R", KF_NONE, kf_channel_reset, 3 },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
