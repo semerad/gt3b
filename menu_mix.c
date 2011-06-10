@@ -61,9 +61,11 @@ static u8 mix_4WS(u8 val_id, u8 action) {
     else if (action == 2) {
 	// select next value
 	if (++id > 3)  id = 1;
+	if (!cm.channel_4WS)  id = 1;
     }
 
     // show value
+    lcd_7seg(4);
     switch (id) {
 	case 1:
 	    // channel number/OFF
@@ -115,9 +117,11 @@ static u8 mix_DIG(u8 val_id, u8 action) {
     else if (action == 2) {
 	// select next value
 	if (++id > 2)  id = 1;
+	if (!cm.channel_DIG)  id = 1;
     }
 
     // show value
+    lcd_7seg(L7_D);
     switch (id) {
 	case 1:
 	    // channel number/OFF
@@ -139,28 +143,26 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 
 
 
+
 typedef u8 (*mix_func_t)(u8 val_id, u8 action);
+static const mix_func_t menu_funcs[] = {
+    mix_4WS, mix_DIG
+};
+#define MAX_MENU_IDS  (sizeof(menu_funcs) / sizeof(void *))
+
+
 
 void menu_mix(void) {
     u8 id_val = 0;			// now in key_id
     u8 menu_id = 0;
-    static const u8 menu_ids[] = {
-	4, L7_D,
-    };
-    static const mix_func_t menu_funcs[] = {
-	mix_4WS, mix_DIG
-    };
     mix_func_t func = menu_funcs[0];
-    #define MAX_MENU_IDS  sizeof(menu_ids)
-
 
     lcd_set_blink(LMENU, LB_SPC);
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_LEFT, LS_OFF);
     lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_7seg(menu_ids[0]);
-    lcd_set_blink(L7SEG, LB_SPC);
     func(1, 0);		// show first setting for first menu id
+    lcd_set_blink(L7SEG, LB_SPC);
     lcd_update();
 
     while (1) {
@@ -186,7 +188,6 @@ void menu_mix(void) {
 		    if (++menu_id >= MAX_MENU_IDS)  menu_id = 0;
 		}
 		func = menu_funcs[menu_id];
-		lcd_7seg(menu_ids[menu_id]);
 		// remove possible showed symbols
 		lcd_segment(LS_SYM_PERCENT, LS_OFF);
 		lcd_segment(LS_SYM_VOLTS, LS_OFF);
