@@ -23,6 +23,12 @@
 #include "buzzer.h"
 #include "input.h"
 #include "menu.h"
+#include "config.h"
+
+
+
+static u16 inactivity;
+
 
 
 // initialize timer 2 used to count seconds
@@ -36,6 +42,8 @@ void timer_init(void) {
     TIM2_ARRH = hi8(TIMER_5MS - 1);	// count till 5ms time
     TIM2_ARRL = lo8(TIMER_5MS - 1);
     TIM2_CR1 = 0b00000101;	// URS-overflow, enable
+
+    inactivity = cg.inactivity_alarm * 60;
 }
 
 
@@ -63,6 +71,10 @@ static u16 menu_delay;		// timer for delay in MENU task
 		lcd_bck_on = 0;
 	    }
 	}
+
+	// inactivity timer
+	if (inactivity && !(--inactivity))
+	    buzzer_on(20, 255, BUZZER_MAX);	// expired, buzzer on
 
     }
 
@@ -121,5 +133,12 @@ void delay_menu_always(u8 len_s) {
     u16 to_time = time_sec + len_s;
     while (time_sec < to_time)
 	delay_menu((to_time - time_sec) * 200);
+}
+
+
+// inactivity timer reset
+void reset_inactivity_timer(void) {
+    if (!inactivity)  buzzer_off();	// stop beeping when applied previously
+    inactivity = cg.inactivity_alarm * 60;
 }
 

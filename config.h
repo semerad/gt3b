@@ -31,7 +31,7 @@
 // change MAGIC number when changing global config
 // also add code to setting default values
 // 28 bytes
-#define CONFIG_GLOBAL_MAGIC  0xfc03
+#define CONFIG_GLOBAL_MAGIC  0xfb04
 typedef struct {
     u8  steering_dead_zone;
     u8  throttle_dead_zone;
@@ -48,7 +48,7 @@ typedef struct {
     u16 battery_calib;		// raw ADC value for 10 Volts
     u8  battery_low;		// low battery threshold in .1 Volts
     u8  endpoint_max;
-    u16 inactivity_alarm;	// time (sec) of inactivity warning
+    u8  inactivity_alarm:4;	// time (min) of inactivity warning
     u8	key_beep:1;
 } config_global_s;
 

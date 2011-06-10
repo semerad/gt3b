@@ -176,6 +176,7 @@ Global setup menu:
 - selected menu items are indicated by following symbols:
     F		firmware version (this of course cannot be changed :-)
     L		backlight time			5s,10s...10m...MAX
+    A		inactivity alarm		OFF,1m...10m
     LOW POWER!	battery low voltage		7.5...10.5V
     E.POINT	maximum allowed endpoint value	100...150%
 		DANGER - values greater than 120% can damage

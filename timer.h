@@ -34,5 +34,9 @@ extern void delay_menu(u16 len_5ms);
 extern void delay_menu_always(u8 len_s);
 
 
+// inactivity timer
+extern void reset_inactivity_timer(void);
+
+
 #endif
 

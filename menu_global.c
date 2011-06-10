@@ -110,6 +110,25 @@ static void gs_backlight_time(u8 change) {
 }
 
 
+static void gs_inactivity_alarm(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change) {
+	cg.inactivity_alarm = (u8)menu_change_val(cg.inactivity_alarm, 0, 10,
+						  1, 1);
+	reset_inactivity_timer();
+    }
+    lcd_7seg(L7_A);
+    if (!cg.inactivity_alarm)  lcd_chars("OFF");
+    else {
+	bl_num2(cg.inactivity_alarm);
+	lcd_char(LCHR3, 'M');
+    }
+}
+
+
 static void gs_battery_low(u8 change) {
     u8 *addr = &cg.battery_low;
     if (change == 0xff) {
@@ -227,6 +246,7 @@ typedef void (*global_setup_t)(u8 change);
 static const global_setup_t gs_config[] = {
     gs_firmware,
     gs_backlight_time,
+    gs_inactivity_alarm,
     gs_battery_low,
     gs_endpoint_max,
     gs_steering_dead,

@@ -265,11 +265,11 @@ static void read_keys(void) {
     }
 
 
-    // if some of the keys changed, wakeup MENU task
+    // if some of the keys changed, wakeup MENU task and reset inactivity timer
     if (buttons_last != buttons || buttons_state_last != buttons_state) {
 	awake(MENU);
+	reset_inactivity_timer();
     }
-
 }
 
 
@@ -296,6 +296,7 @@ volatile u16 ADC_DB3R @0x53e6;
                       + adc_buffer[2][id] + adc_buffer[3][id];
 static void read_ADC(void) {
     u16 *buf = adc_buffer[adc_buffer_pos];
+    u8  dead;
 
     ADC_NEWVAL(0);
     ADC_NEWVAL(1);
@@ -332,9 +333,24 @@ static void read_ADC(void) {
 	    }
 	}
     }
-    // wakeup task when showing battery or at calibrate
+
+    // wakeup MENU task when showing battery or at calibrate
     if (menu_wants_adc)
 	awake(MENU);
+
+    // reset inactivity timer when some steering or throttle applied
+    dead = cg.steering_dead_zone;
+    if (dead < 20)  dead = 20;  // use some minimal dead zone for this check
+    if (adc_steering_last < (cg.calib_steering_mid - dead) ||
+        adc_steering_last > (cg.calib_steering_mid + dead))
+	    reset_inactivity_timer();
+    else {
+	dead = cg.throttle_dead_zone;
+	if (dead < 20)  dead = 20;  // use some minimal dead zone for this check
+	if (adc_throttle_last < (cg.calib_throttle_mid - dead) ||
+	    adc_throttle_last > (cg.calib_throttle_mid + dead))
+		reset_inactivity_timer();
+    }
 }
 
 

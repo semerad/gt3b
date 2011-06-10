@@ -3,6 +3,8 @@
     added 4WS mix
     added DIG mix
     added steering speed (Turn, Return)
+    added inactivity alarm
+    internal changes of trims momentary/opposite_reset
 
 *0.1.0 (2 Jun 2011)
 
