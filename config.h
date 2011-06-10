@@ -90,7 +90,7 @@ typedef struct {
 typedef struct {
     config_key_map_s	key_map[NUM_KEYS];  // will expand to following et_map
     config_et_map_s	et_map[NUM_TRIMS];
-    u16			momentary:11;	// bit for each button (and trims)
+    u16			momentary:11;	// bit for each button (for trims lower bit is opposite_reset)
     u16			et_off:5;	// bit for each trim (1 = off)
 } config_key_mapping_s;
 
