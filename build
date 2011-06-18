@@ -27,7 +27,7 @@ cp -p ChangeLog $R/ChangeLog.txt
 
 
 # firmwares for more max channels
-for N in 3 6; do
+for N in 3 8 6; do
     make clean
     make CHANNELS=$N
     cp -p gt3b.s19 $R/gt3b-ch$N-$V.s19
@@ -41,4 +41,9 @@ git ci -am "Release: version-$V"
 
 # tag this release
 git tag version-$V
+
+
+# push it to github
+git push origin master
+git push origin version-$V
 
