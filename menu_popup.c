@@ -154,6 +154,17 @@ u8 menu_et_function_long_special(u8 n) {
     return (u8)(et_functions[n].long_func ? 1 : 0);
 }
 
+static et_functions_s *menu_et_function_find_name(u8 *name) {
+    u8 i, *n;
+    for (i = 0; i < ET_FUNCTIONS_SIZE; i++) {
+	n = et_functions[i].name;
+	if (n[0] == name[0] && n[1] == name[1] && n[2] == name[2])
+	    return &et_functions[i];
+    }
+    return NULL;
+}
+
+
 
 
 const u8 steps_map[STEPS_MAP_SIZE] = {
@@ -166,6 +177,9 @@ const u8 steps_map[STEPS_MAP_SIZE] = {
 
 // temporary show popup value (trim, subtrim, dualrate, ...)
 // if another key pressed, return
+#define RVAL(x) \
+    if (etf->min >= 0)  x = *(u8 *)etf->aval; \
+    else		x = *(s8 *)etf->aval;
 #define AVAL(x)  *(s8 *)etf->aval = (s8)(x)
 static u8 menu_popup_et(u8 trim_id) {
     u16 delay_time;
@@ -205,8 +219,7 @@ static u8 menu_popup_et(u8 trim_id) {
     step = steps_map[etm->step];
 
     // read value
-    if (etf->min >= 0)  val = *(u8 *)etf->aval;	// *aval is unsigned
-    else                val = *(s8 *)etf->aval;	// *aval is signed
+    RVAL(val);
 
     // show MENU and CHANNEL
     lcd_menu(etf->menu);
@@ -377,8 +390,8 @@ typedef struct {
     u8 idx;		// will be showed sorted by this
     u8 *name;		// showed identification
     u8 flags;		// bits below
-    void (*func)(s16 param, u8 flags);	// function to process key, flags below
-    s16 param;		// param given to function
+    void (*func)(u8 *id, u8 *param, u8 flags);	// function to process key, flags below
+    void *param;	// param given to function
 } key_functions_s;
 // flags bits
 #define KF_NONE		0
@@ -393,45 +406,60 @@ typedef struct {
 
 
 
-// set channel value
-static void kf_channel(s16 channel, u8 flags) {
-    s8 *aval = &menu_channel3_8[channel - 3];
+// set channel value to one endpoint
+static void kf_set_switch(u8 *id, u8 *param, u8 flags) {
+    u8 *name = param ? param : id;
+    et_functions_s *etf = menu_et_function_find_name(name);
+    s16 val;
+
+    if (!etf)  return;
+    RVAL(val);
 
     if (flags & FF_SET) {
 	// set value based on state
 	if (flags & FF_ON)
-	    *aval = (s8)(flags & FF_REVERSE ? -100 : 100);
+	    val = (s8)(flags & FF_REVERSE ? etf->min : etf->max);
 	else
-	    *aval = (s8)(flags & FF_REVERSE ? 100 : -100);
+	    val = (s8)(flags & FF_REVERSE ? etf->max : etf->min);
 	// check CH3 midle position
-	if (flags & FF_MID)  *aval = 0;
+	if (flags & FF_MID)  val = etf->reset;
     }
     else {
 	// switch to opposite value
-	if (*aval > 0)  *aval = -100;
-	else		*aval = 100;
+	if (val > etf->reset)  val = etf->min;
+	else	    	       val = etf->max;
     }
+    AVAL(val);
+
     if (flags & FF_SHOW) {
-	lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	lcd_7seg((u8)channel);
-	lcd_char_num3(*aval);
+	if (!(etf->flags & EF_NOCHANNEL))
+	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_7seg(etf->channel);
+	lcd_char_num3(val);
     }
 }
 
-// reset channel value to 0
-static void kf_channel_reset(s16 channel, u8 flags) {
-    s8 *aval = &menu_channel3_8[channel - 3];
+// reset value to reset_value
+static void kf_reset(u8 *id, u8 *param, u8 flags) {
+    u8 *name = param ? param : id;
+    et_functions_s *etf = menu_et_function_find_name(name);
+    s16 val;
 
-    *aval = 0;
+    if (!etf)  return;
+    RVAL(val);
+    val = etf->reset;
+    AVAL(val);
+
     if (flags & FF_SHOW) {
-	lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	lcd_7seg((u8)channel);
-	lcd_char_num3(*aval);
+	if (!(etf->flags & EF_NOCHANNEL))
+	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_7seg(etf->channel);
+	lcd_char_num3(val);
     }
 }
 
 // change 4WS crab/no-crab
-static void kf_4ws(s16 unused, u8 flags) {
+static void kf_4ws(u8 *id, u8 *param, u8 flags) {
     if (flags & FF_SET) {
 	if (flags & FF_ON)
 	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 0 : 1);
@@ -451,24 +479,24 @@ static void kf_4ws(s16 unused, u8 flags) {
 
 // table of key functions
 static const key_functions_s key_functions[] = {
-    { 0, "OFF", KF_NONE, 0 },
-    { 1, "CH3", KF_2STATE, kf_channel, 3 },
-    { 7, "C3R", KF_NONE, kf_channel_reset, 3 },
+    { 0, "OFF", KF_NONE, NULL, NULL },
+    { 1, "CH3", KF_2STATE, kf_set_switch, NULL },
+    { 7, "C3R", KF_NONE, kf_reset, "CH3" },
 #if MAX_CHANNELS >= 4
-    { 2, "CH4", KF_2STATE, kf_channel, 4 },
-    { 8, "C4R", KF_NONE, kf_channel_reset, 4 },
+    { 2, "CH4", KF_2STATE, kf_set_switch, NULL },
+    { 8, "C4R", KF_NONE, kf_reset, "CH4" },
 #if MAX_CHANNELS >= 5
-    { 3, "CH5", KF_2STATE, kf_channel, 5 },
-    { 9, "C5R", KF_NONE, kf_channel_reset, 5 },
+    { 3, "CH5", KF_2STATE, kf_set_switch, NULL },
+    { 9, "C5R", KF_NONE, kf_reset, "CH5" },
 #if MAX_CHANNELS >= 6
-    { 4, "CH6", KF_2STATE, kf_channel, 6 },
-    { 10, "C6R", KF_NONE, kf_channel_reset, 6 },
+    { 4, "CH6", KF_2STATE, kf_set_switch, NULL },
+    { 10, "C6R", KF_NONE, kf_reset, "CH6" },
 #if MAX_CHANNELS >= 7
-    { 5, "CH7", KF_2STATE, kf_channel, 7 },
-    { 11, "C7R", KF_NONE, kf_channel_reset, 7 },
+    { 5, "CH7", KF_2STATE, kf_set_switch, NULL },
+    { 11, "C7R", KF_NONE, kf_reset, "CH7" },
 #if MAX_CHANNELS >= 8
-    { 6, "CH8", KF_2STATE, kf_channel, 8 },
-    { 12, "C8R", KF_NONE, kf_channel_reset, 8 },
+    { 6, "CH8", KF_2STATE, kf_set_switch, NULL },
+    { 12, "C8R", KF_NONE, kf_reset, "CH8" },
 #endif
 #endif
 #endif
@@ -524,7 +552,7 @@ static u8 menu_popup_key(u8 key_id) {
 	if (km->reverse)		flags |= FF_REVERSE;
 	if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768)
 					flags |= FF_MID;
-	kf->func(kf->param, flags);	// set value to state
+	kf->func(kf->name, kf->param, flags);	// set value to state
 	return 0;
     }
 
@@ -550,14 +578,14 @@ static u8 menu_popup_key(u8 key_id) {
 	if (km->function_long && btnl(btnx)) {
 	    // long key press
 	    key_beep();
-	    kfl->func(kfl->param, FF_SHOW);	// switch value
+	    kfl->func(kfl->name, kfl->param, FF_SHOW);	// switch value
 	    lcd_update();
 	    is_long = 1;
 	}
 	else if (km->function && btn(btnx)) {
 	    // short key press
 	    key_beep();
-	    kf->func(kf->param, FF_SHOW);	// switch value
+	    kf->func(kf->name, kf->param, FF_SHOW);	// switch value
 	    lcd_update();
 	}
 	else {
