@@ -44,6 +44,9 @@
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5
 
+// pause in 5ms when reset value is reached during trim popup
+#define RESET_VALUE_DELAY	(500 / 5)
+
 
 
 

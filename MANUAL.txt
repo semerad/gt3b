@@ -43,9 +43,11 @@ Buttons:
 	key press), values are saved to EEPROm automatically when it disappears
     > when autorepeat disabled on trims (default), reset trim to 0
 	by pressing both trim keys together for long
-	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2)
+	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2 trim)
     > while value is showed, it is possible to change it with rotate
         encoder also
+    > when value set to reset_value (usualy 0), longer beep sounds to
+	attention to it and short pause is intruduced to ignore keys
 
 
 Standard menu:

@@ -30,7 +30,7 @@ extern volatile u8  time_5ms;
 
 
 // delay in task MENU - will be interrupted by buttons/ADC
-extern void delay_menu(u16 len_5ms);
+extern u16 delay_menu(u16 len_5ms);
 extern void delay_menu_always(u8 len_s);
 
 

@@ -168,7 +168,7 @@ const u8 steps_map[STEPS_MAP_SIZE] = {
 // if another key pressed, return
 #define AVAL(x)  *(s8 *)etf->aval = (s8)(x)
 static u8 menu_popup_et(u8 trim_id) {
-    u16 to_time;
+    u16 delay_time;
     s16 val;
     u8  step;
     u16 buttons_state_last;
@@ -222,6 +222,8 @@ static u8 menu_popup_et(u8 trim_id) {
     lcd_7seg(etf->channel);
 
     while (1) {
+	u8  val_set_to_reset = 0;
+
 	// check value left/right
 	if (btnl_all(btn_lr)) {
 	    key_beep();
@@ -269,6 +271,7 @@ static u8 menu_popup_et(u8 trim_id) {
 			    if ((ck.momentary & opposite_reset) &&
 				val < etf->reset)  val = etf->reset;
 			}
+			if (val == etf->reset)  val_set_to_reset = 1;
 		    }
 		}
 		AVAL(val);
@@ -277,11 +280,19 @@ static u8 menu_popup_et(u8 trim_id) {
 	    else btnr_nolong(btn_lr);  // keep long-presses for testing-both
 	}
 	else if (btn(BTN_ROT_ALL)) {
+	    s16 val2 = val;
 	    val = menu_change_val(val, etf->min, etf->max, etf->rot_fast_step,
 	                          0);
+	    // if encoder skipped reset value, set it to reset value
+	    if (val2 < etf->reset && val > etf->reset ||
+	        val2 > etf->reset && val < etf->reset)  val = etf->reset;
+	    if (val == etf->reset)  val_set_to_reset = 1;
 	    AVAL(val);
 	}
 	btnr(BTN_ROT_ALL);
+
+	// longer beep at value reset value
+	if (val_set_to_reset)  buzzer_on(3, 0, 1);
 
 	// if another button was pressed, leave this screen
 	if (buttons)  break;
@@ -292,11 +303,21 @@ static u8 menu_popup_et(u8 trim_id) {
 	else			lcd_char_num3(val);
 	lcd_update();
 
+	// if reset value was reached, ignore rotate/btn_lr for some time
+	delay_time = POPUP_DELAY * 200;
+	if (val_set_to_reset) {
+	    u8 delay = RESET_VALUE_DELAY;
+	    while (delay && !(buttons & ~(btn_lr | BTN_ROT_ALL)) &&
+		   ((buttons_state & ~btn_lr) == buttons_state_last))
+		delay = (u8)delay_menu(delay);
+	    btnr(BTN_ROT_ALL | btn_lr);
+	    delay_time -= RESET_VALUE_DELAY;
+	}
+
 	// sleep 5s, and if no button was changed during, end this screen
-	to_time = time_sec + POPUP_DELAY;
-	while (time_sec < to_time && !buttons &&
+	while (delay_time && !buttons &&
 	       ((buttons_state & ~btn_lr) == buttons_state_last))
-	    delay_menu((to_time - time_sec) * 200);
+	    delay_time = delay_menu(delay_time);
 
 	if (!buttons)  break;  // timeouted without button press
     }
@@ -477,7 +498,7 @@ u8 menu_key_function_2state(u8 n) {
 // change val, temporary show new value (not always)
 // end when another key pressed
 static u8 menu_popup_key(u8 key_id) {
-    u16 to_time;
+    u16 delay_time;
     u16 buttons_state_last;
     u16 btnx;
     config_key_map_s *km = &ck.key_map[key_id];
@@ -549,10 +570,10 @@ static u8 menu_popup_key(u8 key_id) {
 	if ((buttons_state & ~btnx) != buttons_state_last)  break;
 
 	// sleep 5s, and if no button was changed during, end this screen
-	to_time = time_sec + POPUP_DELAY;
-	while (time_sec < to_time && !buttons &&
+	delay_time = POPUP_DELAY * 200;
+	while (delay_time && !buttons &&
 	       ((buttons_state & ~btnx) == buttons_state_last))
-	    delay_menu((to_time - time_sec) * 200);
+	    delay_time = delay_menu(delay_time);
 
 	if (!buttons)  break;  // timeouted without button press
 	if (is_long) {

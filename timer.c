@@ -123,16 +123,20 @@ static u16 menu_delay;		// timer for delay in MENU task
 
 
 // delay in task MENU - will be interrupted by buttons/ADC
-void delay_menu(u16 len_5ms) {
+u16 delay_menu(u16 len_5ms) {
+    u16 rest;
+
     menu_delay = len_5ms;
     stop();
+    rest = menu_delay;
     menu_delay = 0;	// MENU task can be awaked from input also, so set no delay for sure
+    return rest;
 }
 
 void delay_menu_always(u8 len_s) {
-    u16 to_time = time_sec + len_s;
-    while (time_sec < to_time)
-	delay_menu((to_time - time_sec) * 200);
+    u16 delay_time = len_s * 200;
+    while (delay_time)
+	delay_time = delay_menu(delay_time);
 }
 
 
