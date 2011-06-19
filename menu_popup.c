@@ -385,9 +385,9 @@ typedef struct {
 #define KF_2STATE	0b00000001
 // func flags bits
 #define FF_SET		0b00000001
-#define FF_STATE	0b00000010
+#define FF_ON		0b00000010
 #define FF_REVERSE	0b00000100
-#define FF_CH3		0b00001000
+#define FF_MID		0b00001000
 #define FF_SHOW		0b10000000
 
 
@@ -399,13 +399,12 @@ static void kf_channel(s16 channel, u8 flags) {
 
     if (flags & FF_SET) {
 	// set value based on state
-	if (flags & FF_STATE)
+	if (flags & FF_ON)
 	    *aval = (s8)(flags & FF_REVERSE ? -100 : 100);
 	else
 	    *aval = (s8)(flags & FF_REVERSE ? 100 : -100);
 	// check CH3 midle position
-	if ((flags & FF_CH3) && adc_ch3_last > 256 && adc_ch3_last < 768)
-	    *aval = 0;
+	if (flags & FF_MID)  *aval = 0;
     }
     else {
 	// switch to opposite value
@@ -434,7 +433,7 @@ static void kf_channel_reset(s16 channel, u8 flags) {
 // change 4WS crab/no-crab
 static void kf_4ws(s16 unused, u8 flags) {
     if (flags & FF_SET) {
-	if (flags & FF_STATE)
+	if (flags & FF_ON)
 	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 0 : 1);
 	else
 	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 1 : 0);
@@ -521,9 +520,10 @@ static u8 menu_popup_key(u8 key_id) {
     // check momentary setting
     if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
 	flags = FF_SET;
-	if (btns(btnx))			flags |= FF_STATE;
+	if (btns(btnx))			flags |= FF_ON;
 	if (km->reverse)		flags |= FF_REVERSE;
-	if (key_id == 0)		flags |= FF_CH3;
+	if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768)
+					flags |= FF_MID;
 	kf->func(kf->param, flags);	// set value to state
 	return 0;
     }
