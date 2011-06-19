@@ -85,7 +85,7 @@ void apply_model_config(void) {
 
     // set autorepeat
     for (i = 0; i < 4; i++) {
-	if (ck.et_off & (1 << i))  continue;  // trim is off, skip
+	if (!ck.et_map[i].is_trim)  continue;  // trim is off, skip
 	if (ck.et_map[i].buttons == ETB_AUTORPT)
 	    autorepeat |= (u8)((u8)et_buttons[i][0] | (u8)et_buttons[i][1]);
     }

@@ -68,11 +68,17 @@ extern config_global_s config_global;
 
 // model config
 
-typedef struct {
+typedef struct {	// unused parts are to match with config_key_map_s
     u8 function:7;
-    u8 reverse:1;
+    u8 is_trim:1;
     u8 step:5;
+    u8 unused1:1;
+    u8 reverse:1;
+    u8 opposite_reset:1;
     u8 buttons:3;
+    u8 unused2:4;
+    u8 is_trim2:1;
+    u8 unused3;
 } config_et_map_s;
 #define ETB_LONG_OFF	0
 #define ETB_AUTORPT	1
@@ -82,8 +88,12 @@ typedef struct {
 #define ETB_SPECIAL	5
 
 typedef struct {
-    u8 function:4;
-    u8 function_long:4;
+    u8 function:6;
+    u8 momentary:1;
+    u8 is_trim:1;
+    u8 function_long:6;
+    u8 reverse:1;
+    u8 unused:1;
 } config_key_map_s;
 
 #define NUM_TRIMS  4
@@ -91,14 +101,12 @@ typedef struct {
 typedef struct {
     config_key_map_s	key_map[NUM_KEYS];  // will expand to following et_map
     config_et_map_s	et_map[NUM_TRIMS];
-    u16			momentary:11;	// bit for each button (for trims lower bit is opposite_reset)
-    u16			et_off:5;	// bit for each trim (1 = off)
 } config_key_mapping_s;
 
 // change MAGIC number when changing model config
 // also add code to setting default values
 // 13 + 13 + channels * 3 bytes
-#define CONFIG_MODEL_MAGIC  (0xfd20 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xfc20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel

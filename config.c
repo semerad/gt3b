@@ -71,21 +71,17 @@ u8 config_global_set_default(void) {
 static const config_key_mapping_s default_key_mapping = {
     // keys: function, function_long
     {
-	{ 1, 0 },		// CH3 to channel 3
-	{ 0, 0 },
-	{ 0, 0 }
+	{ 1, 0, 0, 0, 0, 0 },		// CH3 to channel 3
+	{ 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0 }
     },
     // trims: function, reverse, step, buttons
     {
-	{ 1, 0, 0, 0 },		// trim1 to steering trim
-	{ 2, 0, 0, 0 },		// trim2 to throttle trim
-	{ 1, 0, 0, 0 },		// trim3 to steering trim
-	{ 3, 0, 0, 1 }		// trim4(DR) to steering dualrate, autorepeat
+	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim1 to steer trim
+	{ 2, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim2 to throt trim
+	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim3 to steer trim
+	{ 3, 1, 0, 0, 0, 0, ETB_AUTORPT, 0, 1, 0 }	// trim4(DR) to steer dualrate, autorepeat
     },
-    // momentary
-    0,
-    // et_off
-    0
 };
 
 // set default name to given pointer

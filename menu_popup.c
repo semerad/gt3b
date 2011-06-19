@@ -177,7 +177,6 @@ static u8 menu_popup_et(u8 trim_id) {
     u16 btn_lr = btn_l | btn_r;
     config_et_map_s *etm = &ck.et_map[trim_id];
     et_functions_s *etf = &et_functions[etm->function];
-    u16 opposite_reset = 1 << (u8)(trim_id * 2 + NUM_KEYS);
 
     // if keys are momentary, show nothing, but set value
     if (etm->buttons == ETB_MOMENTARY) {
@@ -262,13 +261,13 @@ static u8 menu_popup_et(u8 trim_id) {
 			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
 			    val -= step;
 			    if (val < etf->min)  val = etf->min;
-			    if ((ck.momentary & opposite_reset) &&
+			    if (etm->opposite_reset &&
 				val > etf->reset)  val = etf->reset;
 			}
 			else {
 			    val += step;
 			    if (val > etf->max)  val = etf->max;
-			    if ((ck.momentary & opposite_reset) &&
+			    if (etm->opposite_reset &&
 				val < etf->reset)  val = etf->reset;
 			}
 			if (val == etf->reset)  val_set_to_reset = 1;
@@ -292,7 +291,7 @@ static u8 menu_popup_et(u8 trim_id) {
 	btnr(BTN_ROT_ALL);
 
 	// longer beep at value reset value
-	if (val_set_to_reset)  buzzer_on(3, 0, 1);
+	if (val_set_to_reset)  buzzer_on(20, 0, 1);
 
 	// if another button was pressed, leave this screen
 	if (buttons)  break;
@@ -343,7 +342,7 @@ u8 menu_electronic_trims(void) {
 
     // for each trim, call function
     for (i = 0; i < ET_BUTTONS_SIZE; i++) {
-	if (ck.et_off & (u8)(1 << i))  continue;  // trim is off
+	if (!ck.et_map[i].is_trim)  continue;  // trim is off
 	if (menu_popup_et(i))  return 1;
     }
 
@@ -455,23 +454,28 @@ static void kf_4ws(s16 unused, u8 flags) {
 static const key_functions_s key_functions[] = {
     { 0, "OFF", KF_NONE, 0 },
     { 1, "CH3", KF_2STATE, kf_channel, 3 },
+    { 7, "C3R", KF_NONE, kf_channel_reset, 3 },
 #if MAX_CHANNELS >= 4
     { 2, "CH4", KF_2STATE, kf_channel, 4 },
+    { 8, "C4R", KF_NONE, kf_channel_reset, 4 },
 #if MAX_CHANNELS >= 5
     { 3, "CH5", KF_2STATE, kf_channel, 5 },
+    { 9, "C5R", KF_NONE, kf_channel_reset, 5 },
 #if MAX_CHANNELS >= 6
     { 4, "CH6", KF_2STATE, kf_channel, 6 },
+    { 10, "C6R", KF_NONE, kf_channel_reset, 6 },
 #if MAX_CHANNELS >= 7
     { 5, "CH7", KF_2STATE, kf_channel, 7 },
+    { 11, "C7R", KF_NONE, kf_channel_reset, 7 },
 #if MAX_CHANNELS >= 8
     { 6, "CH8", KF_2STATE, kf_channel, 8 },
+    { 12, "C8R", KF_NONE, kf_channel_reset, 8 },
 #endif
 #endif
 #endif
 #endif
 #endif
-    { 8, "4WS", KF_2STATE, kf_4ws, 0 },
-    { 7, "C3R", KF_NONE, kf_channel_reset, 3 },
+    { 13, "4WS", KF_2STATE, kf_4ws, 0 },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
@@ -504,7 +508,6 @@ static u8 menu_popup_key(u8 key_id) {
     config_key_map_s *km = &ck.key_map[key_id];
     key_functions_s *kf;
     key_functions_s *kfl;
-    u16 key_bit;
     u8 flags;
     u8 is_long = 0;
 
@@ -512,15 +515,14 @@ static u8 menu_popup_key(u8 key_id) {
     if (!km->function && !km->function_long)  return 0;
 
     // prepare more variables
-    key_bit = 1 << key_id;
     kf = &key_functions[km->function];
     btnx = key_buttons[key_id];
 
     // check momentary setting
-    if (km->function && (kf->flags & KF_2STATE) && (ck.momentary & key_bit)) {
+    if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
 	flags = FF_SET;
 	if (btns(btnx))			flags |= FF_STATE;
-	if (km->function_long)		flags |= FF_REVERSE;
+	if (km->reverse)		flags |= FF_REVERSE;
 	if (key_id == 0)		flags |= FF_CH3;
 	kf->func(kf->param, flags);	// set value to state
 	return 0;
@@ -603,7 +605,7 @@ u8 menu_buttons(void) {
 
     // for each key, call function
     for (i = 0; i < KEY_BUTTONS_SIZE; i++) {
-	if (i >= NUM_KEYS && !(ck.et_off & (u8)(1 << ((i - NUM_KEYS) >> 1))))
+	if (i >= NUM_KEYS && ck.key_map[i].is_trim)
 	    continue;	// trim is enabled for this key
 	if (menu_popup_key(i))  return 1;
     }
