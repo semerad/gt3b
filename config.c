@@ -50,7 +50,7 @@ u8 config_global_set_default(void) {
     cg.battery_calib	= 672;
     cg.battery_low	= 92;		// 9.2 V
     cg.endpoint_max	= 120;
-    cg.long_press_delay	= (1000 / 5);	// 1sec
+    cg.long_press_delay	= 1000 / 5;	// 1sec
     cg.inactivity_alarm	= 0;
     cg.key_beep		= 1;
 
