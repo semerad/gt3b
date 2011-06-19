@@ -188,6 +188,7 @@ Global setup menu:
     1		dead zone for steering		0...50
     2		dead zone for throttle		0...50
     b		key beep			OFF/ON
+    d		long press key delay		100...1000ms
     r + ALL	global reset - change to YES to set global configuration
 			       and all models to default values
     r + MOD	all models reset - change to YES to set all models

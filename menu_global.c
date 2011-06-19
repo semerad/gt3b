@@ -177,6 +177,18 @@ static void gs_key_beep(u8 change) {
 }
 
 
+static void gs_long_press_delay(u8 change) {
+    u8 *addr = &cg.long_press_delay;
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  *addr = (u8)menu_change_val(*addr, 20, 200, 5, 0);
+    lcd_7seg(L7_D);
+    lcd_char_num3(*addr * 5);
+}
+
+
 static void gs_steering_dead(u8 change) {
     u8 *addr = &cg.steering_dead_zone;
     if (change == 0xff) {
@@ -252,6 +264,7 @@ static const global_setup_t gs_config[] = {
     gs_steering_dead,
     gs_throttle_dead,
     gs_key_beep,
+    gs_long_press_delay,
     gs_reset_all,
     gs_reset_model_all,
 };

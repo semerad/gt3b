@@ -1,22 +1,24 @@
 
-add multi-position
-    select channel
-    for each positions set from range -100%..100%
-    ? max number of positions
-    settable to keys and trims
-
-2-state keys
-    add possibility of set value/return to previous value
-
 trims
     longer beep at centre
     short pause at centre, ignore the same key for some time
+
+2-state keys
+    add possibility of set value/return to previous value
+    add DIG as key function, also for SWItch allow set reverse
+
+trims
     when momentary, add possibility return to previous value
 
 MOMentary trims/keys
     change value only when state of button change
 
-globally settable long-press time for all keys
+add multi-position
+    select channel
+    for each positions set from range -100%..100%
+    max number of positions -> 8
+    settable to keys and trims
+
 
 ? not so smooth servo travel
 

@@ -30,7 +30,6 @@
 // autorepeat/long press times in 5ms steps
 #define BTN_AUTOREPEAT_DELAY	(500 / 5)
 #define BTN_AUTOREPEAT_RATE	(70 / 5)
-#define BTN_LONG_PRESS_DELAY	(1000 / 5)
 #define ENCODER_FAST_THRESHOLD  10
 
 
@@ -218,7 +217,7 @@ static void read_keys(void) {
 		// last not pressed
 		if (bs) {
 		    // now pressed, set long press delay
-		    buttons_timer[i] = BTN_LONG_PRESS_DELAY;
+		    buttons_timer[i] = cg.long_press_delay;
 		}
 		// do nothing for now not pressed
 	    }
