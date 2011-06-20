@@ -235,6 +235,6 @@ CHn		- switch channel "n" value from one end value to opposite end
 		  selected for this button, then centre 3-pos value will also
 		  be detected and set to servo (but this was not tested yet,
 		  I wouldn't do this modification to my radio).
-C3R		- channel3 reset value to centre
+CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
 
