@@ -549,7 +549,8 @@ static const key_functions_s key_functions[] = {
 #endif
 #endif
 #endif
-    { 13, "4WS", KF_2STATE, kf_4ws, 0 },
+    { 13, "4WS", KF_2STATE, kf_4ws, NULL },
+    { 14, "DIG", KF_2STATE, kf_set_switch, NULL },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
