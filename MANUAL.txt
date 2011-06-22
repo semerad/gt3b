@@ -103,43 +103,51 @@ Standard menu:
     > ....
     -----
     steps of settings of trims (1 2 3 and D/R):
-	- sequence: function -> buttons -> step -> reverse -> opposite_reset -> previous_val
-	        id:              %         % V      V          V blinking        % blinking
+	- sequence:
+	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val
+	  id:          %          % V     V          V blinking        % blinking
 	- function: selected function listed at the end of manual
-	- buttons: MOM - momentary, hold left/right trim key to get end values,
-			 when nothing pressed, servo is at centre
-		   NOL - no long keys, long press is the same as short press
-		   RPT - autorepeat is on
-		   RES - long press of one of trim keys will reset to
-			 centre/reset value
-		   END - long press of trim key will set to coresponding end
-			 value
+	- buttons:
+	    MOM - momentary, hold left/right trim key to get end values,
+		  when nothing pressed, servo is at centre
+	    NOL - no long keys, long press is the same as short press
+	    RPT - autorepeat is on
+	    RES - long press of one of trim keys will reset to
+		  centre/reset value
+	    END - long press of trim key will set to coresponding end value
 	- step: select trim step for one trim key press (1, 2, ... 100, 200),
 		not available when buttons MOM
-	- reverse: NOR - no change
-		   REV - swap left/right trim keys - NOR/REV
+	- reverse:
+	    NOR - no change
+	    REV - swap left/right trim keys
 	- opposite_reset: not available when buttons MOM
-		   NOO - no change
-		   RES - when trim key is pressed and value is at opposite
-			  side of centre/reset, set value to centre/reset,
+	    NOO - no change
+	    RES - when trim key is pressed and value is at opposite
+		  side of centre/reset, set value to centre/reset,
 	- previous_val: available only when buttons MOM
-		   NPV - no change
-		   PRV - instead of setting value to centre/reset when key is
-			 released, it is set to previous value, which was
-			 active before key press
+	    NPV - no change
+	    PRV - instead of setting value to centre/reset when key is released,
+		  it is set to previous value, which was active before key press
     -----
     steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
-	- sequence: function -> momentary -> reverse -> function_long
-	        id:              %            V          % V
+	- sequence:
+	  function -> momentary -> reverse -> prev_val -> function_long -> reverse_long -> prev_val_long
+	  id:          %            V          % blink     % V              V               % blink
 	- function: selected function listed at the end of manual
 	- momentary: only available for 2-state functions (channel, ...)
-		     SWI - press will switch something (channel value, ...)
-		     MOM - value change will be active only while pressed
-	- reverse: only available when momentary MOM
-		   NOR - no change
-		   REV - swap press/no-press behaviour
+	    SWI - key press will switch something (channel value, ...)
+	    MOM - value change will be active only while key is pressed
+	- reverse: only available for 2-state functions
+	    NOR - no-press or default value is left endpoint
+	    REV - no-press or default value is right endpoint
+	- prev_val: only available for 2-state functions
+	    NPV - key release or OFF state sets value to left endpoint (noREV)
+	    PRV - key release or OFF state sets value to value active before
+		  key press or ON state
 	- function_long: function applied when long press of key happens,
 	                 choose from the same list as function
+	- reverse_long: same as "reverse"
+	- prev_val_long: same as "prev_val"
 		   
 
 

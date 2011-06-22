@@ -171,12 +171,20 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 @near static u8 key_functions[KEY_FUNCTIONS_SIZE];
 @near static u8 key_functions_max;
 // 7seg:  C b E 1l 1r 2l 2r 3l 3r dl dr
-// chars: function
-//          OFF    -> function_long (% V)
-//          2STATE -> momentary (%)
-//                      SWI -> function_long (% V)
-//                      MOM -> reverse(NOR/REV) (V)
-//          other  -> function_long (% V)
+// chars:
+// function
+//   OFF    -> function_long
+//   2STATE -> momentary (%)
+//               SWI -> reverse (V) -> prev_val (% blink) -> function_long
+//               MOM -> reverse (V) -> prev_val (% blink)
+//                      (NOR/REV)      (NPV/PRV)
+//   other  -> function_long
+//
+// function_long (% V)
+//   OFF
+//   2STATE -> reverse (V) -> prev_val (% blink)
+//             (NOR/REV)      (NPV/PRV)
+//   other
 static u8 km_key(u8 key_id, u8 val_id, u8 action) {
     config_key_map_s *km = &ck.key_map[key_id];
     u8 id = val_id;
@@ -199,14 +207,32 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		    }
 		    if (key_functions[idx])  break;  // we have it
 		}
-		*(u16 *)km = 0;  // set values to defaults
+		// set values to defaults
+		if (km->momentary)  *(u16 *)km = 0;  // was momentary, zero all
+		else {
+		    // zero only no-long function parameters
+		    km->reverse = 0;
+		    km->previous_val = 0;
+		}
 		km->function = (u8)(key_functions[idx] - 1);
 		break;
 	    case 2:
 		// momentary setting
 		km->momentary ^= 1;
+		// after change momentary, reset long setting
+		km->function_long = 0;
+		km->reverse_long = 0;
+		km->previous_val_long = 0;
 		break;
 	    case 3:
+		// reverse
+		km->reverse ^= 1;
+		break;
+	    case 4:
+		// previous_val
+		km->previous_val ^= 1;
+		break;
+	    case 5:
 		// function long
 		// select new function, map through key_functions
 		idx = menu_key_function_idx(km->function_long);
@@ -220,11 +246,18 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		    }
 		    if (key_functions[idx])  break;  // we have it
 		}
+		// set values to defaults
+		km->reverse_long = 0;
+		km->previous_val_long = 0;
 		km->function_long = (u8)(key_functions[idx] - 1);
 		break;
-	    case 4:
-		// reverse
-		km->reverse ^= 1;
+	    case 6:
+		// reverse_long
+		km->reverse_long ^= 1;
+		break;
+	    case 7:
+		// previous_val_long
+		km->previous_val_long ^= 1;
 		break;
 	}
     }
@@ -234,16 +267,26 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	switch (id) {
 	    case 1:
 		if (menu_key_function_2state(km->function))  id = 2;
-		else  id = 3;
+		else  id = 5;
 		break;
 	    case 2:
-		if (km->momentary)  id = 4;
-		else  id = 3;
+		id = 3;
 		break;
 	    case 3:
-		id = 1;
+		id = 4;
 		break;
 	    case 4:
+		if (km->momentary)  id = 1;
+		else  id = 5;
+		break;
+	    case 5:
+		if (menu_key_function_2state(km->function_long))  id = 6;
+		else  id = 1;
+		break;
+	    case 6:
+		id = 7;
+		break;
+	    case 7:
 		id = 1;
 		break;
 	}
@@ -264,16 +307,36 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
 	case 3:
+	    // reverse
+	    lcd_chars(km->reverse ? "REV" : "NOR");
+	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    break;
+	case 4:
+	    // previous_val
+	    lcd_chars(km->previous_val ? "NPV" : "PRV");
+	    lcd_segment(LS_SYM_PERCENT, LS_ON);
+	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    break;
+	case 5:
 	    // function long
 	    lcd_chars(menu_key_function_name(km->function_long));
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 4:
-	    // reverse
-	    lcd_chars(km->reverse ? "REV" : "NOR");
+	case 6:
+	    // reverse_long
+	    lcd_chars(km->reverse_long ? "REV" : "NOR");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    break;
+	case 7:
+	    // previous_val_long
+	    lcd_chars(km->previous_val_long ? "NPV" : "PRV");
+	    lcd_segment(LS_SYM_PERCENT, LS_ON);
+	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 	    break;
     }
     return id;
