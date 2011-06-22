@@ -103,8 +103,8 @@ Standard menu:
     > ....
     -----
     steps of settings of trims (1 2 3 and D/R):
-	- sequence: function -> buttons -> step -> reverse -> opposite_reset
-	        id:              %         % V      V          V blinking
+	- sequence: function -> buttons -> step -> reverse -> opposite_reset -> previous_val
+	        id:              %         % V      V          V blinking        % blinking
 	- function: selected function listed at the end of manual
 	- buttons: MOM - momentary, hold left/right trim key to get end values,
 			 when nothing pressed, servo is at centre
@@ -118,9 +118,15 @@ Standard menu:
 		not available when buttons MOM
 	- reverse: NOR - no change
 		   REV - swap left/right trim keys - NOR/REV
-	- opposite_reset: when trim key is pressed and value is at opposite
+	- opposite_reset: not available when buttons MOM
+		   NOO - no change
+		   RES - when trim key is pressed and value is at opposite
 			  side of centre/reset, set value to centre/reset,
-			  not available when buttons MOM
+	- previous_val: available only when buttons MOM
+		   NPV - no change
+		   PRV - instead of setting value to centre/reset when key is
+			 released, it is set to previous value, which was
+			 active before key press
     -----
     steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
 	- sequence: function -> momentary -> reverse -> function_long

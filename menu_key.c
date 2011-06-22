@@ -46,12 +46,13 @@ static const u8 *trim_buttons[] = {
 };
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))
 // 7seg:  1 2 3 d
-// chars: function
-//          OFF					  (NOR/REV)  (NOO/RES)
-//          other -> buttons
-//                     MOM	       -> 	  reverse
-// 		       NOL/RPT/RES/END -> step -> reverse -> opp_reset
-// id:                 %                  % V     V          V blink
+// chars:
+// function
+//   OFF			        (NOR/REV)  (NOO/RES)    (NPV/PRV)
+//   other -> buttons
+//              MOM	     -> 	reverse              -> prev_val
+//           NOL/RPT/RES/END -> step -> reverse -> opp_reset
+// id:        %                  % V     V          V blink      % blink
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 id = val_id;
@@ -104,6 +105,9 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		// opposite reset
 		etm->opposite_reset ^= 1;
 		break;
+	    case 6:
+		// return to previous value
+		etm->previous_val ^= 1;
 	}
     }
 
@@ -111,8 +115,9 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	// switch to next setting
 	if (id != 1 || etm->is_trim) {
 	    if (etm->buttons == ETB_MOMENTARY) {
-		if (++id > 4)  id = 1;
-		if (id == 3)   id = 4;  // skip "step" for momentary
+		if (++id > 6)       id = 1;
+		else if (id == 3)   id = 4;  // skip "step" for momentary
+		else if (id == 5)   id = 6;  // skip "opposite_reset"
 	    }
 	    else {
 		if (++id > 5)  id = 1;
@@ -148,6 +153,12 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
+	    break;
+	case 6:
+	    lcd_chars(etm->previous_val ? "NPV" : "PRV");
+	    lcd_segment(LS_SYM_PERCENT, LS_ON);
+	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 	    break;
     }
     return id;
