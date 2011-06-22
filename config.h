@@ -72,7 +72,7 @@ typedef struct {	// unused parts are to match with config_key_map_s
     u8 function:7;
     u8 is_trim:1;
     u8 step:5;
-    u8 unused1:1;
+    u8 previous_val:1;
     u8 reverse:1;
     u8 opposite_reset:1;
     u8 buttons:3;
@@ -88,10 +88,12 @@ typedef struct {	// unused parts are to match with config_key_map_s
 #define ETB_SPECIAL	5
 
 typedef struct {
-    u8 function:6;
+    u8 function:5;
+    u8 previous_val:1;
     u8 reverse:1;
     u8 is_trim:1;
-    u8 function_long:6;
+    u8 function_long:5;
+    u8 previous_val_long:1;
     u8 reverse_long:1;
     u8 momentary:1;
 } config_key_map_s;
