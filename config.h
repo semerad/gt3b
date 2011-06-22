@@ -89,11 +89,11 @@ typedef struct {	// unused parts are to match with config_key_map_s
 
 typedef struct {
     u8 function:6;
-    u8 momentary:1;
+    u8 reverse:1;
     u8 is_trim:1;
     u8 function_long:6;
-    u8 reverse:1;
-    u8 unused:1;
+    u8 reverse_long:1;
+    u8 momentary:1;
 } config_key_map_s;
 
 #define NUM_TRIMS  4

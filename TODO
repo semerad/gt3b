@@ -1,13 +1,9 @@
 
 2-state keys
     add possibility of set value/return to previous value
-    add DIG as key function, also for SWItch allow set reverse
+    for SWItch allow set reverse
 
-trims
-    when momentary, add possibility return to previous value
-
-MOMentary trims/keys
-    change value only when state of button change
+add DIG as key function
 
 add multi-position
     select channel
@@ -24,7 +20,6 @@ Some suggestions taken from manuals of other radios:
 
 timer - up/down/lap/lap navigate - buttons LAP START, LAP RESET
 ---
-? multi-speed transmission - ability to set exact positions
 ? CH3-8 position settable from menu
 programmable mixes
 throttle speed 1-3 SPEED 1-100%, trigger points 1-100

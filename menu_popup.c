@@ -32,6 +32,16 @@
 
 
 
+// last state of buttons
+@near u8 menu_buttons_state[NUM_KEYS + 2 * NUM_TRIMS];
+
+// set state of buttons to do initialize
+void menu_buttons_initialize(void) {
+    memset(menu_buttons_state, MBS_INITIALIZE, NUM_KEYS + 2 * NUM_TRIMS);
+}
+
+
+
 
 // ********************* TRIMS ****************************
 
@@ -194,16 +204,23 @@ static u8 menu_popup_et(u8 trim_id) {
 
     // if keys are momentary, show nothing, but set value
     if (etm->buttons == ETB_MOMENTARY) {
+	u8 *mbs = &menu_buttons_state[NUM_KEYS + 2 * trim_id];
 	if (btns(btn_l)) {
 	    // left
+	    if (*mbs == MBS_LEFT)  return 0;	// already was left
+	    *mbs = MBS_LEFT;
 	    AVAL(etm->reverse ? etf->max : etf->min);
 	}
 	else if (btns(btn_r)) {
 	    // right
+	    if (*mbs == MBS_RIGHT)  return 0;	// already was right
+	    *mbs = MBS_RIGHT;
 	    AVAL(etm->reverse ? etf->min : etf->max);
 	}
 	else {
 	    // center
+	    if (*mbs == MBS_RELEASED)  return 0;  // already was center
+	    *mbs = MBS_RELEASED;
 	    AVAL(etf->reset);
 	}
 	return 0;
@@ -397,10 +414,11 @@ typedef struct {
 #define KF_NONE		0
 #define KF_2STATE	0b00000001
 // func flags bits
-#define FF_SET		0b00000001
-#define FF_ON		0b00000010
-#define FF_REVERSE	0b00000100
-#define FF_MID		0b00001000
+#define FF_NONE		0
+#define FF_ON		0b00000001
+#define FF_REVERSE	0b00000010
+#define FF_MID		0b00000100
+#define FF_HAS_MID	0b00001000
 #define FF_SHOW		0b10000000
 
 
@@ -415,20 +433,12 @@ static void kf_set_switch(u8 *id, u8 *param, u8 flags) {
     if (!etf)  return;
     RVAL(val);
 
-    if (flags & FF_SET) {
-	// set value based on state
-	if (flags & FF_ON)
-	    val = (s8)(flags & FF_REVERSE ? etf->min : etf->max);
-	else
-	    val = (s8)(flags & FF_REVERSE ? etf->max : etf->min);
-	// check CH3 midle position
-	if (flags & FF_MID)  val = etf->reset;
-    }
-    else {
-	// switch to opposite value
-	if (val > etf->reset)  val = etf->min;
-	else	    	       val = etf->max;
-    }
+    if (flags & FF_ON)
+	val = (s8)(flags & FF_REVERSE ? etf->min : etf->max);
+    else
+	val = (s8)(flags & FF_REVERSE ? etf->max : etf->min);
+    // check CH3 midle position
+    if (flags & FF_MID)  val = etf->reset;
     AVAL(val);
 
     if (flags & FF_SHOW) {
@@ -460,14 +470,11 @@ static void kf_reset(u8 *id, u8 *param, u8 flags) {
 
 // change 4WS crab/no-crab
 static void kf_4ws(u8 *id, u8 *param, u8 flags) {
-    if (flags & FF_SET) {
-	if (flags & FF_ON)
-	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 0 : 1);
-	else
-	    menu_4WS_crab = (u8)(flags & FF_REVERSE ? 1 : 0);
-    }
+    if (flags & FF_ON)
+	menu_4WS_crab = (u8)(flags & FF_REVERSE ? 0 : 1);
     else
-	menu_4WS_crab ^= 1;
+	menu_4WS_crab = (u8)(flags & FF_REVERSE ? 1 : 0);
+
     if (flags & FF_SHOW) {
 	lcd_7seg(4);
 	lcd_chars(menu_4WS_crab ? "CRB" : "NOC");
@@ -537,6 +544,7 @@ static u8 menu_popup_key(u8 key_id) {
     key_functions_s *kfl;
     u8 flags;
     u8 is_long = 0;
+    u8 *mbs = &menu_buttons_state[key_id];
 
     // do nothing when both short and long set to OFF
     if (!km->function && !km->function_long)  return 0;
@@ -547,19 +555,43 @@ static u8 menu_popup_key(u8 key_id) {
 
     // check momentary setting
     if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
-	flags = FF_SET;
-	if (btns(btnx))			flags |= FF_ON;
-	if (km->reverse)		flags |= FF_REVERSE;
-	if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768)
-					flags |= FF_MID;
-	kf->func(kf->name, kf->param, flags);	// set value to state
+	static @near u8 ch3_has_middle;  // set to 1 if ch3 have middle state
+	u8 state = MBS_RELEASED;	// new button state
+	flags = FF_NONE;
+
+	if (btns(btnx)) {
+	    flags |= FF_ON;
+	    state = MBS_PRESSED;
+	}
+	if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768) {
+	    flags |= FF_MID;
+	    state = MBS_MIDDLE;
+	    ch3_has_middle = 1;
+	}
+	// return if button state didn't changed
+	if (state == *mbs)  return 0;
+	*mbs = state;
+	if (km->reverse)     flags |= FF_REVERSE;
+	if (ch3_has_middle)  flags |= FF_HAS_MID;
+	// call function to set value
+	kf->func(kf->name, kf->param, flags);
 	return 0;
+    }
+
+    kfl = &key_functions[km->function_long];
+
+    // if button is not initialized, do it
+    if (*mbs == MBS_INITIALIZE) {
+	if (km->function && (kf->flags & KF_2STATE))
+	    kf->func(kf->name, kf->param, (u8)(km->reverse ? FF_REVERSE : 0));
+	if (km->function_long && (kfl->flags & KF_2STATE))
+	    kfl->func(kfl->name, kfl->param,
+		      (u8)(km->reverse_long ? FF_REVERSE : 0));
+	*mbs = 0;  // both are OFF
     }
 
     // return when key was not pressed
     if (!btn(btnx))	 return 0;
-
-    kfl = &key_functions[km->function_long];
 
     // remember buttons state
     buttons_state_last = buttons_state & ~btnx;
@@ -578,14 +610,40 @@ static u8 menu_popup_key(u8 key_id) {
 	if (km->function_long && btnl(btnx)) {
 	    // long key press
 	    key_beep();
-	    kfl->func(kfl->name, kfl->param, FF_SHOW);	// switch value
+	    flags = FF_SHOW;
+	    if (kfl->flags & KF_2STATE) {	// ON/OFF is only for 2-state
+		if (*mbs & MBS_ON_LONG) {
+		    // is ON, switch to OFF
+		    *mbs &= (u8)~MBS_ON_LONG;
+		}
+		else {
+		    // is OFF, switch to ON
+		    *mbs |= MBS_ON_LONG;
+		    flags |= FF_ON;
+		}
+		if (km->reverse_long)  flags |= FF_REVERSE;
+	    }
+	    kfl->func(kfl->name, kfl->param, flags);	// switch value
 	    lcd_update();
 	    is_long = 1;
 	}
 	else if (km->function && btn(btnx)) {
 	    // short key press
 	    key_beep();
-	    kf->func(kf->name, kf->param, FF_SHOW);	// switch value
+	    flags = FF_SHOW;
+	    if (kf->flags & KF_2STATE) {	// ON/OFF is only for 2-state
+		if (*mbs & MBS_ON) {
+		    // is ON, switch to OFF
+		    *mbs &= (u8)~MBS_ON;
+		}
+		else {
+		    // is OFF, switch to ON
+		    *mbs |= MBS_ON;
+		    flags |= FF_ON;
+		}
+		if (km->reverse)  flags |= FF_REVERSE;
+	    }
+	    kf->func(kf->name, kf->param, flags);	// switch value
 	    lcd_update();
 	}
 	else {

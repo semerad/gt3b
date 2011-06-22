@@ -66,6 +66,19 @@ extern s8  menu_4WS_mix;		// mix -100..100
 extern _Bool menu_4WS_crab;		// when 1, crab steering
 extern s8  menu_DIG_mix;		// mix -100..100
 
+extern @near u8 menu_buttons_state[];	// last state of button
+#define MBS_INITIALIZE	0xff
+// for momentary keys
+#define MBS_RELEASED	0x01
+#define MBS_PRESSED	0x02
+#define MBS_MIDDLE	0x03
+// for momentary trims
+#define	MBS_LEFT	0x04
+#define	MBS_RIGHT	0x05
+// for switched keys
+#define MBS_ON		0x40
+#define MBS_ON_LONG	0x80
+
 
 
 
@@ -107,6 +120,7 @@ extern const u16 et_buttons[][2];
 extern void menu_mix(void);
 extern void menu_key_mapping(void);
 extern void menu_key_mapping_prepare(void);
+extern void menu_buttons_initialize(void);
 
 
 #endif

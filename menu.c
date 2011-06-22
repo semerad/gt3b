@@ -108,7 +108,8 @@ void menu_load_model(void) {
     menu_4WS_crab = 0;
     menu_DIG_mix = 0;
 
-    // set other values: mixers, ...
+    // set state of buttons to do initialize
+    menu_buttons_initialize();
 
     // apply config to radio setting
     apply_model_config();

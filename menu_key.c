@@ -378,6 +378,7 @@ void menu_key_mapping(void) {
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();
+    menu_buttons_initialize();
 }
 
 
