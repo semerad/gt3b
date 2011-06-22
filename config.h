@@ -105,10 +105,13 @@ typedef struct {
     config_et_map_s	et_map[NUM_TRIMS];
 } config_key_mapping_s;
 
+#define NUM_MULTI_POSITION  8
+#define MULTI_POSITION_END  -128
+
 // change MAGIC number when changing model config
 // also add code to setting default values
 // 13 + 13 + channels * 3 bytes
-#define CONFIG_MODEL_MAGIC  (0xfc20 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xfb20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel
@@ -118,8 +121,10 @@ typedef struct {
     u8 dualrate[3];		// for steering and throttle
     s8 expo[3];			// steering/forward/back
     u8 abs_type:2;
-    u8 channel_4WS:3;		// channel for 4WS mix or 0 when off
-    u8 channel_DIG:3;		// channel for DIG mix or 0 when off
+    u8 channel_4WS:4;		// channel for 4WS mix or 0 when off
+    u8 channel_DIG:4;		// channel for DIG mix or 0 when off
+    u8 channel_MP:4;		// channel for MultiPosition or 0 when off
+    s8 multi_position[NUM_MULTI_POSITION];  // values for MultiPosition
     u8 stspd_turn;		// steering speed turn
     u8 stspd_return;		// steering speed return
     config_key_mapping_s key_mapping;
