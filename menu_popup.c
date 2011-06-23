@@ -331,6 +331,7 @@ static u8 menu_popup_et(u8 trim_id) {
 
 	// check value left/right
 	if (btnl_all(btn_lr)) {
+	    // both long keys together
 	    key_beep();
 	    if (etf->long_func && etm->buttons == ETB_SPECIAL)
 		// special handling
@@ -343,41 +344,40 @@ static u8 menu_popup_et(u8 trim_id) {
 	}
 	else if (btn(btn_lr)) {
 	    if (!btns_all(btn_lr)) {
+		// only one key is currently pressed
 		key_beep();
 		if (etf->long_func && etm->buttons == ETB_SPECIAL &&
 		    btnl(btn_lr))
 		    // special handling
 		    etf->long_func(&val, btn_l, btn_r);
+		else if ((etm->buttons == ETB_LONG_RESET ||
+			  etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
+		    // handle long key press
+		    if (etm->buttons == ETB_LONG_RESET)
+			val = etf->reset;
+		    else {
+			// set side value
+			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
+			    val = etf->min;
+			else
+			    val = etf->max;
+		    }
+		}
 		else {
-		    if ((etm->buttons == ETB_LONG_RESET ||
-			etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
-			// handle long key press
-			if (etm->buttons == ETB_LONG_RESET)
-			    val = etf->reset;
-			else {
-			    // set side value
-			    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
-				val = etf->min;
-			    else
-				val = etf->max;
-			}
+		    // handle short key press
+		    if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
+			val -= step;
+			if (val < etf->min)  val = etf->min;
+			if (etm->opposite_reset &&
+			    val > etf->reset)  val = etf->reset;
 		    }
 		    else {
-			// handle short key press
-			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse) {
-			    val -= step;
-			    if (val < etf->min)  val = etf->min;
-			    if (etm->opposite_reset &&
-				val > etf->reset)  val = etf->reset;
-			}
-			else {
-			    val += step;
-			    if (val > etf->max)  val = etf->max;
-			    if (etm->opposite_reset &&
-				val < etf->reset)  val = etf->reset;
-			}
-			if (val == etf->reset)  val_set_to_reset = 1;
+			val += step;
+			if (val > etf->max)  val = etf->max;
+			if (etm->opposite_reset &&
+			    val < etf->reset)  val = etf->reset;
 		    }
+		    if (val == etf->reset)  val_set_to_reset = 1;
 		}
 		AVAL(val);
 		btnr(btn_lr);
