@@ -1,4 +1,6 @@
 
+? show value also for momentary trims/keys
+
 add multi-position
     select channel
     for each positions set from range -100%..100%

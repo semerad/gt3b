@@ -194,6 +194,19 @@ static et_functions_s *menu_et_function_find_name(u8 *name) {
     return NULL;
 }
 
+// show functions ID
+static void menu_et_function_show_id(et_functions_s *etf) {
+    lcd_menu(etf->menu);
+    if (etf->flags & EF_BLINK) lcd_set_blink(LMENU, LB_SPC);
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_DOT, LS_OFF);
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+    lcd_segment(LS_SYM_PERCENT, (u8)(etf->flags & EF_PERCENT ? LS_ON : LS_OFF));
+    lcd_segment(LS_SYM_LEFT, (u8)(etf->flags & EF_LEFT ? LS_ON : LS_OFF));
+    lcd_segment(LS_SYM_RIGHT, (u8)(etf->flags & EF_RIGHT ? LS_ON : LS_OFF));
+    lcd_segment(LS_SYM_CHANNEL, (u8)(etf->flags & EF_NOCHANNEL ? LS_OFF : LS_ON));
+    lcd_7seg(etf->channel);
+}
 
 
 
@@ -225,55 +238,93 @@ static u8 menu_popup_et(u8 trim_id) {
     // read value
     RVAL(val);
 
-    // if keys are momentary, show nothing, but set value
+    // remember buttons state
+    buttons_state_last = buttons_state & ~btn_lr;
+
+    // handle momentary keys
+    //   when something changed, show value for 5s while checking buttons
+    //   during initialize show nothing
     if (etm->buttons == ETB_MOMENTARY) {
 	u8 *mbs = &menu_buttons_state[NUM_KEYS + 2 * trim_id];
 	s16 *pv = &menu_buttons_previous_values[NUM_KEYS + 2 * trim_id];
+	u8 value_showed = 0;
+	u8 state;
 
-	if (btns(btn_l)) {
-	    // left
-	    if (*mbs == MBS_LEFT)  return 0;	// already was left
-	    *mbs = MBS_LEFT;
-	    *pv = val;
-	    AVAL(etm->reverse ? etf->max : etf->min);
+	while (1) {
+	    // set actual state of btn_lr to buttons_state_last
+	    buttons_state_last &= ~btn_lr;
+	    buttons_state_last |= buttons_state & btn_lr;
+
+	    // check buttons
+	    if (btns(btn_l)) {
+		// left
+		if (*mbs == MBS_LEFT)  break;	// already was left
+		state = MBS_LEFT;
+		*pv = val;
+		AVAL(etm->reverse ? etf->max : etf->min);
+	    }
+	    else if (btns(btn_r)) {
+		// right
+		if (*mbs == MBS_RIGHT)  break;	// already was right
+		state = MBS_RIGHT;
+		*pv = val;
+		AVAL(etm->reverse ? etf->min : etf->max);
+	    }
+	    else {
+		// center
+		if (*mbs == MBS_RELEASED)  break;  // already was center
+		state = MBS_RELEASED;
+		if (etm->previous_val) {
+		    if (*mbs != MBS_INITIALIZE)  AVAL(*pv);
+		}
+		else  AVAL(etf->reset);
+	    }
+	    if (*mbs == MBS_INITIALIZE) {
+		// show nothing when doing initialize
+		*mbs = state;
+		break;
+	    }
+	    *mbs = state;
+	    btnr(btn_lr);
+	    key_beep();
+
+	    // if another button was pressed, leave this screen
+	    if (buttons)  break;
+	    if (buttons_state != buttons_state_last) break;
+
+	    // show function id first time
+	    if (!value_showed) {
+		value_showed = 1;
+		menu_et_function_show_id(etf);
+	    }
+
+	    // show current value
+	    if (etf->labels)	lcd_char_num2_lbl((s8)val, etf->labels);
+	    else		lcd_char_num3(val);
+	    lcd_update();
+
+	    // sleep 5s, and if no button was changed during, end this screen
+	    delay_time = POPUP_DELAY * 200;
+	    while (delay_time && !buttons &&
+		   (buttons_state == buttons_state_last))
+		delay_time = delay_menu(delay_time);
+
+	    if ((buttons_state & btn_lr) == (buttons_state_last & btn_lr))
+		break;
 	}
-	else if (btns(btn_r)) {
-	    // right
-	    if (*mbs == MBS_RIGHT)  return 0;	// already was right
-	    *mbs = MBS_RIGHT;
-	    *pv = val;
-	    AVAL(etm->reverse ? etf->min : etf->max);
-	}
-	else {
-	    // center
-	    if (*mbs == MBS_RELEASED)  return 0;  // already was center
-	    *mbs = MBS_RELEASED;
-	    if (etm->previous_val)  AVAL(*pv);
-	    else		    AVAL(etf->reset);
-	}
-	return 0;
+
+	if (value_showed)  lcd_menu(0);		// set MENU off
+	return value_showed;
     }
 
     // return when key was not pressed
     if (!btn(btn_lr))	 return 0;
 
-    // remember buttons state
-    buttons_state_last = buttons_state & ~btn_lr;
-
     // convert steps
     step = steps_map[etm->step];
 
     // show MENU and CHANNEL
-    lcd_menu(etf->menu);
-    if (etf->flags & EF_BLINK) lcd_set_blink(LMENU, LB_SPC);
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_DOT, LS_OFF);
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, (u8)(etf->flags & EF_PERCENT ? LS_ON : LS_OFF));
-    lcd_segment(LS_SYM_LEFT, (u8)(etf->flags & EF_LEFT ? LS_ON : LS_OFF));
-    lcd_segment(LS_SYM_RIGHT, (u8)(etf->flags & EF_RIGHT ? LS_ON : LS_OFF));
-    lcd_segment(LS_SYM_CHANNEL, (u8)(etf->flags & EF_NOCHANNEL ? LS_OFF : LS_ON));
-    lcd_7seg(etf->channel);
+    menu_et_function_show_id(etf);
 
     while (1) {
 	u8  val_set_to_reset = 0;
@@ -483,9 +534,7 @@ static void kf_set_switch(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
     AVAL(val);
 
     if (flags & FF_SHOW) {
-	if (!(etf->flags & EF_NOCHANNEL))
-	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	lcd_7seg(etf->channel);
+	menu_et_function_show_id(etf);
 	lcd_char_num3(val);
     }
 }
@@ -501,9 +550,7 @@ static void kf_reset(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
     AVAL(val);
 
     if (flags & FF_SHOW) {
-	if (!(etf->flags & EF_NOCHANNEL))
-	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	lcd_7seg(etf->channel);
+	menu_et_function_show_id(etf);
 	lcd_char_num3(val);
     }
 }
