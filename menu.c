@@ -54,6 +54,8 @@ _Bool menu_wants_adc;
 _Bool menu_battery_low;
 // raw battery ADC value for check to battery low
 u16 battery_low_raw;
+// don't stop main loop and check keys
+u8 menu_check_keys;
 
 
 
@@ -712,14 +714,16 @@ static void menu_loop(void) {
     lcd_clear();
 
     while (1) {
-	main_screen(item);
-	btnra();
-	menu_stop();
+	if (!menu_check_keys) {
+	    main_screen(item);
+	    btnra();
+	    menu_stop();
 
-	// don't wanted in submenus, will be set back in main_screen()
-	menu_wants_adc = 0;
+	    // don't wanted in submenus, will be set back in main_screen()
+	    menu_wants_adc = 0;
+	}
+	else  menu_check_keys = 0;
 
-    check_keys:
 	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
 	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
@@ -737,11 +741,11 @@ static void menu_loop(void) {
 
 	// electronic trims
 	else if (menu_electronic_trims())
-	    goto check_keys;
+	    menu_check_keys = 1;
 
 	// buttons (CH3, Back, End)
 	else if (menu_buttons())
-	    goto check_keys;
+	    menu_check_keys = 1;
 
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {

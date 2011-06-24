@@ -81,6 +81,8 @@ extern _Bool menu_wants_adc;
 extern _Bool menu_battery_low;
 // raw battery ADC value for check to battery low
 extern u16 battery_low_raw;
+// don't stop main loop and check keys
+extern u8 menu_check_keys;
 
 
 

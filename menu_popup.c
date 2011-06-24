@@ -49,6 +49,7 @@ static @near u8 menu_buttons_state[NUM_KEYS + 2 * NUM_TRIMS];
 // set state of buttons to do initialize
 void menu_buttons_initialize(void) {
     memset(menu_buttons_state, MBS_INITIALIZE, NUM_KEYS + 2 * NUM_TRIMS);
+    menu_check_keys = 1;
 }
 
 
@@ -310,7 +311,7 @@ static u8 menu_popup_et(u8 trim_id) {
 
 	    // sleep 5s, and if no button was changed during, end this screen
 	    delay_time = POPUP_DELAY * 200;
-	    while (delay_time && !buttons &&
+	    while (delay_time && !(buttons & ~btn_lr) &&
 		   (buttons_state == buttons_state_last))
 		delay_time = delay_menu(delay_time);
 
@@ -730,10 +731,11 @@ static u8 menu_popup_key(u8 key_id) {
 	    // call function to set value and show it
 	    flags |= FF_SHOW;
 	    kf->func(kf->name, kf->param, flags, pv);
+	    lcd_update();
 
 	    // sleep 5s, and if no button was changed during, end this screen
 	    delay_time = POPUP_DELAY * 200;
-	    while (delay_time && !buttons &&
+	    while (delay_time && !(buttons & ~btnx) &&
 		   (buttons_state == buttons_state_last))
 		delay_time = delay_menu(delay_time);
 

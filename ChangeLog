@@ -6,7 +6,7 @@
     momentary trims/keys now sets value only when state of buttons changed
 	(previously it always forced value to reflect button state), so it is
 	possible to map momentary and non-momentary keys to the same
-	channel/mix value
+	channel/mix value, also value is showed when changed
     added possibility for momentary trims and 2-state keys to return not
 	to centre/left, but to previous value which was active before button
 	press

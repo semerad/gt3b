@@ -48,7 +48,7 @@ static const u8 *trim_buttons[] = {
 // 7seg:  1 2 3 d
 // chars:
 // function
-//   OFF			        (NOR/REV)  (NOO/RES)    (NPV/PRV)
+//   OFF			        (NOR/REV)  (NOO/ORS)    (NPV/PRV)
 //   other -> buttons
 //              MOM	     -> 	reverse              -> prev_val
 //           NOL/RPT/RES/END -> step -> reverse -> opp_reset
@@ -149,13 +149,13 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
 	case 5:
-	    lcd_chars(etm->opposite_reset ? "RES" : "NOO");
+	    lcd_chars(etm->opposite_reset ? "ORS" : "NOO");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
 	    break;
 	case 6:
-	    lcd_chars(etm->previous_val ? "NPV" : "PRV");
+	    lcd_chars(etm->previous_val ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
@@ -314,7 +314,7 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	    break;
 	case 4:
 	    // previous_val
-	    lcd_chars(km->previous_val ? "NPV" : "PRV");
+	    lcd_chars(km->previous_val ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
@@ -333,7 +333,7 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	    break;
 	case 7:
 	    // previous_val_long
-	    lcd_chars(km->previous_val_long ? "NPV" : "PRV");
+	    lcd_chars(km->previous_val_long ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);

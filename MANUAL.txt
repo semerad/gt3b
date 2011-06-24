@@ -122,7 +122,7 @@ Standard menu:
 	    REV - swap left/right trim keys
 	- opposite_reset: not available when buttons MOM
 	    NOO - no change
-	    RES - when trim key is pressed and value is at opposite
+	    ORS - when trim key is pressed and value is at opposite
 		  side of centre/reset, set value to centre/reset,
 	- previous_val: available only when buttons MOM
 	    NPV - no change
