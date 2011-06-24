@@ -39,7 +39,7 @@ static @near u8 menu_buttons_state[NUM_KEYS + 2 * NUM_TRIMS];
 #define MBS_RELEASED	0x01
 #define MBS_PRESSED	0x02
 #define MBS_MIDDLE	0x03
-// for momentary trims
+// for momentary trims (+MBS_RELEASED)
 #define	MBS_LEFT	0x04
 #define	MBS_RIGHT	0x05
 // for switched keys
@@ -168,6 +168,8 @@ static const et_functions_s et_functions[] = {
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
 
 
+
+
 // return name of given line
 u8 *menu_et_function_name(u8 n) {
     return et_functions[n].name;
@@ -184,6 +186,7 @@ u8 menu_et_function_long_special(u8 n) {
     return (u8)(et_functions[n].long_func ? 1 : 0);
 }
 
+// find function by name
 static et_functions_s *menu_et_function_find_name(u8 *name) {
     u8 i, *n;
     for (i = 0; i < ET_FUNCTIONS_SIZE; i++) {
@@ -210,6 +213,7 @@ static void menu_et_function_show_id(et_functions_s *etf) {
 
 
 
+// mapping of trim steps
 const u8 steps_map[STEPS_MAP_SIZE] = {
     1, 2, 5, 10, 20, 30, 40, 50, 67, 100, 200,
 };
@@ -449,7 +453,7 @@ u8 menu_electronic_trims(void) {
     // for each trim, call function
     for (i = 0; i < ET_BUTTONS_SIZE; i++) {
 	if (!ck.et_map[i].is_trim)  continue;  // trim is off
-	if (menu_popup_et(i))  return 1;
+	if (menu_popup_et(i))  return 1;  // check other keys in main loop
     }
 
     return 0;
@@ -497,6 +501,8 @@ typedef struct {
 #define FF_HAS_MID	0b00001000
 #define FF_PREVIOUS	0b00010000
 #define FF_SHOW		0b10000000
+
+
 
 
 
@@ -602,6 +608,8 @@ static const key_functions_s key_functions[] = {
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
 
+
+
 // return name of given line
 u8 *menu_key_function_name(u8 n) {
     return key_functions[n].name;
@@ -618,6 +626,7 @@ u8 menu_key_function_2state(u8 n) {
     return (u8)(key_functions[n].flags & KF_2STATE);
 }
 
+// delete all symbols and clean 7seg
 static void menu_key_empty_id(void) {
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_DOT, LS_OFF);
@@ -840,7 +849,7 @@ u8 menu_buttons(void) {
     for (i = 0; i < KEY_BUTTONS_SIZE; i++) {
 	if (i >= NUM_KEYS && ck.key_map[i].is_trim)
 	    continue;	// trim is enabled for this key
-	if (menu_popup_key(i))  return 1;
+	if (menu_popup_key(i))  return 1;  // check other keys in main loop
     }
 
     return 0;
