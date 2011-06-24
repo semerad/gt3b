@@ -618,6 +618,17 @@ u8 menu_key_function_2state(u8 n) {
     return (u8)(key_functions[n].flags & KF_2STATE);
 }
 
+static void menu_key_empty_id(void) {
+    lcd_segment(LS_SYM_MODELNO, LS_OFF);
+    lcd_segment(LS_SYM_DOT, LS_OFF);
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+    lcd_segment(LS_SYM_LEFT, LS_OFF);
+    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+    lcd_set(L7SEG, LB_EMPTY);
+}
+
 
 
 
@@ -642,41 +653,84 @@ static u8 menu_popup_key(u8 key_id) {
     kf = &key_functions[km->function];
     btnx = key_buttons[key_id];
 
-    // check momentary setting
-    if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
-	static @near u8 ch3_has_middle;  // set to 1 if ch3 have middle state
-	u8 state = MBS_RELEASED;	// new button state
-	flags = FF_NONE;
+    // remember buttons state
+    buttons_state_last = buttons_state & ~btnx;
 
-	if (btns(btnx)) {
-	    flags |= FF_ON;
-	    state = MBS_PRESSED;
-	}
-	if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768) {
-	    flags |= FF_MID;
-	    state = MBS_MIDDLE;
-	    ch3_has_middle = 1;
-	}
-	if (km->previous_val) {
-	    if (*mbs == MBS_INITIALIZE &&
-	        (state == MBS_RELEASED || state == MBS_MIDDLE)) {
-		// do not initialize this when we have to remember
-		//   previous value
-		*mbs = state;
-		return 0;
+
+    // check momentary setting
+    //   when something changed, show value for 5s while checking buttons
+    //   during initialize show nothing
+    if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
+	static @near u8 ch3_has_middle; // set to 1 if ch3 have middle state
+	u8 state;			// new button state
+	u8 value_showed = 0;
+
+	while (1) {
+	    // set actual state of btn_lr to buttons_state_last
+	    buttons_state_last &= ~btnx;
+	    buttons_state_last |= buttons_state & btnx;
+
+	    // check button
+	    flags = FF_NONE;
+	    state = MBS_RELEASED;
+	    if (btns(btnx)) {
+		flags |= FF_ON;
+		state = MBS_PRESSED;
 	    }
-	    flags |= FF_PREVIOUS;
+	    if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768) {
+		flags |= FF_MID;
+		state = MBS_MIDDLE;
+		ch3_has_middle = 1;
+	    }
+	    if (km->reverse)       flags |= FF_REVERSE;
+	    if (ch3_has_middle)    flags |= FF_HAS_MID;
+	    if (km->previous_val)  flags |= FF_PREVIOUS;
+
+	    // end if button state didn't changed
+	    if (state == *mbs)  break;
+
+	    // end when initialize
+	    if (*mbs == MBS_INITIALIZE) {
+		// call func when not previous_val
+		if (!km->previous_val || state == MBS_PRESSED)
+		    kf->func(kf->name, kf->param, flags, pv);
+		*mbs = state;
+		break;
+	    }
+	    *mbs = state;
+	    btnr(btnx);
+	    key_beep();
+
+	    // if another button was pressed, leave this screen
+	    if (buttons)  break;
+	    if (buttons_state != buttons_state_last) break;
+
+	    // show function id first time
+	    if (!value_showed) {
+		value_showed = 1;
+		menu_key_empty_id();
+	    }
+
+	    // call function to set value
+	    flags |= FF_SHOW;
+	    kf->func(kf->name, kf->param, flags, pv);
+
+	    // sleep 5s, and if no button was changed during, end this screen
+	    delay_time = POPUP_DELAY * 200;
+	    while (delay_time && !buttons &&
+		   (buttons_state == buttons_state_last))
+		delay_time = delay_menu(delay_time);
+
+	    if ((buttons_state & btnx) == (buttons_state_last & btnx))
+		break;
 	}
-	// return if button state didn't changed
-	if (state == *mbs)  return 0;
-	*mbs = state;
-	if (km->reverse)     flags |= FF_REVERSE;
-	if (ch3_has_middle)  flags |= FF_HAS_MID;
-	// call function to set value
-	kf->func(kf->name, kf->param, flags, pv);
-	return 0;
+
+	if (value_showed)  lcd_menu(0);		// set MENU off
+	return value_showed;
     }
 
+
+    // non-momentary key
     kfl = &key_functions[km->function_long];
 
     // if button is not initialized, do it
@@ -694,18 +748,8 @@ static u8 menu_popup_key(u8 key_id) {
     // return when key was not pressed
     if (!btn(btnx))	 return 0;
 
-    // remember buttons state
-    buttons_state_last = buttons_state & ~btnx;
-
     // clear some lcd segments
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_DOT, LS_OFF);
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
-    lcd_set(L7SEG, LB_EMPTY);
+    menu_key_empty_id();
 
     while (1) {
 	if (km->function_long && btnl(btnx)) {
@@ -750,7 +794,7 @@ static u8 menu_popup_key(u8 key_id) {
 	    lcd_update();
 	}
 	else {
-	    // nothink to do
+	    // nothing to do
 	    btnr(btnx);
 	    break;
 	}
