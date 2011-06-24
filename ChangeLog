@@ -1,5 +1,5 @@
 
-*0.3.0 ()
+*0.3.0 (24 Jun 2011)
 
     added globally settable key long-press delay
     when using trims, longer beep at value reset and short pause ignoring keys
