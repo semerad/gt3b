@@ -41,7 +41,7 @@
 #define TRIM_FUNCTIONS_SIZE  128
 @near static u8 trim_functions[TRIM_FUNCTIONS_SIZE];
 @near static u8 trim_functions_max;
-static const u8 *trim_buttons[] = {
+static const u8 trim_buttons[][4] = {
     "NOL", "RPT", "MOM", "RES", "END", "SPC"
 };
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))

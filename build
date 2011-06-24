@@ -29,7 +29,7 @@ cp -p ChangeLog $R/ChangeLog.txt
 # firmwares for more max channels
 for N in 3 8 6; do
     make clean
-    make CHANNELS=$N
+    make CHANNELS=$N || exit 2
     cp -p gt3b.s19 $R/gt3b-ch$N-$V.s19
     git add $R/gt3b-ch$N-$V.s19
 done

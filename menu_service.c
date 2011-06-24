@@ -188,7 +188,7 @@ void menu_calibrate(void) {
 
 
 // key test menu
-static u8 *key_ids[] = {
+static const u8 key_ids[][4] = {
     "T1L", "T1R",
     "T2F", "T2B",
     "T3-", "T3+",

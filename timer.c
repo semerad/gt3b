@@ -27,7 +27,7 @@
 
 
 
-static u16 inactivity;
+static @near u16 inactivity;
 
 
 

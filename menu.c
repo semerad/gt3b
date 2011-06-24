@@ -185,8 +185,8 @@ static void main_screen(u8 item) {
 	lcd_chars(cm.name);
     }
     else if (item == MS_BATTERY) {
-	static u16 bat_val = 0;
-	static u16 bat_time = 0;
+	static u16 bat_val;
+	static u16 bat_time;
 
 	// battery voltage
 	lcd_segment(LS_SYM_DOT, LS_ON);
@@ -592,7 +592,7 @@ static void menu_expo(void) {
 
 // set abs: OFF, SLO(6), NOR(4), FAS(3)
 // pulses between full brake and 1/2 brake and only when enought brake applied
-static const u8 *abs_labels[] = {
+static const u8 abs_labels[][4] = {
     "OFF", "SLO", "NOR", "FAS"
 };
 #define ABS_LABEL_SIZE  (sizeof(abs_labels) / sizeof(u8 *))

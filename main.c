@@ -55,7 +55,7 @@ static void clock_init(void) {
 
 // copyright to firmware
 static u8 *copret(void) {
-    static const u8 *copyright = "(C) 2011 Pavel Semerad";
+    static const u8 copyright[] = "(C) 2011 Pavel Semerad";
     return copyright;
 }
 

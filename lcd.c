@@ -700,7 +700,7 @@ void lcd_set_full_on(void) {
 
 _Bool lcd_bck_on;		// set when backlight ON
 u16   lcd_bck_count;		// counter in seconds
-u16   lcd_bck_seconds = 30;	// default number of backlight seconds
+u16   lcd_bck_seconds;		// default number of backlight seconds
 
 
 // set default ON seconds
@@ -719,6 +719,7 @@ void backlight_on_sec(u16 seconds) {
 
 // set on for default seconds
 void backlight_on(void) {
+    if (!lcd_bck_seconds)  return;	// nothing when not set
     backlight_on_sec(lcd_bck_seconds);
 }
 
