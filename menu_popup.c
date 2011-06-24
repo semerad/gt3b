@@ -239,6 +239,7 @@ static u8 menu_popup_et(u8 trim_id) {
     u16 btn_lr = btn_l | btn_r;
     config_et_map_s *etm = &ck.et_map[trim_id];
     et_functions_s *etf = &et_functions[etm->function];
+    u8 *mbs = &menu_buttons_state[NUM_KEYS + 2 * trim_id];
 
     // read value
     RVAL(val);
@@ -250,7 +251,6 @@ static u8 menu_popup_et(u8 trim_id) {
     //   when something changed, show value for 5s while checking buttons
     //   during initialize show nothing
     if (etm->buttons == ETB_MOMENTARY) {
-	u8 *mbs = &menu_buttons_state[NUM_KEYS + 2 * trim_id];
 	s16 *pv = &menu_buttons_previous_values[NUM_KEYS + 2 * trim_id];
 	u8 value_showed = 0;
 	u8 state;
@@ -322,6 +322,13 @@ static u8 menu_popup_et(u8 trim_id) {
 	btnr(btn_lr);
 	if (value_showed)  lcd_menu(0);		// set MENU off
 	return value_showed;
+    }
+
+    // if button is not initialized, do it
+    if (*mbs == MBS_INITIALIZE) {
+	val = etf->reset;
+	AVAL(val);
+	*mbs = MBS_RELEASED;
     }
 
     // return when key was not pressed

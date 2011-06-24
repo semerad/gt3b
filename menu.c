@@ -101,7 +101,9 @@ void menu_load_model(void) {
     // load config
     config_model_read();
 
-    // set values of channels >= 3 to default left state
+    // set values of channels >= 3 to default left state,
+    //   for channels mapped to some trims/keys, it will next be set
+    //   to corresponding centre/reset value
     for (i = 0; i <= MAX_CHANNELS - 3; i++)
 	menu_channel3_8[i] = -100;
 
