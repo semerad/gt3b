@@ -197,6 +197,7 @@ static const u8 key_ids[][4] = {
     "BCK",
     "END",
     "CH3",
+    "NO1", "NO2",
     "ROL", "ROR"
 };
 void menu_key_test(void) {
@@ -224,7 +225,7 @@ void menu_key_test(void) {
     while (1) {
 	if (btnl(BTN_BACK | BTN_ENTER))  break;
 
-	for (i = 0, bit = 1; i < 14; i++, bit <<= 1) {
+	for (i = 0, bit = 1; i < 16; i++, bit <<= 1) {
 	    if (btn(bit)) {
 		key_beep();
 		lcd_chars(key_ids[i]);
