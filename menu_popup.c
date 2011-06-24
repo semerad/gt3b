@@ -264,25 +264,26 @@ static u8 menu_popup_et(u8 trim_id) {
 		// left
 		if (*mbs == MBS_LEFT)  break;	// already was left
 		state = MBS_LEFT;
-		*pv = val;
-		AVAL(etm->reverse ? etf->max : etf->min);
+		*pv = val;			// save previous value
+		val = etm->reverse ? etf->max : etf->min;
 	    }
 	    else if (btns(btn_r)) {
 		// right
 		if (*mbs == MBS_RIGHT)  break;	// already was right
 		state = MBS_RIGHT;
-		*pv = val;
-		AVAL(etm->reverse ? etf->min : etf->max);
+		*pv = val;			// save previous value
+		val = etm->reverse ? etf->min : etf->max;
 	    }
 	    else {
 		// center
 		if (*mbs == MBS_RELEASED)  break;  // already was center
 		state = MBS_RELEASED;
 		if (etm->previous_val) {
-		    if (*mbs != MBS_INITIALIZE)  AVAL(*pv);
+		    if (*mbs != MBS_INITIALIZE)  val = *pv;
 		}
-		else  AVAL(etf->reset);
+		else  val = etf->reset;
 	    }
+	    AVAL(val);
 	    if (*mbs == MBS_INITIALIZE) {
 		// show nothing when doing initialize
 		*mbs = state;
@@ -340,9 +341,11 @@ static u8 menu_popup_et(u8 trim_id) {
 	    if (etf->long_func && etm->buttons == ETB_SPECIAL)
 		// special handling
 		etf->long_func(&val, btn_l, btn_r);
-	    else
+	    else {
 		// reset to given reset value
 		val = etf->reset;
+		val_set_to_reset = 1;
+	    }
 	    AVAL(val);
 	    btnr(btn_lr);
 	}
@@ -357,8 +360,10 @@ static u8 menu_popup_et(u8 trim_id) {
 		else if ((etm->buttons == ETB_LONG_RESET ||
 			  etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
 		    // handle long key press
-		    if (etm->buttons == ETB_LONG_RESET)
+		    if (etm->buttons == ETB_LONG_RESET) {
 			val = etf->reset;
+			val_set_to_reset = 1;
+		    }
 		    else {
 			// set side value
 			if ((u8)(btn(btn_l) ? 1 : 0) ^ etm->reverse)
