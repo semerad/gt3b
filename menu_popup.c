@@ -318,6 +318,7 @@ static u8 menu_popup_et(u8 trim_id) {
 		break;
 	}
 
+	btnr(btn_lr);
 	if (value_showed)  lcd_menu(0);		// set MENU off
 	return value_showed;
     }
@@ -675,12 +676,12 @@ static u8 menu_popup_key(u8 key_id) {
     //   when something changed, show value for 5s while checking buttons
     //   during initialize show nothing
     if (km->function && (kf->flags & KF_2STATE) && km->momentary) {
-	static @near u8 ch3_has_middle; // set to 1 if ch3 have middle state
+	static @near u8 ch3_has_middle; // set to 1 if ch3 has middle state
 	u8 state;			// new button state
 	u8 value_showed = 0;
 
 	while (1) {
-	    // set actual state of btn_lr to buttons_state_last
+	    // set actual state of btnx to buttons_state_last
 	    buttons_state_last &= ~btnx;
 	    buttons_state_last |= buttons_state & btnx;
 
@@ -692,6 +693,7 @@ static u8 menu_popup_key(u8 key_id) {
 		state = MBS_PRESSED;
 	    }
 	    if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768) {
+		// special check for CH3 button middle
 		flags |= FF_MID;
 		state = MBS_MIDDLE;
 		ch3_has_middle = 1;
@@ -725,7 +727,7 @@ static u8 menu_popup_key(u8 key_id) {
 		menu_key_empty_id();
 	    }
 
-	    // call function to set value
+	    // call function to set value and show it
 	    flags |= FF_SHOW;
 	    kf->func(kf->name, kf->param, flags, pv);
 
@@ -739,6 +741,7 @@ static u8 menu_popup_key(u8 key_id) {
 		break;
 	}
 
+	btnr(btnx);
 	if (value_showed)  lcd_menu(0);		// set MENU off
 	return value_showed;
     }
