@@ -648,7 +648,13 @@ static void select_menu(void) {
 	// Enter key - goto submenu
 	if (btn(BTN_ENTER)) {
 	    key_beep();
-	    if (menu == LM_MODEL)	menu_model((u8)(btnl(BTN_ENTER) ? 1 : 0));
+	    if (menu == LM_MODEL) {
+		if (btnl(BTN_ENTER))	menu_model(1);
+		else {
+					menu_model(0);
+					break;
+		}
+	    }
 	    else if (menu == LM_NAME) {
 		if (btnl(BTN_ENTER))	menu_reset_model();
 		else			menu_name();
@@ -737,6 +743,7 @@ static void menu_loop(void) {
 	else if (btn(BTN_ENTER)) {
 	    key_beep();
 	    select_menu();
+	    btnra();
 	}
 
 	// electronic trims
