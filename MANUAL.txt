@@ -20,8 +20,8 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Global characteristics:
 =======================
-- up to 21 models memory (for 6-channel firmware,will be less at the future
-	after adding more functions and more channels)
+- 15 models memory (for 6-channel firmware, for 3-channel it is little more
+		    and for 8-channel little less)
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
 - added Subtrims
@@ -204,7 +204,7 @@ Global setup menu:
     1		dead zone for steering		0...50
     2		dead zone for throttle		0...50
     b		key beep			OFF/ON
-    d		long press key delay		100...1000ms
+    d		long press key delay		100...1000 miliseconds
     r + ALL	global reset - change to YES to set global configuration
 			       and all models to default values
     r + MOD	all models reset - change to YES to set all models
@@ -227,7 +227,8 @@ Return to original (and modified) firmware:
 
 Functions assignable to trims:
 ==============================
-OFF		- nothing, it is possible to assign each button as keys
+OFF		- nothing, it is possible to assign each button individualy
+		  as key
 TR1, TR2	- trim of channel 1/2
 DRS, DRF, DRB	- dualrate of steering/forward/back
 EXS, EXF, EXB	- expo of steering/forward/back
@@ -251,5 +252,6 @@ CHn		- switch channel "n" value from one end value to opposite end
 		  I wouldn't do this modification to my radio).
 CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
-DIG		- switch DIG mix between -100 and 100
+DIG		- switch DIG mix between -100 and 100 (more useable when using
+		  return to previous val key setting)
 
