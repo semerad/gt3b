@@ -272,6 +272,9 @@ static void calc_loop(void) {
 	    // set DIG mix
 	    DIG_mix = -val;  // minus, because 100 will reduce channel 1
 	    menu_DIG_mix = (s8)(DIG_mix / PPM(5));
+	    // set it 2 times more to have contra ESC steering, it can be
+	    //   reduced by D/R setting
+	    DIG_mix *= 2;
 	}
 
 
