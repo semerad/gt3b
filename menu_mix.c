@@ -103,7 +103,7 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 		// channel number/off
 		val = cm.channel_DIG;
 		if (!val)  val = 2;
-		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
+		val = (u8)menu_change_val(val, 1, MAX_CHANNELS, 1, 1);
 		if (val == 2)   cm.channel_DIG = 0;
 		else		cm.channel_DIG = val;
 		break;

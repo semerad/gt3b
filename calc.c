@@ -223,8 +223,10 @@ static u16 steering_speed(s16 val, u8 channel) {
 static void calc_loop(void) {
     s16 val, val2;
     u8  i, bit;
+    s16 DIG_mix;
 
     while (1) {
+	DIG_mix = menu_DIG_mix * PPM(5);  // to -5000..5000 range
 
 	// steering
 	val = channel_calib(adc_steering_ovs,
@@ -234,23 +236,42 @@ static void calc_loop(void) {
 			    cg.steering_dead_zone << ADC_OVS_SHIFT);
 	val = expo(val, cm.expo_steering);
 	val = dualrate(val, cm.dr_steering);
-	if (!cm.channel_4WS)
-	    channel_params(1, steering_speed(val, 1));
+	if (cm.channel_DIG != 1) {
+	    // channel 1 is normal servo steering
+	    if (!cm.channel_4WS)
+		channel_params(1, steering_speed(val, 1));
+	    else {
+		// 4WS mixing
+		val2 = val;
+		if (menu_4WS_crab)  val2 = -val2;	// apply crab
+
+		if (menu_4WS_mix < 0)
+		    // reduce front steering
+		    val = (s16)((s32)val * (100 + menu_4WS_mix) / 100);
+		else if (menu_4WS_mix > 0)
+		    // reduce rear steering
+		    val2 = (s16)((s32)val2 * (100 - menu_4WS_mix) / 100);
+
+		channel_params(1, steering_speed(val, 1));
+		channel_params(cm.channel_4WS,
+			    steering_speed(val2, cm.channel_4WS));
+	    }
+	}
 	else {
-	    // 4WS mixing
-	    val2 = val;
-	    if (menu_4WS_crab)  val2 = -val2;	// apply crab
+	    // channel 1 is part of dual-ESC steering
+	    @near static s16 last_ch1;
 
-	    if (menu_4WS_mix < 0)
-		// reduce front steering
-		val = (s16)((s32)val * (100 + menu_4WS_mix) / 100);
-	    else if (menu_4WS_mix > 0)
-		// reduce rear steering
-		val2 = (s16)((s32)val2 * (100 - menu_4WS_mix) / 100);
-
-	    channel_params(1, steering_speed(val, 1));
-	    channel_params(cm.channel_4WS,
-			   steering_speed(val2, cm.channel_4WS));
+	    // return back value from steering wheel to allow to use
+	    //   steering speed
+	    last_value[0] = last_ch1;
+	    val = steering_speed(val, 1);
+	    if (val < PPM(-500))      val = PPM(-500);
+	    else if (val > PPM(500))  val = PPM(500);
+	    // save steering value for steering speed
+	    last_ch1 = val;
+	    // set DIG mix
+	    DIG_mix = -val;  // minus, because 100 will reduce channel 1
+	    menu_DIG_mix = (s8)(DIG_mix / PPM(5));
 	}
 
 
@@ -296,10 +317,10 @@ static void calc_loop(void) {
 
 	    if (menu_DIG_mix < 0)
 		// reduce front throttle
-		val = (s16)((s32)val * (100 + menu_DIG_mix) / 100);
+		val = (s16)((s32)val * (PPM(500) + DIG_mix) / PPM(500));
 	    else if (menu_DIG_mix > 0)
 		// reduce rear throttle
-		val2 = (s16)((s32)val2 * (100 - menu_DIG_mix) / 100);
+		val2 = (s16)((s32)val2 * (PPM(500) - DIG_mix) / PPM(500));
 
 	    channel_params(2, val);
 	    channel_params(cm.channel_DIG, val2);
