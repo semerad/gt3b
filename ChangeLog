@@ -1,4 +1,8 @@
 
+*0.3.1 ()
+
+    DIG mix can be set to channel 1 to have dual-ESC steering (boat, tank, ...)
+
 *0.3.0 (24 Jun 2011)
 
     added globally settable key long-press delay

@@ -86,7 +86,8 @@ Standard menu:
 - 4WS and DIG mixes
     > choose menu EPOINT and press ENTER-long
     > menu EPOINT will blink
-    > select one of mixes 4WS (4) or DIG (d)
+    > select one of mixes 4WS (4) or DIG (d) - for dual-ESC steering select
+					       DIG channel 1
     > press ENTER and choose channel for this mix or OFF
     > press ENTER and set mix in range -100...0...100 %
 	0%   is default and means both channel have same max steering/throttle
