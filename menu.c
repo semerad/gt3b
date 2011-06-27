@@ -597,7 +597,7 @@ static void menu_expo(void) {
 static const u8 abs_labels[][4] = {
     "OFF", "SLO", "NOR", "FAS"
 };
-#define ABS_LABEL_SIZE  (sizeof(abs_labels) / sizeof(u8 *))
+#define ABS_LABEL_SIZE  (sizeof(abs_labels) / 4)
 static void menu_abs(void) {
     lcd_segment(LS_SYM_MODELNO, LS_OFF);
     lcd_segment(LS_SYM_LEFT, LS_OFF);

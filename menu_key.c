@@ -44,7 +44,7 @@
 static const u8 trim_buttons[][4] = {
     "NOL", "RPT", "MOM", "RES", "END", "SPC"
 };
-#define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / sizeof(u8 *))
+#define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / 4)
 // 7seg:  1 2 3 d
 // chars:
 // function
