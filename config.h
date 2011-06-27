@@ -122,6 +122,7 @@ typedef struct {
     s8 expo[3];			// steering/forward/back
     u8 abs_type:2;
     u8 channel_4WS:4;		// channel for 4WS mix or 0 when off
+    u8 brake_off:1;		// don't use brake side of throttle
     u8 channel_DIG:4;		// channel for DIG mix or 0 when off
     u8 channel_MP:4;		// channel for MultiPosition or 0 when off
     s8 multi_position[NUM_MULTI_POSITION];  // values for MultiPosition

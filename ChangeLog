@@ -1,6 +1,9 @@
 
 *0.3.2 ()
 
+    added option throttle brake cut of to be able to drive forward only
+	vehicles (boats)
+
 *0.3.1 (26 Jun 2011)
 
     DIG mix can be set to channel 1 to have dual-ESC steering (boat, tank, ...)

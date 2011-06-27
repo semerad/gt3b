@@ -274,7 +274,7 @@ static void calc_loop(void) {
 	    menu_DIG_mix = (s8)(DIG_mix / PPM(5));
 	    // set it 2 times more to have contra ESC steering, it can be
 	    //   reduced by D/R setting
-	    DIG_mix *= 2;
+	    if (!cm.brake_off)  DIG_mix *= 2;
 	}
 
 
@@ -286,6 +286,7 @@ static void calc_loop(void) {
 			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
 			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
 			    cg.throttle_dead_zone << ADC_OVS_SHIFT);
+	if (cm.brake_off && val > 0)  val = 0;  // throttle brake cut off
 	val = expo(val, (u8)(val < 0 ? cm.expo_forward : cm.expo_back));
 	if (cm.abs_type) {
 	    // apply selected ABS
@@ -312,8 +313,10 @@ static void calc_loop(void) {
 	    }
 	}
 	val = dualrate(val, (u8)(val < 0 ? cm.dr_forward : cm.dr_back));
-	if (!cm.channel_DIG)
+	if (!cm.channel_DIG) {
+	    if (cm.brake_off)  val = val * 2 + PPM(500);
 	    channel_params(2, val);
+	}
 	else {
 	    // DIG mixing
 	    val2 = val;
@@ -325,6 +328,10 @@ static void calc_loop(void) {
 		// reduce rear throttle
 		val2 = (s16)((s32)val2 * (PPM(500) - DIG_mix) / PPM(500));
 
+	    if (cm.brake_off) {
+		val  = val  * 2 + PPM(500);
+		val2 = val2 * 2 + PPM(500);
+	    }
 	    channel_params(2, val);
 	    channel_params(cm.channel_DIG, val2);
 	}

@@ -108,6 +108,7 @@ void config_model_set_default(void) {
     cm.expo_back	= 0;
     cm.abs_type		= 0;
     cm.channel_4WS	= 0;
+    cm.brake_off	= 0;
     cm.channel_DIG	= 0;
     cm.channel_MP	= 0;
     memset(cm.multi_position, (u8)MULTI_POSITION_END, NUM_MULTI_POSITION);
