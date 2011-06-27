@@ -83,7 +83,8 @@ Standard menu:
     > turn wheel right to show right arrow - this represents Return speed 1-100%
 	100% means no delay
 	1%   means above 4s delay end to end
-- mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only throttle)
+- mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
+  throttle), Multi-Position (to set arbitrary up to 8 positions)
     > choose menu EPOINT and press ENTER-long
     > menu EPOINT will blink
     > select one of mixes 4WS (4), DIG (d) or brake cut-off (b)
@@ -97,6 +98,11 @@ Standard menu:
 	    100% means 100% reduce on rear steering/throttle (eg. no steering)
 	-100% means 100% reduce on front steering/throttle (eg. no steering)
 	> for 4WS press ENTER and select crab (CRB) or no-crab (NOC)
+      for Multi-Position:
+	> press ENTER and choose channel for this mix or OFF
+	> press ENTER and set channel value for first position
+	> press ENTER and set channel value for second position or END
+	> ... up to eight position
       for brake cut-off:
 	> ser OFF or CUT
 - Key mapping specific for each model:
@@ -110,8 +116,8 @@ Standard menu:
     -----
     steps of settings of trims (1 2 3 and D/R):
 	- sequence:
-	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val
-	  id:          %          % V     V          V blinking        % blinking
+	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val -> rotate
+	  id:          %          % V     V          V blinking        % blinking      % V blinking
 	- function: selected function listed at the end of manual
 	- buttons:
 	    MOM - momentary, hold left/right trim key to get end values,
@@ -122,7 +128,7 @@ Standard menu:
 		  centre/reset value
 	    END - long press of trim key will set to coresponding end value
 	- step: select trim step for one trim key press (1, 2, ... 100, 200),
-		not available when buttons MOM
+		not available when buttons MOM or fuction is list of items (MPO)
 	- reverse:
 	    NOR - no change
 	    REV - swap left/right trim keys
@@ -130,10 +136,14 @@ Standard menu:
 	    NOO - no change
 	    ORS - when trim key is pressed and value is at opposite
 		  side of centre/reset, set value to centre/reset,
-	- previous_val: available only when buttons MOM
+	- previous_val: available only when buttons MOM or fuction is list of
+			items (MPO)
 	    NPV - no change
 	    PRV - instead of setting value to centre/reset when key is released,
 		  it is set to previous value, which was active before key press
+	- rotate: available only if fuction is list of items (MPO)
+	    NOR - no rotate
+	    ROT - rotate from max item to 1.item and back
     -----
     steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
 	- sequence:
@@ -242,6 +252,7 @@ CHn		- change channel "n" value in range -100...100
 STn		- subtrim of channel "n"
 4WS		- 4 wheel steering mix -100...100%
 DIG		- DIG throttle mix -100...100%
+MPO		- Multi-POsition, switches position up/down
 SST		- steering speed turn 1...100%
 SSR		- steering speed return 1...100%
 
@@ -260,4 +271,6 @@ CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
 DIG		- switch DIG mix between -100 and 100 (more useable when using
 		  return to previous val key setting)
+MPO		- Multi-POsition, switches position up (at END back to 1.)
+MPR		- Multi-Position Reset, switches position to first one
 

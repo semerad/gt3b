@@ -42,6 +42,7 @@ u8  menu_channels_mixed;	// channel with 1 here will not be set from
 s8  menu_4WS_mix;		// mix -100..100
 _Bool menu_4WS_crab;		// when 1, crab steering
 s8  menu_DIG_mix;		// mix -100..100
+u8  menu_MP_index;		// index of MultiPosition channel
 
 
 
@@ -104,13 +105,16 @@ void menu_load_model(void) {
     // set values of channels >= 3 to default left state,
     //   for channels mapped to some trims/keys, it will next be set
     //   to corresponding centre/reset value
-    for (i = 0; i <= MAX_CHANNELS - 3; i++)
+    for (i = 0; i < MAX_CHANNELS - 2; i++)
 	menu_channel3_8[i] = -100;
 
-    // set 4WS and DIG to defaults
+    // set 4WS, DIG, MP to defaults
     menu_4WS_mix = 0;
     menu_4WS_crab = 0;
     menu_DIG_mix = 0;
+    menu_MP_index = 0;
+    if (cm.channel_MP)
+	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
 
     // set state of buttons to do initialize
     menu_buttons_initialize();

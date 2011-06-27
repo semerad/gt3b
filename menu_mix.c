@@ -140,6 +140,73 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 }
 
 
+static u8 mix_MultiPosition(u8 val_id, u8 action) {
+    u8 id = val_id;
+    s8 val;
+
+    if (action == 1) {
+	// change value
+	if (id == 1) {
+	    // channel number/off
+	    val = cm.channel_MP;
+	    if (!val)  val = 2;
+	    val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
+	    if (val == 2)   cm.channel_MP = 0;
+	    else	    cm.channel_MP = val;
+	}
+	else {
+	    // position value + END state (END not for first position)
+	    val = cm.multi_position[id - 2];
+	    if (val == MULTI_POSITION_END)  val = -101;
+	    val = (s8)menu_change_val(val, id == 2 ? -100 : -101, 100,
+				      CHANNEL_FAST, 0);
+	    if (val == -101) {
+		// set all from this to END value
+		memset(&cm.multi_position[id - 2], (u8)MULTI_POSITION_END,
+		       NUM_MULTI_POSITION + 2 - id);
+	    }
+	    else cm.multi_position[id - 2] = val;
+	}
+    }
+    else if (action == 2) {
+	// select next value
+	if (cm.channel_MP) {
+	    if (id == 1)  id = 2;
+	    else if (cm.multi_position[id - 2] == MULTI_POSITION_END
+		    || ++id > (NUM_MULTI_POSITION + 1))  id = 1;
+	}
+	// allow forcing channel value
+	if (id > 1 && cm.channel_MP) {
+	    menu_force_value_channel = cm.channel_MP;
+	}
+	else menu_force_value_channel = 0;
+    }
+
+    // set forced value
+    if (menu_force_value_channel) {
+	val = cm.multi_position[id - 2];
+	if (val == MULTI_POSITION_END)  val = -100;
+    }
+
+    // show value
+    lcd_7seg(L7_P);
+    if (id == 1) {
+	// channel number/OFF
+	if (!cm.channel_MP)  lcd_chars("OFF");
+	else		     lcd_char_num3(cm.channel_MP);
+    }
+    else {
+	// position value
+	val = cm.multi_position[id - 2];
+	if (val == MULTI_POSITION_END)  lcd_chars("END");
+	else				lcd_char_num3(val);
+	menu_force_value = val * PPM(5);
+    }
+
+    return id;
+}
+
+
 static u8 mix_brake_off(u8 val_id, u8 action) {
     u8 id = val_id;
     u8 val;
@@ -169,6 +236,7 @@ typedef u8 (*mix_func_t)(u8 val_id, u8 action);
 static const mix_func_t menu_funcs[] = {
     mix_4WS,
     mix_DIG,
+    mix_MultiPosition,
     mix_brake_off,
 };
 #define MAX_MENU_IDS  (sizeof(menu_funcs) / sizeof(void *))
@@ -203,6 +271,7 @@ void menu_mix(void) {
 	    }
 	    else {
 		// change menu-id
+		menu_force_value_channel = 0;
 		if (btn(BTN_ROT_L)) {
 		    if (menu_id)  menu_id--;
 		    else	  menu_id = MAX_MENU_IDS - 1;
@@ -246,6 +315,7 @@ void menu_mix(void) {
 	}
     }
 
+    menu_force_value_channel = 0;
     key_beep();
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();

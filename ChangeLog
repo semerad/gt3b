@@ -1,8 +1,9 @@
 
-*0.3.2 ()
+*0.3.2 (27 Jun 2011)
 
     added option throttle brake cut of to be able to drive forward only
 	vehicles (boats)
+    added MultiPosition settable to channel
 
 *0.3.1 (26 Jun 2011)
 

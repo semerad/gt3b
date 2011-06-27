@@ -114,6 +114,29 @@ static void show_trim2(s16 val) {
     lcd_char_num2_lbl((s8)val, "FNB");
 }
 
+// multi-position show and set value
+static void show_MP(s16 val) {
+    lcd_7seg(cm.channel_MP);  // show also selected channel
+    lcd_char_num3(cm.multi_position[menu_MP_index]);
+}
+static void set_MP(s16 *aval, u8 rotate) {
+    // if END value selected, return it back to previous
+    if (cm.multi_position[*aval] == MULTI_POSITION_END) {
+	if (rotate) {
+	    if (!menu_MP_index) {
+		// rotated left through 0, find right value
+		while (cm.multi_position[*aval] == MULTI_POSITION_END)
+		    (*aval)--;
+	    }
+	    else  *aval = 0;  // rotated right, return to 0
+	}
+	else  (*aval)--;  // no rotate, return back to previous index
+    }
+    // set value of channel
+    if (cm.channel_MP)
+	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[*aval];
+}
+
 
 static const et_functions_s et_functions[] = {
     { 0, "OFF", 0, EF_NONE, 0, NULL, 0, 0, 0, 0, NULL, NULL },
@@ -179,6 +202,8 @@ static const et_functions_s et_functions[] = {
       1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
     { 28, "SSR", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.stspd_return,
       1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
+    { 31, "MPO", 0, EF_LIST, 0, &menu_MP_index,
+      0, NUM_MULTI_POSITION - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
 
@@ -619,6 +644,34 @@ static void kf_4ws(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
     }
 }
 
+// switch multi-position to next index
+static void kf_multi_position(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
+    if (++menu_MP_index >= NUM_MULTI_POSITION ||
+        cm.multi_position[menu_MP_index] == MULTI_POSITION_END)
+	    menu_MP_index = 0;
+    if (cm.channel_MP)
+	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[menu_MP_index];
+
+    if (flags & FF_SHOW) {
+	if (!menu_MP_index)  BEEP_RESET;
+	lcd_7seg(cm.channel_MP);
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_char_num3(cm.multi_position[menu_MP_index]);
+    }
+}
+static void kf_multi_position_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
+    menu_MP_index = 0;
+    if (cm.channel_MP)
+	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
+
+    if (flags & FF_SHOW) {
+	BEEP_RESET;
+	lcd_7seg(cm.channel_MP);
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	lcd_char_num3(cm.multi_position[0]);
+    }
+}
+
 
 
 
@@ -649,6 +702,8 @@ static const key_functions_s key_functions[] = {
 #endif
     { 13, "4WS", KF_2STATE, kf_4ws, NULL },
     { 14, "DIG", KF_2STATE, kf_set_switch, NULL },
+    { 15, "MPO", KF_NONE, kf_multi_position, NULL },
+    { 16, "MPR", KF_NONE, kf_multi_position_reset, NULL },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

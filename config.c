@@ -111,7 +111,9 @@ void config_model_set_default(void) {
     cm.brake_off	= 0;
     cm.channel_DIG	= 0;
     cm.channel_MP	= 0;
-    memset(cm.multi_position, (u8)MULTI_POSITION_END, NUM_MULTI_POSITION);
+    cm.multi_position[0]= -100;
+    memset(&cm.multi_position[1], (u8)MULTI_POSITION_END,
+	   NUM_MULTI_POSITION - 1);
     cm.stspd_turn	= 100;
     cm.stspd_return	= 100;
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
