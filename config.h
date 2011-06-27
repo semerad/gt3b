@@ -76,7 +76,8 @@ typedef struct {	// unused parts are to match with config_key_map_s
     u8 reverse:1;
     u8 opposite_reset:1;
     u8 buttons:3;
-    u8 unused2:4;
+    u8 rotate:1;
+    u8 unused2:3;
     u8 is_trim2:1;
     u8 unused3;
 } config_et_map_s;

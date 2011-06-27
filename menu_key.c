@@ -48,15 +48,15 @@ static const u8 trim_buttons[][4] = {
 // 7seg:  1 2 3 d
 // chars:
 // function
-//   OFF			        (NOR/REV)  (NOO/ORS)    (NPV/PRV)
+//   OFF			        (NOR/REV)  (NOO/ORS)    (NPV/PRV)   (NOR/ROT)
 //   other -> buttons
 //              MOM	     -> 	reverse              -> prev_val
-//           NOL/RPT/RES/END -> step -> reverse -> opp_reset
-// id:        %                  % V     V          V blink      % blink
+//           NOL/RPT/RES/END -> step -> reverse -> opp_reset             -> rotate
+// id:        %                  % V     V          V blink      % blink    % V blink
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 id = val_id;
-    u8 idx;
+    u8 idx, btn;
 
     if (action == 1) {
 	// change value
@@ -89,8 +89,15 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		if (menu_et_function_long_special(etm->function))
 			idx = 1;
 		else	idx = 2;
-		etm->buttons = (u8)menu_change_val(etm->buttons, 0,
-						 TRIM_BUTTONS_SIZE - idx, 1, 1);
+		btn = etm->buttons;
+		btn = (u8)menu_change_val(btn, 0, TRIM_BUTTONS_SIZE - idx,
+					  1, 1);
+		if (btn == ETB_MOMENTARY &&
+		    menu_et_function_is_list(etm->function)) {
+		    if (etm->buttons < ETB_MOMENTARY)  btn++;
+		    else  btn--;
+		}
+		etm->buttons = btn;
 		break;
 	    case 3:
 		// step
@@ -108,6 +115,10 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    case 6:
 		// return to previous value
 		etm->previous_val ^= 1;
+		break;
+	    case 7:
+		etm->rotate ^= 1;
+		break;
 	}
     }
 
@@ -121,6 +132,18 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    }
 	    else {
 		if (++id > 5)  id = 1;
+		else if (menu_et_function_is_list(etm->function)) {
+		    if (id == 3) {
+			// skip "step"
+			id++;
+			etm->step = 0;
+		    }
+		    else if (id == 5) {
+			// skip "opposite reset"
+			id = 7;
+			etm->opposite_reset = 0;
+		    }
+		}
 	    }
 	}
     }
@@ -159,6 +182,13 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    break;
+	case 7:
+	    lcd_chars(etm->rotate ? "ROT" : "NOR");
+	    lcd_segment(LS_SYM_PERCENT, LS_ON);
+	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
 	    break;
     }
     return id;

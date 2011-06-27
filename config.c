@@ -77,10 +77,10 @@ static const config_key_mapping_s default_key_mapping = {
     },
     // trims: function, reverse, step, buttons
     {
-	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim1 to steer trim
-	{ 2, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim2 to throt trim
-	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 1, 0 },	// trim3 to steer trim
-	{ 3, 1, 0, 0, 0, 0, ETB_AUTORPT, 0, 1, 0 }	// trim4(DR) to steer dualrate, autorepeat
+	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 0, 1, 0 },	// trim1 to steer trim
+	{ 2, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 0, 1, 0 },	// trim2 to throt trim
+	{ 1, 1, 0, 0, 0, 0, ETB_LONG_OFF, 0, 0, 1, 0 },	// trim3 to steer trim
+	{ 3, 1, 0, 0, 0, 0, ETB_AUTORPT, 0, 0, 1, 0 }	// trim4(DR) to steer dualrate, autorepeat
     },
 };
 
