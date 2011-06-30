@@ -111,8 +111,8 @@ typedef struct {
 
 // change MAGIC number when changing model config
 // also add code to setting default values
-// 24 + 22(keys) + channels * 3 bytes
-#define CONFIG_MODEL_MAGIC  (0xfb20 | (MAX_CHANNELS - 1))
+// 23 + 22(keys) + channels * 4 bytes
+#define CONFIG_MODEL_MAGIC  (0xfa20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel
@@ -130,12 +130,15 @@ typedef struct {
 #define expo_forward	expo[1]
 #define expo_back	expo[2]
     u8 abs_type:2;
-    u8 channel_4WS:4;		// channel for 4WS mix or 0 when off
     u8 brake_off:1;		// don't use brake side of throttle
+    u8 thspd_onlyfwd:1;		// throttle speed only at forward side
+    u8 channel_4WS:4;		// channel for 4WS mix or 0 when off
     u8 channel_DIG:4;		// channel for DIG mix or 0 when off
     u8 channel_MP:4;		// channel for MultiPosition or 0 when off
     s8 multi_position[NUM_MULTI_POSITION];  // values for MultiPosition
-    u8 stspd_turn;		// steering speed turn
+    u8 speed[MAX_CHANNELS];	// reduce speed of servo
+#define stspd_turn	speed[0]
+#define thspd		speed[1]
     u8 stspd_return;		// steering speed return
     config_key_mapping_s key_mapping;
 } config_model_s;

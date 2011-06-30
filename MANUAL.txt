@@ -20,7 +20,7 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Global characteristics:
 =======================
-- 15 models memory (for 6-channel firmware, for 3-channel it is little more
+- 14 models memory (for 6-channel firmware, for 3-channel it is little more
 		    and for 8-channel little less)
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
@@ -75,14 +75,19 @@ Standard menu:
     > menu TRIM will blink
     > set subtrims for each channel
     > press ENTER/BACK to end this submenu
-- Steering speed
+- channel speed
     > choose menu D/R and press ENTER-long
     > menu D/R wil blink
-    > now only channel 1 can be selected
-    > turn wheel left to show left arrow - this represents Turn speed 1-100%
-    > turn wheel right to show right arrow - this represents Return speed 1-100%
-	100% means no delay
-	1%   means above 4s delay end to end
+    > select channel
+    > for channels 1 and 2 (steering and throttle)
+	- turn wheel left to show left arrow
+	    - this represents Turn speed or throttle speed
+	- turn wheel right to show right arrow
+	    - this represents Return speed or
+	      "throttle speed only for forward" (OFF/ON)
+    > select required speed 1...100%
+	- 100% means no delay
+	-   1% means above 4s delay end to end
 - mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
   throttle), Multi-Position (to set arbitrary up to 8 positions)
     > choose menu EPOINT and press ENTER-long
@@ -255,6 +260,7 @@ DIG		- DIG throttle mix -100...100%
 MPO		- Multi-POsition, switches position up/down
 SST		- steering speed turn 1...100%
 SSR		- steering speed return 1...100%
+CSn		- channel speed for channel "n" 1...100%
 
 
 

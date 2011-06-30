@@ -143,7 +143,7 @@ static s16 expo(s16 inval, s8 exp) {
 
 
 // apply steering speed
-static u16 steering_speed(s16 val, u8 channel) {
+static s16 steering_speed(s16 val, u8 channel) {
     s16 last = last_value[channel - 1];
     s16 delta = val - last;
     s16 delta2 = 0;
@@ -220,6 +220,41 @@ static u16 steering_speed(s16 val, u8 channel) {
 }
 
 
+// apply servo speed
+static s16 channel_speed(s16 val, u8 channel) {
+    s16 last = last_value[channel - 1];
+    s16 delta = val - last;
+    s16 max_delta;
+    u8  speed = cm.speed[channel - 1];
+
+    // for DIG channel use throttle speed
+    if (channel == cm.channel_DIG) speed = cm.thspd;
+
+    if (!delta)  return val;		// no change from previous val
+    if (speed == 100)  return val;	// max speed
+
+    // special handling for "throttle only for forward"
+    if (cm.thspd_onlyfwd && (channel == 2 || channel == cm.channel_DIG)) {
+	if (val >= 0 && !cm.brake_off)  return val;	// at brake side
+	if (delta > 0)  return val;			// not forwarding
+	if (last > 0 && !cm.brake_off) {
+	    // apply speed only from centre to forward
+	    last = 0;
+	    delta = val;
+	}
+    }
+
+    max_delta = PPM(1000) / 2 / (100 - speed);
+    if (delta < 0) {
+	if (max_delta < -delta)  val = last - max_delta;
+    }
+    else {
+	if (max_delta < delta)   val = last + max_delta;
+    }
+    return val;
+}
+
+
 
 
 
@@ -261,7 +296,7 @@ static void calc_loop(void) {
 
 		channel_params(1, steering_speed(val, 1));
 		channel_params(cm.channel_4WS,
-			    steering_speed(val2, cm.channel_4WS));
+			       steering_speed(val2, cm.channel_4WS));
 	    }
 	}
 	else {
@@ -276,12 +311,14 @@ static void calc_loop(void) {
 	    }
 	    // return back value from steering wheel to allow to use
 	    //   steering speed
+	    val2 = last_value[0];
 	    last_value[0] = last_ch1;
 	    val = steering_speed(val, 1);
 	    if (val < PPM(-500))      val = PPM(-500);
 	    else if (val > PPM(500))  val = PPM(500);
 	    // save steering value for steering speed
 	    last_ch1 = val;
+	    last_value[0] = val2;
 	    // set DIG mix
 	    DIG_mix = -val;  // minus, because 100 will reduce channel 1
 	    menu_DIG_mix = (s8)(DIG_mix / PPM(5));
@@ -328,7 +365,7 @@ static void calc_loop(void) {
 	val = dualrate(val, (u8)(val < 0 ? cm.dr_forward : cm.dr_back));
 	if (!cm.channel_DIG) {
 	    if (cm.brake_off)  val = val * 2 + PPM(500);
-	    channel_params(2, val);
+	    channel_params(2, channel_speed(val, 2));
 	}
 	else {
 	    // DIG mixing
@@ -345,8 +382,8 @@ static void calc_loop(void) {
 		val  = val  * 2 + PPM(500);
 		val2 = val2 * 2 + PPM(500);
 	    }
-	    channel_params(2, val);
-	    channel_params(cm.channel_DIG, val2);
+	    channel_params(2, channel_speed(val, 2));
+	    channel_params(cm.channel_DIG, channel_speed(val2, cm.channel_DIG));
 	}
 
 
@@ -354,9 +391,9 @@ static void calc_loop(void) {
 
 	// channels 3-8, exclude mixed channels in the future
 	for (i = 3, bit = 0b100; i <= MAX_CHANNELS; i++, bit <<= 1) {
-	    // check if channel was already mixed before
+	    // check if channel was already mixed before (4WS, DIG)
 	    if (menu_channels_mixed & bit)  continue;
-	    channel_params(i, menu_channel3_8[i - 3] * PPM(5));
+	    channel_params(i, channel_speed(menu_channel3_8[i - 3] * PPM(5), i));
 	}
 
 

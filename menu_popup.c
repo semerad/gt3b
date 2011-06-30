@@ -164,45 +164,59 @@ static const et_functions_s et_functions[] = {
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
     { 21, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 27, "SST", LM_DR, EF_BLINK | EF_LEFT | EF_PERCENT, 1, &cm.stspd_turn,
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
+    { 28, "SSR", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.stspd_return,
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
+    { 29, "CS2", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.thspd,
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
+    { 30, "CS3", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[2],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 4
     { 14, "CH4", 0, EF_NONE, 4, &menu_channel4, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 22, "ST4", LM_TRIM, EF_BLINK, 4, &cm.subtrim[3], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 31, "CS4", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[3],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 5
     { 15, "CH5", 0, EF_NONE, 5, &menu_channel5, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 23, "ST5", LM_TRIM, EF_BLINK, 5, &cm.subtrim[4], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 32, "CS5", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[4],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 6
     { 16, "CH6", 0, EF_NONE, 6, &menu_channel6, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 24, "ST6", LM_TRIM, EF_BLINK, 6, &cm.subtrim[5], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 33, "CS6", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[5],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 7
     { 17, "CH7", 0, EF_NONE, 7, &menu_channel7, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 25, "ST7", LM_TRIM, EF_BLINK, 7, &cm.subtrim[6], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 34, "CS7", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[6],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 8
     { 18, "CH8", 0, EF_NONE, 8, &menu_channel8, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 26, "ST8", LM_TRIM, EF_BLINK, 8, &cm.subtrim[7], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
+    { 35, "CS8", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.speed[7],
+      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
 #endif
 #endif
 #endif
 #endif
 #endif
-    { 29, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, 4,
+    { 36, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, 4,
       &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 30, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, L7_D,
+    { 37, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, L7_D,
       &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 27, "SST", LM_DR, EF_BLINK | EF_LEFT | EF_PERCENT, 1, &cm.stspd_turn,
-      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
-    { 28, "SSR", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.stspd_return,
-      1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
-    { 31, "MPO", 0, EF_LIST, 0, &menu_MP_index,
+    { 38, "MPO", 0, EF_LIST, 0, &menu_MP_index,
       0, NUM_MULTI_POSITION - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))

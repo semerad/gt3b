@@ -1,4 +1,10 @@
 
+*0.4.0 ()
+
+    use steering trim when dual-ESC steering
+    added channel_speed for all channels, throttle channel can be applied only
+	for forward side
+
 *0.3.2 (27 Jun 2011)
 
     added option throttle brake cut of to be able to drive forward only

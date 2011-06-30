@@ -568,14 +568,22 @@ static void menu_dualrate(void) {
 
 // set servo speed
 static void sf_speed(u8 channel, u8 change) {
-    u8 *addr = menu_adc_direction ? &cm.stspd_return : &cm.stspd_turn;
-    if (change)  *addr = (u8)menu_change_val(*addr, 1, 100, SPEED_FAST, 0);
-    lcd_char_num3(*addr);
+    u8 *addr = &cm.speed[channel];
+    u8 thfwdonly = (u8)(channel == 1 && menu_adc_direction ? 1 : 0);
+    if (channel == 0 && menu_adc_direction)  addr = &cm.stspd_return;
+    if (change) {
+	if (thfwdonly)
+	    // throttle forward only setting
+	    cm.thspd_onlyfwd ^= 1;
+	else *addr = (u8)menu_change_val(*addr, 1, 100, SPEED_FAST, 0);
+    }
+    if (thfwdonly)  lcd_chars(cm.thspd_onlyfwd ? "OFF" : "ON ");
+    else	    lcd_char_num3(*addr);
 }
 static void menu_speed(void) {
     lcd_set_blink(LMENU, LB_SPC);
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(1, 0x1, 0, sf_speed);
+    menu_channel(MAX_CHANNELS, 0x3, 0, sf_speed);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
     lcd_set_blink(LMENU, LB_OFF);
 }

@@ -107,14 +107,15 @@ void config_model_set_default(void) {
     cm.expo_forward	= 0;
     cm.expo_back	= 0;
     cm.abs_type		= 0;
-    cm.channel_4WS	= 0;
     cm.brake_off	= 0;
+    cm.thspd_onlyfwd	= 0;
+    cm.channel_4WS	= 0;
     cm.channel_DIG	= 0;
     cm.channel_MP	= 0;
     cm.multi_position[0]= -100;
     memset(&cm.multi_position[1], (u8)MULTI_POSITION_END,
 	   NUM_MULTI_POSITION - 1);
-    cm.stspd_turn	= 100;
+    memset(&cm.speed[0], 100, MAX_CHANNELS);
     cm.stspd_return	= 100;
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
 }
