@@ -70,6 +70,7 @@ static s16 channel_calib(u16 adc_ovs, u16 call, u16 calm, u16 calr, u16 dead) {
     }
 }
 
+
 // apply reverse, endpoint, subtrim, trim (for channel 1-2)
 // set value to ppm channel
 static void channel_params(u8 channel, s16 inval) {
@@ -89,11 +90,14 @@ static void channel_params(u8 channel, s16 inval) {
     last_value[channel - 1] = inval;
 
     // read trims for channels 1-2 and compute inval offset
-    if (channel < 3) {
-	trim = cm.trim[channel-1];
-	if (trim && inval)	// abs(inval) * (trim * 10) / 5000 -> 100x more
-	    trim32 = ((s32)(inval < 0 ? -inval : inval) * trim + 2) / 5;
-    }
+    if (channel == 1 && cm.channel_DIG != 1)
+	// steering and not dual-ESC steering
+	trim = cm.trim_steering;
+    else if (channel == 2 || channel == cm.channel_DIG)
+	// throttle and also second throttle from channel_DIG
+	trim = cm.trim_throttle;
+    if (trim && inval)	// abs(inval) * (trim * 10) / 5000 -> 100x more
+	trim32 = ((s32)(inval < 0 ? -inval : inval) * trim + 2) / 5;
 
     // apply endpoint and trim32
     val = (s16)(((s32)inval * cm.endpoint[channel-1][(u8)(inval < 0 ? 0 : 1)] -
@@ -106,6 +110,7 @@ static void channel_params(u8 channel, s16 inval) {
     // set value for this ppm channel
     ppm_set_value(channel, (u16)(PPM(1500) + val));
 }
+
 
 // expo only for plus values: x: 0..5000, exp: 1..99
 static s16 expou(u16 x, u8 exp) {
@@ -130,10 +135,12 @@ static s16 expo(s16 inval, s8 exp) {
     return  neg ? -val : val;
 }
 
+
 // apply dualrate
 @inline static s16 dualrate(s16 val, u8 dr) {
     return (s16)((s32)val * dr / 100);
 }
+
 
 // apply steering speed
 static u16 steering_speed(s16 val, u8 channel) {
@@ -261,6 +268,12 @@ static void calc_loop(void) {
 	    // channel 1 is part of dual-ESC steering
 	    @near static s16 last_ch1;
 
+	    // apply steering trim to val
+	    if (cm.trim_steering) {
+		val2 = (s16)(((s32)(val < 0 ? -val : val) *
+				    cm.trim_steering + 250) / PPM(500 / 10));
+		val = val - val2 + cm.trim_steering * PPM(1);
+	    }
 	    // return back value from steering wheel to allow to use
 	    //   steering speed
 	    last_value[0] = last_ch1;
