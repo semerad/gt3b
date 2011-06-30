@@ -98,8 +98,8 @@ void config_model_set_default(void) {
     cm.reverse		= 0;
     memset(cm.subtrim, 0, MAX_CHANNELS);
     memset(cm.endpoint, 100, MAX_CHANNELS * 2);
-    cm.trim[0]		= 0;
-    cm.trim[1]		= 0;
+    cm.trim_steering	= 0;
+    cm.trim_throttle	= 0;
     cm.dr_steering	= 100;
     cm.dr_forward	= 100;
     cm.dr_back		= 100;

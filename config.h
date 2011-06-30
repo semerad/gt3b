@@ -30,7 +30,7 @@
 
 // change MAGIC number when changing global config
 // also add code to setting default values
-// 28 bytes
+// 27 bytes
 #define CONFIG_GLOBAL_MAGIC  0xfa05
 typedef struct {
     u8  steering_dead_zone;
@@ -111,7 +111,7 @@ typedef struct {
 
 // change MAGIC number when changing model config
 // also add code to setting default values
-// 13 + 13 + channels * 3 bytes
+// 24 + 22(keys) + channels * 3 bytes
 #define CONFIG_MODEL_MAGIC  (0xfb20 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
@@ -119,8 +119,16 @@ typedef struct {
     s8 subtrim[MAX_CHANNELS];
     u8 endpoint[MAX_CHANNELS][2];
     s8 trim[2];			// for steering and throttle
+#define trim_steering	trim[0]
+#define trim_throttle	trim[1]
     u8 dualrate[3];		// for steering and throttle
+#define dr_steering	dualrate[0]
+#define dr_forward	dualrate[1]
+#define dr_back		dualrate[2]
     s8 expo[3];			// steering/forward/back
+#define expo_steering	expo[0]
+#define expo_forward	expo[1]
+#define expo_back	expo[2]
     u8 abs_type:2;
     u8 channel_4WS:4;		// channel for 4WS mix or 0 when off
     u8 brake_off:1;		// don't use brake side of throttle
@@ -134,13 +142,6 @@ typedef struct {
 
 extern config_model_s config_model;
 #define cm config_model
-#define dr_steering	dualrate[0]
-#define dr_forward	dualrate[1]
-#define dr_back		dualrate[2]
-#define expo_steering	expo[0]
-#define expo_forward	expo[1]
-#define expo_back	expo[2]
-
 #define ck		cm.key_mapping
 
 
