@@ -18,3 +18,5 @@ include Makefile.toolset
 
 include Makefile.stm8
 
+include Makefile.doxygen
+

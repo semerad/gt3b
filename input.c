@@ -1,22 +1,32 @@
-/*
-    input - read keys and ADC values
-    Copyright (C) 2011 Pavel Semerad
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
+/**
+ *  @copyright
+ *    Copyright (C) 2011 Pavel Semerad
+ *
+ *  @file
+ *    $RCSfile: $
+ *
+ *  @purpose
+ *    gt3b alternative firmware - read keys and ADC values
+ *
+ *  @cfg_management
+ *    $Source: $
+ *    $Author: $
+ *    $Date: $
+ *
+ *  @comment
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "input.h"
 #include "menu.h"
@@ -122,7 +132,14 @@ void button_reset_nolong(u16 btn) {
 }
 
 
-// set autorepeat
+/**
+   @brief
+     set autorepeat
+   @detailed
+     FIXME
+   @param[in] btn
+     FIXME
+ */
 void button_autorepeat(u8 btn) {
     buttons_autorepeat = btn;
 }
@@ -142,6 +159,17 @@ void button_autorepeat(u8 btn) {
     BSET(P ## port ## _ODR, bit); \
     BRES(P ## port ## _CR2, bit); \
     BRES(P ## port ## _DDR, bit)
+
+
+
+/** @brief
+ *    FIXME
+ *  @detailed
+ *    FIXME
+ *  @returns
+ *  @retval
+ *    FIXME
+ */
 static u16 read_key_matrix(void) {
     u16 btn = 0;
     button_row(B, 4, BTN_TRIM_LEFT,  BTN_TRIM_CH3_L, BTN_END);
