@@ -87,7 +87,8 @@ Standard menu:
   throttle), Multi-Position (to set arbitrary up to 8 positions)
     > choose menu EPOINT and press ENTER-long
     > menu EPOINT will blink
-    > select one of mixes 4WS (4), DIG (d) or brake cut-off (b)
+    > select one of mixes 4WS (4), DIG (d), brake cut-off (b),
+	multi-position (P)
       for mixes 4WS, DIG:
 	> press ENTER and choose channel for this mix or OFF
 	    - for dual-ESC steering (boat, tank, ...) select DIG channel 1 and
@@ -99,7 +100,7 @@ Standard menu:
 	-100% means 100% reduce on front steering/throttle (eg. no steering)
 	> for 4WS press ENTER and select crab (CRB) or no-crab (NOC)
       for Multi-Position:
-	> press ENTER and choose channel for this mix or OFF
+	> press ENTER and choose channel for this function or OFF
 	> press ENTER and set channel value for first position
 	> press ENTER and set channel value for second position or END
 	> ... up to eight position
