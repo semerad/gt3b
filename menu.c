@@ -730,11 +730,11 @@ static void menu_loop(void) {
 	    main_screen(item);
 	    btnra();
 	    menu_stop();
-
-	    // don't wanted in submenus, will be set back in main_screen()
-	    menu_wants_adc = 0;
 	}
 	else  menu_check_keys = 0;
+
+	// don't wanted in submenus, will be set back in main_screen()
+	menu_wants_adc = 0;
 
 	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
@@ -786,7 +786,7 @@ void menu_init(void) {
 	menu_calibrate();
     apply_global_config();
 
-    // read model config from eeprom, but now awake CALC yet
+    // read model config from eeprom, but not awake CALC yet
     menu_load_model();
 
     // and main loop

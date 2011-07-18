@@ -102,6 +102,7 @@ typedef struct {
 #define EF_LEFT		0b00000010
 #define EF_PERCENT	0b00000100
 #define EF_LIST		0b00001000
+#define EF_NOCONFIG	0b00100000
 #define EF_NOCHANNEL	0b01000000
 #define EF_BLINK	0b10000000
 
@@ -156,7 +157,7 @@ static const et_functions_s et_functions[] = {
       -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL, NULL, NULL },
     { 12, "EXB", LM_EXP, EF_PERCENT | EF_RIGHT, 2, &cm.expo_back,
       -EXPO_MAX, EXPO_MAX, 0, EXPO_FAST, NULL, NULL, NULL },
-    { 13, "CH3", 0, EF_NONE, 3, &menu_channel3, -100, 100, 0, CHANNEL_FAST,
+    { 13, "CH3", 0, EF_NOCONFIG, 3, &menu_channel3, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 19, "ST1", LM_TRIM, EF_BLINK, 1, &cm.subtrim[0], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
@@ -165,27 +166,27 @@ static const et_functions_s et_functions[] = {
     { 21, "ST3", LM_TRIM, EF_BLINK, 3, &cm.subtrim[2], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 4
-    { 14, "CH4", 0, EF_NONE, 4, &menu_channel4, -100, 100, 0, CHANNEL_FAST,
+    { 14, "CH4", 0, EF_NOCONFIG, 4, &menu_channel4, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 22, "ST4", LM_TRIM, EF_BLINK, 4, &cm.subtrim[3], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 5
-    { 15, "CH5", 0, EF_NONE, 5, &menu_channel5, -100, 100, 0, CHANNEL_FAST,
+    { 15, "CH5", 0, EF_NOCONFIG, 5, &menu_channel5, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 23, "ST5", LM_TRIM, EF_BLINK, 5, &cm.subtrim[4], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 6
-    { 16, "CH6", 0, EF_NONE, 6, &menu_channel6, -100, 100, 0, CHANNEL_FAST,
+    { 16, "CH6", 0, EF_NOCONFIG, 6, &menu_channel6, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 24, "ST6", LM_TRIM, EF_BLINK, 6, &cm.subtrim[5], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 7
-    { 17, "CH7", 0, EF_NONE, 7, &menu_channel7, -100, 100, 0, CHANNEL_FAST,
+    { 17, "CH7", 0, EF_NOCONFIG, 7, &menu_channel7, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 25, "ST7", LM_TRIM, EF_BLINK, 7, &cm.subtrim[6], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
 #if MAX_CHANNELS >= 8
-    { 18, "CH8", 0, EF_NONE, 8, &menu_channel8, -100, 100, 0, CHANNEL_FAST,
+    { 18, "CH8", 0, EF_NOCONFIG, 8, &menu_channel8, -100, 100, 0, CHANNEL_FAST,
       NULL, NULL, NULL },
     { 26, "ST8", LM_TRIM, EF_BLINK, 8, &cm.subtrim[7], -SUBTRIM_MAX,
       SUBTRIM_MAX, 0, SUBTRIM_FAST, NULL, NULL, NULL },
@@ -194,15 +195,15 @@ static const et_functions_s et_functions[] = {
 #endif
 #endif
 #endif
-    { 29, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, 4,
-      &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 30, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL, L7_D,
-      &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
+    { 29, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG,
+      4, &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
+    { 30, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG,
+      L7_D, &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
     { 27, "SST", LM_DR, EF_BLINK | EF_LEFT | EF_PERCENT, 1, &cm.stspd_turn,
       1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
     { 28, "SSR", LM_DR, EF_BLINK | EF_RIGHT | EF_PERCENT, 1, &cm.stspd_return,
       1, 100, 100, SPEED_FAST, NULL, NULL, NULL },
-    { 31, "MPO", 0, EF_LIST, 0, &menu_MP_index,
+    { 31, "MPO", 0, EF_LIST | EF_NOCONFIG, 0, &menu_MP_index,
       0, NUM_MULTI_POSITION - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
@@ -221,12 +222,12 @@ s8 menu_et_function_idx(u8 n) {
     return et_functions[n].idx;
 }
 
-// return if given function has special long-press handling
+// return 1 if given function has special long-press handling
 u8 menu_et_function_long_special(u8 n) {
     return (u8)(et_functions[n].long_func ? 1 : 0);
 }
 
-// return if given function has special long-press handling
+// return 1 if given function switches list of items
 u8 menu_et_function_is_list(u8 n) {
     return (u8)(et_functions[n].flags & EF_LIST);
 }
@@ -373,8 +374,11 @@ static u8 menu_popup_et(u8 trim_id) {
 
     // if button is not initialized, do it
     if (*mbs == MBS_INITIALIZE) {
-	val = etf->reset;
-	AVAL(val);
+	// set value to default only for non-config values (mixes, channels...)
+	if (etf->flags & EF_NOCONFIG) {
+	    val = etf->reset;
+	    AVAL(val);
+	}
 	*mbs = MBS_RELEASED;
     }
 
@@ -549,7 +553,7 @@ static const u16 key_buttons[] = {
 
 
 
-// functions assignable to trims
+// functions assignable to keys
 typedef struct {
     u8 idx;		// will be showed sorted by this
     u8 *name;		// showed identification
