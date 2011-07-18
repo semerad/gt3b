@@ -92,6 +92,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		btn = etm->buttons;
 		btn = (u8)menu_change_val(btn, 0, TRIM_BUTTONS_SIZE - idx,
 					  1, 1);
+		// skip MOMentary for list functions
 		if (btn == ETB_MOMENTARY &&
 		    menu_et_function_is_list(etm->function)) {
 		    if (etm->buttons < ETB_MOMENTARY)  btn++;
