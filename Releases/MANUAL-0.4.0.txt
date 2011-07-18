@@ -1,0 +1,283 @@
+****************************
+*                          *
+*  Flysky GT3B-PSX manual  *
+*                          *
+****************************
+
+Date: May 24rd 2011
+
+
+This is a preliminary manual for alternative firmware for FlySky FS-GT3B radio
+and clones. This manual is written as differences to original firmware.
+
+This firmware is completely written from scratch and is not compatible with the
+original Flysky firmware. It is distributed with NO-WARRANTY.
+All of the model setups saved by original firmware will be erased!!!
+You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
+"DATA MEMORY" in STVP to read it from radio a save it to disk.
+
+
+
+Global characteristics:
+=======================
+- 14 models memory (for 6-channel firmware, for 3-channel it is little more
+		    and for 8-channel little less)
+    > numbers 10-19 will show with Right-Arrow
+    > numbers 20-29 will show with Left-Arrow
+- added Subtrims
+- added SaveAs to save model config to another memory location
+- added Global Setup menu to change function features, including backlight time,
+    battery low voltage, etc. 
+- dead zone for steering and throttle
+- added key mapping specific for each model memory
+- calibrate menu will be automatically invoked after first power-on with
+  this firmware, so 6 menu items will start to blink
+
+
+Buttons:
+========
+- it is now possible to differentiate between long press (>1 second) to
+  normal button press (short) and it will be recognized like "ENTER-long"
+- Trims and DualRate
+    > now shows changed value only temporaly (5 seconds or till another
+	key press), values are saved to EEPROm automatically when it disappears
+    > when autorepeat disabled on trims (default), reset trim to 0
+	by pressing both trim keys together for long
+	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2 trim)
+    > while value is showed, it is possible to change it with rotate
+        encoder also
+    > when value set to reset_value (usualy 0), longer beep sounds to
+	attention to it and short pause is intruduced to ignore keys
+
+
+Standard menu:
+==============
+- swapped behaviour of ENTER and END when editing items, ENTER now select
+    next value and END (+ ENTER-long) will end editing items
+- ENTER-long on ABS will leave menu also (as BACK)
+- Trims are now only for steering and throttle
+- Expo
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+    > positive values are those You want to use like at Spektrum radios
+- DualRate
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+- SaveAs
+    > choose menu MODEL and press ENTER-long
+    > menu MODEL will blink
+    > choose memory position where to save model config
+    > press ENTER/BACK to save it
+- Model reset
+    > choose menu NAME and press ENTER-long
+- Subtrims
+    > choose menu TRIM and press ENTER-long
+    > menu TRIM will blink
+    > set subtrims for each channel
+    > press ENTER/BACK to end this submenu
+- channel speed
+    > choose menu D/R and press ENTER-long
+    > menu D/R wil blink
+    > select channel
+    > for channels 1 and 2 (steering and throttle)
+	- turn wheel left to show left arrow
+	    - this represents Turn speed or throttle speed
+	- turn wheel right to show right arrow
+	    - this represents Return speed or
+	      "throttle speed only for forward" (OFF/ON)
+    > select required speed 1...100%
+	- 100% means no delay
+	-   1% means above 4s delay end to end
+- mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
+  throttle), Multi-Position (to set arbitrary up to 8 positions)
+    > choose menu EPOINT and press ENTER-long
+    > menu EPOINT will blink
+    > select one of mixes 4WS (4), DIG (d), brake cut-off (b),
+	multi-position (P)
+      for mixes 4WS, DIG:
+	> press ENTER and choose channel for this mix or OFF
+	    - for dual-ESC steering (boat, tank, ...) select DIG channel 1 and
+	    with D/R reduce required ESC travel (at 100% it will go to contra
+	    to allow steering at place)
+	> press ENTER and set mix in range -100...0...100 %
+	    0%   is default and means both channel have same max steering/throttle
+	    100% means 100% reduce on rear steering/throttle (eg. no steering)
+	-100% means 100% reduce on front steering/throttle (eg. no steering)
+	> for 4WS press ENTER and select crab (CRB) or no-crab (NOC)
+      for Multi-Position:
+	> press ENTER and choose channel for this function or OFF
+	> press ENTER and set channel value for first position
+	> press ENTER and set channel value for second position or END
+	> ... up to eight position
+      for brake cut-off:
+	> ser OFF or CUT
+- Key mapping specific for each model:
+    > choose menu REV and press ENTER-long
+    > menu REV will blink
+    > choose trims (id 1 2 3 d) or other keys (CH3-C, Back-b, End-E) or
+        if trim is OFF, then also trim keys (id 1 2 3 d with left/right arrow)
+    > press ENTER and modify first setting
+    > press ENTER and modify next setting
+    > ....
+    -----
+    steps of settings of trims (1 2 3 and D/R):
+	- sequence:
+	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val -> rotate
+	  id:          %          % V     V          V blinking        % blinking      % V blinking
+	- function: selected function listed at the end of manual
+	- buttons:
+	    MOM - momentary, hold left/right trim key to get end values,
+		  when nothing pressed, servo is at centre
+	    NOL - no long keys, long press is the same as short press
+	    RPT - autorepeat is on
+	    RES - long press of one of trim keys will reset to
+		  centre/reset value
+	    END - long press of trim key will set to coresponding end value
+	- step: select trim step for one trim key press (1, 2, ... 100, 200),
+		not available when buttons MOM or fuction is list of items (MPO)
+	- reverse:
+	    NOR - no change
+	    REV - swap left/right trim keys
+	- opposite_reset: not available when buttons MOM
+	    NOO - no change
+	    ORS - when trim key is pressed and value is at opposite
+		  side of centre/reset, set value to centre/reset,
+	- previous_val: available only when buttons MOM or fuction is list of
+			items (MPO)
+	    NPV - no change
+	    PRV - instead of setting value to centre/reset when key is released,
+		  it is set to previous value, which was active before key press
+	- rotate: available only if fuction is list of items (MPO)
+	    NOR - no rotate
+	    ROT - rotate from max item to 1.item and back
+    -----
+    steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
+	- sequence:
+	  function -> momentary -> reverse -> prev_val -> function_long -> reverse_long -> prev_val_long
+	  id:          %            V          % blink     % V              V               % blink
+	- function: selected function listed at the end of manual
+	- momentary: only available for 2-state functions (channel, ...)
+	    SWI - key press will switch something (channel value, ...)
+	    MOM - value change will be active only while key is pressed
+	- reverse: only available for 2-state functions
+	    NOR - no-press or default value is left endpoint
+	    REV - no-press or default value is right endpoint
+	- prev_val: only available for 2-state functions
+	    NPV - key release or OFF state sets value to left endpoint (noREV)
+	    PRV - key release or OFF state sets value to value active before
+		  key press or ON state
+	- function_long: function applied when long press of key happens,
+	                 choose from the same list as function
+	- reverse_long: same as "reverse"
+	- prev_val_long: same as "prev_val"
+		   
+
+
+
+Calibrate menu:
+===============
+- enter it by wheel right-turn and ENTER-long
+- 6 menu items starts to blink
+- use END or ROTATE to change channels
+- there is also channel 3 representing CH3 button (for those who will do
+    some 3-position switch/potentiometer modification)
+- there is also channal 4 representing battery voltage
+- calibrate as usual (for channel 1/2 left+mid+right and ENTER)
+    > calibrated value will disappear from menu
+    > it is not needed to calibrate all values
+- calibrate battery (it will not be probably needed to use this)
+    > select channel 4
+    > press ENTER
+    > set your current battery voltage (measure it by voltmeter)
+    > press ENTER to save it or END to no-save
+- press BACK-long or ENTER-long to end calibrate menu and save values
+
+
+Key-test menu:
+==============
+- enter it by wheel left-turn and ENTER-long
+- if ENTER-long keep pressed, all segments on display will stay on till
+    ENTER is released
+- now check keys by pressing them short or long
+- if keys long pressed, an "L" symbol will appear left to displayed key symbols
+- press BACK-long or ENTER-long to end key-test menu
+
+
+Global setup menu:
+==================
+- enter it by ENTER-long
+- now menu items MODEL and NAME will start blinking
+- select requested item by ROTATE and press ENTER
+- use ROTATE to change value and press ENTER to end value changing
+- press BACK-long or ENTER-long to end global setup menu,
+    values will be saved to EEPROM
+- selected menu items are indicated by following symbols:
+    F		firmware version (this of course cannot be changed :-)
+    L		backlight time			5s,10s...10m...MAX
+    A		inactivity alarm		OFF,1m...10m
+    LOW POWER!	battery low voltage		7.5...10.5V
+    E.POINT	maximum allowed endpoint value	100...150%
+		DANGER - values greater than 120% can damage
+			    your servo or will not be possible
+			    to transmit to receiver because of
+			    2.4GHz HF module limitation
+		This danger zone will be indicated with a flashing "d" symbol
+		  for values greater than 120%
+    1		dead zone for steering		0...50
+    2		dead zone for throttle		0...50
+    b		key beep			OFF/ON
+    d		long press key delay		100...1000 miliseconds
+    r + ALL	global reset - change to YES to set global configuration
+			       and all models to default values
+    r + MOD	all models reset - change to YES to set all models
+				   to default values
+
+
+
+Return to original (and modified) firmware:
+===========================================
+- flash original firmware
+- delete whole EEPROM (tab DATA MEMORY in STVP and write those empty zeroes)
+    or return back your saved config (also tab DATA MEMORY in STVP, read
+    your saved config from disk and write it to radio)
+- calibrate steering and throttle (not needed when You returned back saved
+    config)
+
+
+
+
+
+Functions assignable to trims:
+==============================
+OFF		- nothing, it is possible to assign each button individualy
+		  as key
+TR1, TR2	- trim of channel 1/2
+DRS, DRF, DRB	- dualrate of steering/forward/back
+EXS, EXF, EXB	- expo of steering/forward/back
+CHn		- change channel "n" value in range -100...100
+STn		- subtrim of channel "n"
+4WS		- 4 wheel steering mix -100...100%
+DIG		- DIG throttle mix -100...100%
+MPO		- Multi-POsition, switches position up/down
+SST		- steering speed turn 1...100%
+SSR		- steering speed return 1...100%
+CSn		- channel speed for channel "n" 1...100%
+
+
+
+Functions assignable to keys:
+=============================
+OFF		- nothing
+CHn		- switch channel "n" value from one end value to opposite end
+		  value. There is special handling for CH3 button. When using
+		  3-position switch instead of CH3 button and momentary is
+		  selected for this button, then centre 3-pos value will also
+		  be detected and set to servo (but this was not tested yet,
+		  I wouldn't do this modification to my radio).
+CnR		- reset value of channel "n" to centre
+4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
+DIG		- switch DIG mix between -100 and 100 (more useable when using
+		  return to previous val key setting)
+MPO		- Multi-POsition, switches position up (at END back to 1.)
+MPR		- Multi-Position Reset, switches position to first one
+
