@@ -1,5 +1,7 @@
 
 microcontroller: STM8S105K6T6C LQFP32, crystal 18.432 MHz
+		 at my unit is written STM8S105K4T6C, but it has 32KB so
+		 this must be wrong sign
 LCD driver: HOLTEK HT1621B
 encoder: 30 ticks/360deg
 
