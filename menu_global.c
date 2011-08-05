@@ -137,7 +137,7 @@ static void gs_battery_low(u8 change) {
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	return;
     }
-    if (change)  *addr = (u8)menu_change_val(*addr, 75, 105, 2, 0);
+    if (change)  *addr = (u8)menu_change_val(*addr, 60, 105, 2, 0);
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
     lcd_segment(LS_SYM_DOT, LS_ON);
     lcd_segment(LS_SYM_VOLTS, LS_ON);

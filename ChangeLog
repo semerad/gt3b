@@ -1,4 +1,8 @@
 
+*0.4.1 ()
+
+    minimum battery voltage set to 6V
+
 *0.4.0 (18 Jul 2011)
 
     use steering trim when dual-ESC steering
