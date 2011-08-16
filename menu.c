@@ -48,6 +48,11 @@ u8  menu_MP_index;		// index of MultiPosition channel
 
 
 
+//
+u8  menu_lap_count;		// lap count
+
+
+
 
 // flags for wakeup after each ADC measure
 _Bool menu_wants_adc;
@@ -172,9 +177,6 @@ void menu_stop(void) {
 
 
 // show main screen (model number and name/battery/...)
-#define MS_NAME		0
-#define MS_BATTERY	1
-#define MS_MAX		2
 static void main_screen(u8 item) {
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     lcd_segment(LS_SYM_CHANNEL, LS_OFF);
@@ -204,6 +206,12 @@ static void main_screen(u8 item) {
 	}
 	lcd_char_num3(bat_val);
 	menu_wants_adc = 1;
+    }
+    else if (item == MS_LAP_COUNT) {
+	lcd_segment(LS_SYM_DOT, LS_OFF);
+	lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	lcd_segment(LS_SYM_PERCENT, LS_ON);
+	lcd_char_num3(menu_lap_count);
     }
     lcd_update();
 }
@@ -728,14 +736,15 @@ static void select_menu(void) {
 // ****************** MAIN LOOP and init *********************************
 
 // main menu loop, shows main screen and handle keys
+u8 menu_main_screen;
 static void menu_loop(void) {
-    u8 item = MS_NAME;
+    menu_main_screen = MS_NAME;
 
     lcd_clear();
 
     while (1) {
 	if (!menu_check_keys) {
-	    main_screen(item);
+	    main_screen(menu_main_screen);
 	    btnra();
 	    menu_stop();
 	}
@@ -771,11 +780,11 @@ static void menu_loop(void) {
 	// rotate encoder - change model name/battery/...
 	else if (btn(BTN_ROT_ALL)) {
 	    if (btn(BTN_ROT_L)) {
-		if (item)  item--;
-		else       item = MS_MAX - 1;
+		if (menu_main_screen)  menu_main_screen--;
+		else		       menu_main_screen = MS_MAX - 1;
 	    }
 	    else {
-		if (++item >= MS_MAX)  item = 0;
+		if (++menu_main_screen >= MS_MAX)  menu_main_screen = 0;
 	    }
 	}
     }

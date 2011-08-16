@@ -233,6 +233,16 @@ Global setup menu:
 				   to default values
 
 
+Main screens:
+=============
+- changeable by rotate encoder:
+    model name
+    battery voltage
+    lap count - identified by "%" sign
+
+
+
+
 
 Return to original (and modified) firmware:
 ===========================================
@@ -281,4 +291,6 @@ DIG		- switch DIG mix between -100 and 100 (more useable when using
 DGR		- reset DIG mix to centre
 MPO		- Multi-POsition, switches position up (at END back to 1.)
 MPR		- Multi-Position Reset, switches position to first one
+LCI		- increment lap count
+LCR		- set lap count to zero
 

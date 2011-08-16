@@ -68,6 +68,9 @@ extern s8  menu_DIG_mix;		// mix -100..100
 extern u8  menu_MP_index;		// index of MultiPosition channel
 
 
+//
+extern u8  menu_lap_count;		// lap count
+
 
 
 
@@ -112,6 +115,11 @@ extern void menu_mix(void);
 extern void menu_key_mapping(void);
 extern void menu_key_mapping_prepare(void);
 extern void menu_buttons_initialize(void);
+extern u8 menu_main_screen;
+#define MS_NAME		0
+#define MS_BATTERY	1
+#define MS_LAP_COUNT	2
+#define MS_MAX		3
 
 
 #endif

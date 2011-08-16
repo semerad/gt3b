@@ -705,6 +705,16 @@ static void kf_multi_position_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
     }
 }
 
+// lap counter
+static void kf_lap_count(u8 *id, u8 *param, u8 flags, s16 *pv) {
+    menu_lap_count++;
+    menu_main_screen = MS_LAP_COUNT;
+}
+static void kf_lap_count_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
+    menu_lap_count = 0;
+    menu_main_screen = MS_LAP_COUNT;
+}
+
 
 
 
@@ -738,6 +748,8 @@ static const key_functions_s key_functions[] = {
     { 16, "MPO", KF_NONE, kf_multi_position, NULL },
     { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL },
     { 15, "DGR", KF_NONE, kf_reset, "DIG" },
+    { 18, "LCI", KF_NOSHOW, kf_lap_count, NULL },
+    { 19, "LCR", KF_NOSHOW, kf_lap_count_reset, NULL },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
