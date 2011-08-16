@@ -71,9 +71,9 @@ u8 config_global_set_default(void) {
 static const config_key_mapping_s default_key_mapping = {
     // keys: function, function_long
     {
-	{ 1, 0, 0, 0, 0, 0, 0, 0 },	// CH3 to channel 3
-	{ 0, 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0 }
+	{ 0, 0, 0, 0, 0, 0, 0, 0 },	// CH3 to nothing
+	{ 0, 0, 0, 0, 0, 0, 0, 0 },	// BACK to nothing
+	{ 0, 0, 0, 0, 0, 0, 0, 0 }	// END to nothing
     },
     // trims: function, reverse, step, buttons
     {
