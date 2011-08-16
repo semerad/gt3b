@@ -118,8 +118,14 @@ static void show_trim2(s16 val) {
 // multi-position show and set value
 static void show_MP(s16 val) {
     // show also selected channel/DIG
-    if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
-    else			  lcd_7seg(cm.channel_MP);
+    if (cm.channel_MP == MP_DIG) {
+	lcd_7seg(L7_D);
+	lcd_menu(LM_EPO);
+	lcd_set_blink(LMENU, LB_SPC);
+	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+	lcd_segment(LS_SYM_PERCENT, LS_ON);
+    }
+    else  lcd_7seg(cm.channel_MP);
     lcd_char_num3(cm.multi_position[menu_MP_index]);
 }
 static void set_MP(s16 *aval, u8 rotate) {
@@ -681,9 +687,16 @@ static void kf_multi_position(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
 
     if (flags & FF_SHOW) {
 	if (!menu_MP_index)  BEEP_RESET;
-	if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
-	else			      lcd_7seg(cm.channel_MP);
-	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	if (cm.channel_MP == MP_DIG) {
+	    lcd_7seg(L7_D);
+	    lcd_menu(LM_EPO);
+	    lcd_set_blink(LMENU, LB_SPC);
+	    lcd_segment(LS_SYM_PERCENT, LS_ON);
+	}
+	else {
+	    lcd_7seg(cm.channel_MP);
+	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	}
 	lcd_char_num3(cm.multi_position[menu_MP_index]);
     }
 }
