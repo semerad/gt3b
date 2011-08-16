@@ -582,6 +582,7 @@ typedef struct {
 // flags bits
 #define KF_NONE		0
 #define KF_2STATE	0b00000001
+#define KF_NOSHOW	0b00000010
 // func flags bits
 #define FF_NONE		0
 #define FF_ON		0b00000001
@@ -844,6 +845,9 @@ static u8 menu_popup_key(u8 key_id) {
 	    btnr(btnx);
 	    key_beep();
 
+	    // if value showing disabled, exit
+	    if (kf->flags & KF_NOSHOW)  break;
+
 	    // if another button was pressed, leave this screen
 	    if (buttons)  break;
 	    if (buttons_state != buttons_state_last) break;
@@ -900,7 +904,8 @@ static u8 menu_popup_key(u8 key_id) {
 	if (km->function_long && btnl(btnx)) {
 	    // long key press
 	    key_beep();
-	    flags = FF_SHOW;
+	    flags = 0;
+	    if (!(kfl->flags & KF_NOSHOW))  flags = FF_SHOW;
 	    if (kfl->flags & KF_2STATE) {	// ON/OFF is only for 2-state
 		if (*mbs & MBS_ON_LONG) {
 		    // is ON, switch to OFF
@@ -915,13 +920,18 @@ static u8 menu_popup_key(u8 key_id) {
 		if (km->previous_val_long)  flags |= FF_PREVIOUS;
 	    }
 	    kfl->func(kfl->name, kfl->param, flags, pv);  // switch value
+	    if (kfl->flags & KF_NOSHOW) {
+		btnr(btnx);
+		return 0;
+	    }
 	    lcd_update();
 	    is_long = 1;
 	}
 	else if (km->function && btn(btnx)) {
 	    // short key press
 	    key_beep();
-	    flags = FF_SHOW;
+	    flags = 0;
+	    if (!(kf->flags & KF_NOSHOW))  flags = FF_SHOW;
 	    if (kf->flags & KF_2STATE) {	// ON/OFF is only for 2-state
 		if (*mbs & MBS_ON) {
 		    // is ON, switch to OFF
@@ -936,12 +946,16 @@ static u8 menu_popup_key(u8 key_id) {
 		if (km->previous_val)  flags |= FF_PREVIOUS;
 	    }
 	    kf->func(kf->name, kf->param, flags, pv);  // switch value
+	    if (kf->flags & KF_NOSHOW) {
+		btnr(btnx);
+		return 0;
+	    }
 	    lcd_update();
 	}
 	else {
 	    // nothing to do
 	    btnr(btnx);
-	    break;
+	    return 0;
 	}
 	btnr(btnx);
 
