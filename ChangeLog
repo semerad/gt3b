@@ -3,6 +3,7 @@
 
     minimum battery voltage set to 6V
     CH3 key set default to OFF
+    added DGR key function to reset DIG mix to centre
 
 *0.4.0 (18 Jul 2011)
 

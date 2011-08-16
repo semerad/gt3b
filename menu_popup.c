@@ -720,8 +720,9 @@ static const key_functions_s key_functions[] = {
 #endif
     { 13, "4WS", KF_2STATE, kf_4ws, NULL },
     { 14, "DIG", KF_2STATE, kf_set_switch, NULL },
-    { 15, "MPO", KF_NONE, kf_multi_position, NULL },
-    { 16, "MPR", KF_NONE, kf_multi_position_reset, NULL },
+    { 16, "MPO", KF_NONE, kf_multi_position, NULL },
+    { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL },
+    { 15, "DGR", KF_NONE, kf_reset, "DIG" },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

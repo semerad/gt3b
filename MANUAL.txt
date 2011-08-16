@@ -278,6 +278,7 @@ CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
 DIG		- switch DIG mix between -100 and 100 (more useable when using
 		  return to previous val key setting)
+DGR		- reset DIG mix to centre
 MPO		- Multi-POsition, switches position up (at END back to 1.)
 MPR		- Multi-Position Reset, switches position to first one
 
