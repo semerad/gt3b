@@ -150,9 +150,11 @@ static u8 mix_MultiPosition(u8 val_id, u8 action) {
 	    // channel number/off
 	    val = cm.channel_MP;
 	    if (!val)  val = 2;
-	    val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
-	    if (val == 2)   cm.channel_MP = 0;
-	    else	    cm.channel_MP = val;
+	    else if (val == MP_DIG)  val = MAX_CHANNELS + 1;
+	    val = (u8)menu_change_val(val, 2, MAX_CHANNELS + 1, 1, 1);
+	    if (val == 2)   			cm.channel_MP = 0;
+	    else if (val == MAX_CHANNELS + 1)	cm.channel_MP = MP_DIG;
+	    else	    			cm.channel_MP = val;
 	}
 	else {
 	    // position value + END state (END not for first position)
@@ -176,31 +178,31 @@ static u8 mix_MultiPosition(u8 val_id, u8 action) {
 		    || ++id > (NUM_MULTI_POSITION + 1))  id = 1;
 	}
 	// allow forcing channel value
-	if (id > 1 && cm.channel_MP) {
+	if (id > 1 && cm.channel_MP && cm.channel_MP <= MAX_CHANNELS) {
 	    menu_force_value_channel = cm.channel_MP;
 	}
 	else menu_force_value_channel = 0;
-    }
-
-    // set forced value
-    if (menu_force_value_channel) {
-	val = cm.multi_position[id - 2];
-	if (val == MULTI_POSITION_END)  val = -100;
     }
 
     // show value
     lcd_7seg(L7_P);
     if (id == 1) {
 	// channel number/OFF
-	if (!cm.channel_MP)  lcd_chars("OFF");
-	else		     lcd_char_num3(cm.channel_MP);
+	if (!cm.channel_MP)	lcd_chars("OFF");
+	else if (cm.channel_MP == MP_DIG)
+				lcd_chars("DIG");
+	else			lcd_char_num3(cm.channel_MP);
     }
     else {
 	// position value
 	val = cm.multi_position[id - 2];
-	if (val == MULTI_POSITION_END)  lcd_chars("END");
-	else				lcd_char_num3(val);
-	menu_force_value = val * PPM(5);
+	if (val == MULTI_POSITION_END) {
+	    lcd_chars("END");
+	    val = -100;
+	}
+	else  lcd_char_num3(val);
+	if (cm.channel_MP == MP_DIG)	menu_DIG_mix = val;
+	else				menu_force_value = val * PPM(5);
     }
 
     return id;

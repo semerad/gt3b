@@ -117,7 +117,9 @@ static void show_trim2(s16 val) {
 
 // multi-position show and set value
 static void show_MP(s16 val) {
-    lcd_7seg(cm.channel_MP);  // show also selected channel
+    // show also selected channel/DIG
+    if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
+    else			  lcd_7seg(cm.channel_MP);
     lcd_char_num3(cm.multi_position[menu_MP_index]);
 }
 static void set_MP(s16 *aval, u8 rotate) {
@@ -134,8 +136,10 @@ static void set_MP(s16 *aval, u8 rotate) {
 	else  (*aval)--;  // no rotate, return back to previous index
     }
     // set value of channel
-    if (cm.channel_MP)
-	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[*aval];
+    if (cm.channel_MP) {
+	if (cm.channel_MP == MP_DIG)  menu_DIG_mix = cm.multi_position[*aval];
+	else  menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[*aval];
+    }
 }
 
 
@@ -667,24 +671,34 @@ static void kf_multi_position(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
     if (++menu_MP_index >= NUM_MULTI_POSITION ||
         cm.multi_position[menu_MP_index] == MULTI_POSITION_END)
 	    menu_MP_index = 0;
-    if (cm.channel_MP)
-	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[menu_MP_index];
+    if (cm.channel_MP) {
+	if (cm.channel_MP == MP_DIG)
+	    menu_DIG_mix = cm.multi_position[menu_MP_index];
+	else
+	    menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[menu_MP_index];
+    }
 
     if (flags & FF_SHOW) {
 	if (!menu_MP_index)  BEEP_RESET;
-	lcd_7seg(cm.channel_MP);
+	if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
+	else			      lcd_7seg(cm.channel_MP);
 	lcd_segment(LS_SYM_CHANNEL, LS_ON);
 	lcd_char_num3(cm.multi_position[menu_MP_index]);
     }
 }
 static void kf_multi_position_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
     menu_MP_index = 0;
-    if (cm.channel_MP)
-	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
+    if (cm.channel_MP) {
+	if (cm.channel_MP == MP_DIG)
+	    menu_DIG_mix = cm.multi_position[0];
+	else
+	    menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
+    }
 
     if (flags & FF_SHOW) {
 	BEEP_RESET;
-	lcd_7seg(cm.channel_MP);
+	if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
+	else			      lcd_7seg(cm.channel_MP);
 	lcd_segment(LS_SYM_CHANNEL, LS_ON);
 	lcd_char_num3(cm.multi_position[0]);
     }

@@ -108,6 +108,7 @@ typedef struct {
 
 #define NUM_MULTI_POSITION  8
 #define MULTI_POSITION_END  -128
+#define MP_DIG              0x0f
 
 // change MAGIC number when changing model config
 // also add code to setting default values
