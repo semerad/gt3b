@@ -1,6 +1,7 @@
 
 CHn, DIG for keys - ability to select 2 values to switch between them
 more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
+? digital/custom switches (set when some conditions are satisfied)
 ? setting fail-safe for 8ch receiver
 ? not so smooth servo travel
 
