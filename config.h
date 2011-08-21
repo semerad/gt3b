@@ -50,7 +50,9 @@ typedef struct {
     u8  endpoint_max;		// max allowed endpoint value (def 120%)
     u8  long_press_delay;	// long press delay in 5ms steps
     u8  inactivity_alarm:4;	// time (min) of inactivity warning
-    u8	key_beep:1;
+    u8	key_beep:1;		// beep on key press
+    u8	reset_beep:1;		// beep on center/reset value
+    u8	unused:2;
 } config_global_s;
 
 extern config_global_s config_global;

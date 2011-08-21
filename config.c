@@ -53,6 +53,8 @@ u8 config_global_set_default(void) {
     cg.long_press_delay	= 1000 / 5;	// 1sec
     cg.inactivity_alarm	= 0;
     cg.key_beep		= 1;
+    cg.reset_beep	= 1;
+    cg.unused		= 0;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);

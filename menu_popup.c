@@ -59,7 +59,7 @@ void menu_buttons_initialize(void) {
 static @near s16 menu_buttons_previous_values[NUM_KEYS + 2 * NUM_TRIMS];
 
 
-#define BEEP_RESET  buzzer_on(20, 0, 1)
+#define BEEP_RESET  if (cg.reset_beep)  buzzer_on(20, 0, 1)
 
 
 
