@@ -110,7 +110,7 @@ Standard menu:
 	> press ENTER and set channel value for second position or END
 	> ... up to eight position
       for brake cut-off:
-	> ser OFF or CUT
+	> set OFF or CUT
 - Key mapping specific for each model:
     > choose menu REV and press ENTER-long
     > menu REV will blink
@@ -215,7 +215,7 @@ Global setup menu:
     F		firmware version (this of course cannot be changed :-)
     L		backlight time			5s,10s...10m...MAX
     A		inactivity alarm		OFF,1m...10m
-    LOW POWER!	battery low voltage		7.5...10.5V
+    LOW POWER!	battery low voltage		2.0...10.5V
     E.POINT	maximum allowed endpoint value	100...150%
 		DANGER - values greater than 120% can damage
 			    your servo or will not be possible

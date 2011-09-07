@@ -1,16 +1,24 @@
 
-CHn, DIG for keys - ability to select 2 values to switch between them
+timer
+    - up/down/lap/lap navigate - buttons LAP START, LAP RESET
+    - ignore lap button after press for 3 seconds to eliminate double clicks
+    - lap time - after press show last time for 3s and then current time
+	       - somewhere show list of lap times
+    - TimerUpReset
+    - TimerUpStart
+    - TimerDownReset
+    - TimerDownStart
+    - TimerLapReset
+    - TimerLapInc/LapCountInc
+
 more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? digital/custom switches (set when some conditions are satisfied)
-? setting fail-safe for 8ch receiver
 ? not so smooth servo travel
 
 
 
 Some suggestions taken from manuals of other radios:
 
-timer - up/down/lap/lap navigate - buttons LAP START, LAP RESET
----
 ? CH3-8 position settable from menu
 programmable mixes
 throttle speed 1-3 SPEED 1-100%, trigger points 1-100

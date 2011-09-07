@@ -1,5 +1,6 @@
 *0.4.2 ()
     added global setting to disable center/reset value beep
+    minimum battery voltage set to 2V for those experimenting with 1S cell
 
 *0.4.1 (17 Aug 2011)
 
