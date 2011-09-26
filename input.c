@@ -71,10 +71,10 @@ void input_init(void) {
     IO_IP(B, 5);  // button row B5
     IO_IP(C, 4);  // button row C4
     IO_IP(D, 3);  // button row D3
-    IO_IP(C, 5);   // button col C5
-    IO_IP(C, 6);   // button col C6
-    IO_IP(C, 7);   // button col C7
-    // and set default row values
+    IO_IP(C, 5);  // button col C5
+    IO_IP(C, 6);  // button col C6
+    IO_IP(C, 7);  // button col C7
+    // and set default row values to 1
     BSET(PB_ODR, 4);
     BSET(PB_ODR, 5);
     BSET(PC_ODR, 4);
