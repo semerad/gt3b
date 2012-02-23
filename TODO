@@ -1,15 +1,43 @@
 
 timer
-    - up/down/lap/lap navigate - buttons LAP START, LAP RESET
+    - up/down/lap
     - ignore lap button after press for 3 seconds to eliminate double clicks
     - lap time - after press show last time for 3s and then current time
 	       - somewhere show list of lap times
-    - TimerUpReset
-    - TimerUpStart
-    - TimerDownReset
-    - TimerDownStart
-    - TimerLapReset
-    - TimerLapInc/LapCountInc
+    - start with throttle
+    - main screens - ENTER stops and allows to set alarm/throttle start/
+		     show lap counts
+    - TimerUpReset - stop+reset to 0
+    - TimerUpStart - start/stop
+	- alarm
+    - TimerDownReset - stop+reset to alarm time
+    - TimerDownStart - reset to alarm time+restart
+	- alarm - then count up
+    - TimerLapReset - stop/reset
+    - TimerLapInc - start/count/stop after alarm
+	- alarm
+    - LapCountInc - count
+    - time format
+	00.0 % - 2-minutes, 1-10ths seconds
+	000  % - 1-minutes, 2-seconds
+	00.0   - 2-seconds, 1-0.1 seconds
+	000    - 1-seconds, 2-0.01 seconds
+timer losikid
+    1 or 2 timers on extra main screens
+    ENTER selects timers settings
+	timer type
+	    lap timer - lap, stop, reset
+	    ? lap timer down - laps_count
+	    lap counter - lap, reset
+	    count up - alarm, pause, reset
+	    cound down - alarm, pause, reset (save rest to lap timers)
+	alarm
+	throttle start
+    ENTER-long selects lap times
+warning when powering up and steering wheel + throttle not in center position
+beep at startup - switchable at global config
+check inactivity as compare to previous value and not center value
+shut-off low-battery beeping
 
 more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? digital/custom switches (set when some conditions are satisfied)
