@@ -1,4 +1,17 @@
 
+ADC wakeups - only every 1/2s instead of checking time at menu code
+ADC - measure every 1ms - timer 1ms, buttons code still every 5ms
+CALC - calc at end of SYNC signal
+	- measure durations of CALC
+	- at end of CALC PPM pulse and servo pulses
+	- after last servo pulse SYNC with time frame_len - calc_len
+	  without PPM pulse, after that activate CALC
+
+warning when powering up and steering wheel + throttle not in center position
+beep at startup - switchable at global config
+check inactivity as compare to previous value and not center value
+shut-off low-battery beeping
+
 timer
     - up/down/lap
     - ignore lap button after press for 3 seconds to eliminate double clicks
@@ -34,10 +47,6 @@ timer losikid
 	alarm
 	throttle start
     ENTER-long selects lap times
-warning when powering up and steering wheel + throttle not in center position
-beep at startup - switchable at global config
-check inactivity as compare to previous value and not center value
-shut-off low-battery beeping
 
 more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? digital/custom switches (set when some conditions are satisfied)
