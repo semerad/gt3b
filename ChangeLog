@@ -1,6 +1,8 @@
 *0.4.2 ()
     added global setting to disable center/reset value beep
     minimum battery voltage set to 2V for those experimenting with 1S cell
+    PPM length shortened to "NUM_CHANNELS x 2ms + 4ms" to send new data
+	to receiver as soon as possible
 
 *0.4.1 (17 Aug 2011)
 

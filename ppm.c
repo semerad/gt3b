@@ -43,7 +43,7 @@
 #define PPM_300US_SYNC ((PPM_MUL_SYNC * 3 + 5) / 10)
 
 // length of whole frame
-#define PPM_FRAME_LENGTH  22500
+#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2000 + 4000)
 
 
 // channel variables
