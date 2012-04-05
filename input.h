@@ -62,10 +62,12 @@ extern volatile u16 buttons_long;	// >1s presses buttons
 #define btns_all(mask)	((buttons_state & (mask)) == (mask))
 #define btnl(mask)	(buttons_long & (mask))
 #define btnl_all(mask)  ((buttons_long & (mask)) == (mask))
+
+
 // variables for ADC values
 extern @near volatile u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
 #define ADC_OVS_SHIFT 2
-#define ADC_OVS_RND   2
+#define ADC_OVS_ROUND 2
 #define adc_steering_ovs   adc_all_ovs[0]
 #define adc_throttle_ovs   adc_all_ovs[1]
 #define adc_ch3_ovs        adc_all_ovs[2]
