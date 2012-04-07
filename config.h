@@ -52,7 +52,8 @@ typedef struct {
     u8  inactivity_alarm:4;	// time (min) of inactivity warning
     u8	key_beep:1;		// beep on key press
     u8	reset_beep:1;		// beep on center/reset value
-    u8	unused:2;
+    u8	poweron_beep:1;		// beep on power on
+    u8	unused:1;
 } config_global_s;
 
 extern config_global_s config_global;

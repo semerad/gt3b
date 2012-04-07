@@ -92,7 +92,7 @@ extern u8 menu_check_keys;
 
 // internal functions, used in split menu files
 extern void menu_stop(void);
-extern void menu_calibrate(void);
+extern void menu_calibrate(u8 at_poweron);
 extern void menu_key_test(void);
 extern void menu_global_setup(void);
 extern s16  menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate);

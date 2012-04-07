@@ -756,7 +756,7 @@ static void menu_loop(void) {
 	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
 	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
-		menu_calibrate();
+		menu_calibrate(0);
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		menu_key_test();
 	    else menu_global_setup();
@@ -804,9 +804,13 @@ void menu_init(void) {
 	adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
 	adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
 	adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
-	adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
-	    menu_calibrate();
+	adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone)) {
+	    menu_calibrate(1);
+	    btnra();
+    }
+    else if (cg.poweron_beep)  beep(30);
     apply_global_config();
+    reset_inactivity_timer();
 
     // read model config from eeprom, but not awake CALC yet
     menu_load_model();

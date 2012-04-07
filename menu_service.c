@@ -31,7 +31,7 @@
 
 
 // calibrate menu
-void menu_calibrate(void) {
+void menu_calibrate(u8 at_poweron) {
     u8 channel = 1;
     u16 last_val = 0xffff;
     u16 val;
@@ -44,7 +44,8 @@ void menu_calibrate(void) {
 
     // cleanup screen and disable possible low bat warning
     buzzer_off();
-    key_beep();
+    if (at_poweron)	buzzer_on(30, 30, 2);
+    else		key_beep();
     menu_battery_low = 0;	// it will be set automatically again
     backlight_set_default(BACKLIGHT_MAX);
     backlight_on();

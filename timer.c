@@ -44,7 +44,7 @@ void timer_init(void) {
     TIM2_ARRL = lo8(TIMER_1MS - 1);
     TIM2_CR1 = 0b00000101;	// URS-overflow, enable
 
-    inactivity = cg.inactivity_alarm * 60;
+    inactivity = 60;		// default value before set to global one
 }
 
 
@@ -155,7 +155,8 @@ void delay_menu_always(u8 len_s) {
 
 // inactivity timer reset
 void reset_inactivity_timer(void) {
-    if (!inactivity)  buzzer_off();	// stop beeping when applied previously
+    // stop beeping when applied previously
+    if (cg.inactivity_alarm && !inactivity)  buzzer_off();
     inactivity = cg.inactivity_alarm * 60;
 }
 

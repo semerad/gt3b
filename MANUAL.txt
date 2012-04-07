@@ -227,6 +227,7 @@ Global setup menu:
     2		dead zone for throttle		0...50
     b		key beep			OFF/ON
     C		center/reset beep		OFF/ON
+    P		poweron beep			OFF/ON
     d		long press key delay		100...1000 miliseconds
     r + ALL	global reset - change to YES to set global configuration
 			       and all models to default values
