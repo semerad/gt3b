@@ -76,7 +76,7 @@ static const config_key_mapping_s default_key_mapping = {
     {
 	{ 0, 0, 0, 0, 0, 0, 0, 0 },	// CH3 to nothing
 	{ 0, 0, 0, 0, 0, 0, 0, 0 },	// BACK to nothing
-	{ 0, 0, 0, 0, 0, 0, 0, 0 }	// END to nothing
+	{ 0, 0, 0, 0, 20, 0, 0, 0 }	// END-long to battery low shutup
     },
     // trims: function, reverse, step, buttons
     {

@@ -6,8 +6,6 @@ CALC - calc at end of SYNC signal
 	  without PPM pulse, after that activate CALC
 	- maybe constant length servo pulse
 
-shut-off low-battery beeping
-
 timer
     - up/down/lap
     - ignore lap button after press for 3 seconds to eliminate double clicks

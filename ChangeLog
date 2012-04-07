@@ -10,6 +10,8 @@
     added poweron beep, can be set ON/OFF in global config
     inactivity timer compares ADC values with previous ones, so now
 	it will activate when radio is not center callibrated also
+    added key function BLS to shutup battery low beeper, by default is
+	assigned to END-long
 
 *0.4.1 (17 Aug 2011)
 

@@ -310,6 +310,7 @@ void menu_global_setup(void) {
     buzzer_off();
     key_beep();
     menu_battery_low = 0;	// it will be set automatically again
+    battery_low_shutup = 0;
     backlight_set_default(BACKLIGHT_MAX);
     backlight_on();
     lcd_clear();

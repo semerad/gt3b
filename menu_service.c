@@ -47,6 +47,7 @@ void menu_calibrate(u8 at_poweron) {
     if (at_poweron)	buzzer_on(30, 30, 2);
     else		key_beep();
     menu_battery_low = 0;	// it will be set automatically again
+    battery_low_shutup = 0;
     backlight_set_default(BACKLIGHT_MAX);
     backlight_on();
     lcd_clear();
@@ -223,6 +224,7 @@ void menu_key_test(void) {
     buzzer_off();
     key_beep();
     menu_battery_low = 0;	// it will be set automatically again
+    battery_low_shutup = 0;
 
     // do full screen blink
     lcd_set_full_on();

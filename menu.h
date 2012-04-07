@@ -83,6 +83,7 @@ extern u8  menu_lap_count;		// lap count
 extern _Bool menu_wants_adc;
 // flag low battery voltage
 extern _Bool menu_battery_low;
+extern _Bool battery_low_shutup;  // stop bat low beeping
 // raw battery ADC value for check to battery low
 extern u16 battery_low_raw;
 // don't stop main loop and check keys

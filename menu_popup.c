@@ -728,6 +728,12 @@ static void kf_lap_count_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
     menu_main_screen = MS_LAP_COUNT;
 }
 
+// shut up battery low beeper
+static void kf_battery_low_shutup(u8 *id, u8 *param, u8 flags, s16 *pv) {
+    battery_low_shutup = 1;
+    buzzer_off();
+}
+
 
 
 
@@ -763,6 +769,7 @@ static const key_functions_s key_functions[] = {
     { 15, "DGR", KF_NONE, kf_reset, "DIG" },
     { 18, "LCI", KF_NOSHOW, kf_lap_count, NULL },
     { 19, "LCR", KF_NOSHOW, kf_lap_count_reset, NULL },
+    { 20, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL },  // default END-long
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
