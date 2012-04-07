@@ -23,12 +23,14 @@ ppm_interrupt
     - wakeups task CALC during SYNC signal
 timer_interrupt
     - timer2 overflow
+    - every 1ms read ADC values
     - every 5ms
-    - increments time from start
-    - count LCD blink time and wakeups task LCD
-    - handles buzzer
-    - wakeups task INPUT
-    - handles task MENU delay and wakeups this task
+	- increments time from start
+	- count LCD blink time and wakeups task LCD
+	- handles buzzer
+	- wakeups task INPUT
+	- wakeups task MENU when it wants ADC values (calibrate, ...)
+	- handles task MENU delay and wakeups this task
 
 
 
@@ -40,7 +42,7 @@ LCD
     - is waked up by lcd_update(), lcd_clear()
     - is waked up from timer to do automatic blinking
 INPUT
-    - is doing reading of ADC values and key matrix
+    - is doing reading key matrix and some ADC checks
     - is waked up from timer every 5ms
 CALC
     - is computing values for each servo and sync signal
@@ -48,10 +50,9 @@ CALC
     - also needed to wakeup after changing number of PPM channels in MENU
 MENU
     - is main program handling keys, menus, lcd
-    - is waked up from timer when menu_delay expired
+    - is waked up from timer when menu_delay expired or when ADC values needed
     - is waked up from INPUT task when
 	- buttons state changed
-	- MENU task wanted ADC values (for calibrate) or battery voltage
 	- status of battery low changed
 
 

@@ -118,7 +118,7 @@ u16 buttons;
 u16 buttons_long;  // >1s press
 // variables for ADC values
 @near u16 adc_all_last[3], adc_battery_last;
-@near u16 adc_all_ovs[3], adc_battery;
+@near u16 adc_battery;
 @near u32 adc_battery_filt;
 
 
@@ -305,43 +305,26 @@ static void read_keys(void) {
 
 // ADC buffers, last 4 values for each channel
 #define ADC_BUFFERS  4
-@near static u16 adc_buffer[ADC_BUFFERS][3];
-static u8  adc_buffer_pos;
+@near u16 adc_buffer0[ADC_BUFFERS];
+@near u16 adc_buffer1[ADC_BUFFERS];
+@near u16 adc_buffer2[ADC_BUFFERS];
+u16 adc_buffer_pos;
 
 
-// define missing ADC buffer registers
-volatile u16 ADC_DB0R @0x53e0;
-volatile u16 ADC_DB1R @0x53e2;
-volatile u16 ADC_DB2R @0x53e4;
-volatile u16 ADC_DB3R @0x53e6;
-
-// read ADC values and compute sum of last 4 for each channel
-#define ADC_NEWVAL(id) \
-    adc_all_last[id] = ADC_DB ## id ## R; \
-    buf[id] = adc_all_last[id]; \
-    adc_all_ovs[id] = adc_buffer[0][id] + adc_buffer[1][id] \
-                      + adc_buffer[2][id] + adc_buffer[3][id];
+// read ADC values
 static void read_ADC(void) {
-    u16 *buf = adc_buffer[adc_buffer_pos];
-    u8  dead;
+    READ_ADC();
+}
 
-    ADC_NEWVAL(0);
-    ADC_NEWVAL(1);
-    ADC_NEWVAL(2);
-    adc_battery_last = ADC_DB3R;
 
-    adc_buffer_pos++;
-    adc_buffer_pos &= 3;
-
-    BRES(ADC_CSR, 7);		// remove EOC flag
-    BSET(ADC_CR1, 0);		// start new conversion
-
-    // average battery voltage and check battery low
+// average battery voltage and check battery low
+static void update_battery(void) {
     // ignore very low, which means that it is supplied from SWIM connector
     adc_battery_filt = adc_battery_filt * (ADC_BAT_FILT - 1); // splitted - compiler hack
     adc_battery_filt = (adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT
 		       + adc_battery_last;
     adc_battery = (u16)((adc_battery_filt + (ADC_BAT_FILT / 2)) / ADC_BAT_FILT);
+
     // start checking battery after 5s from power on
     if (time_sec >= 5) {
 	// wakeup task only when something changed
@@ -360,13 +343,12 @@ static void read_ADC(void) {
 	    }
 	}
     }
+}
 
-    // wakeup MENU task when showing battery or at calibrate
-    if (menu_wants_adc)
-	awake(MENU);
 
-    // reset inactivity timer when some steering or throttle applied
-    dead = cg.steering_dead_zone;
+// reset inactivity timer when some steering or throttle applied
+static void check_inactivity(void) {
+    u8 dead = cg.steering_dead_zone;
     if (dead < 20)  dead = 20;  // use some minimal dead zone for this check
     if (adc_steering_last < (cg.calib_steering_mid - dead) ||
         adc_steering_last > (cg.calib_steering_mid + dead))
@@ -388,9 +370,8 @@ static void read_ADC(void) {
 // input task, awaked every 5ms
 _Bool input_initialized;
 #define ADC_BUFINIT(id) \
-    adc_buffer[1][id] = adc_buffer[2][id] = adc_buffer[3][id] = \
-                        adc_buffer[0][id]; \
-    adc_all_ovs[id] = adc_buffer[0][id] << ADC_OVS_SHIFT;
+    adc_buffer ## id ## [1] = adc_buffer ## id ## [2] = \
+	adc_buffer ## id ## [3] = adc_buffer ## id ## [0];
 static void input_loop(void) {
 
     // read initial ADC values
@@ -410,10 +391,9 @@ static void input_loop(void) {
     input_initialized = 1;
 
     while (1) {
-	// read ADC only when EOC flag (only for first it will not be ready)
-	if (BCHK(ADC_CSR, 7))
-	    read_ADC();
 	read_keys();
+	check_inactivity();
+	update_battery();
 	stop();
     }
 }

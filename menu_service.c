@@ -88,7 +88,7 @@ void menu_calibrate(void) {
 	    // select actual voltage for channel 4
 	    if (channel == 1) {
 		key_beep();
-		val = (adc_steering_ovs + ADC_OVS_ROUND) >> ADC_OVS_SHIFT;
+		val = ADC_OVS(steering);
 		if (val < CALIB_ST_LOW_MID) {
 		    cg.calib_steering_left = val;
 		    seg = LS_MENU_MODEL;
@@ -106,7 +106,7 @@ void menu_calibrate(void) {
 	    }
 	    else if (channel == 2) {
 		key_beep();
-		val = (adc_throttle_ovs + ADC_OVS_ROUND) >> ADC_OVS_SHIFT;
+		val = ADC_OVS(throttle);
 		if (val < CALIB_TH_LOW_MID) {
 		    cg.calib_throttle_fwd = val;
 		    seg = LS_MENU_TRIM;
@@ -157,8 +157,22 @@ void menu_calibrate(void) {
 	}
 
 	// show ADC value if other than last val
-	if (channel == 4)  val = adc_battery;
-	else  val = (adc_all_ovs[channel-1] + ADC_OVS_ROUND) >> ADC_OVS_SHIFT;
+	switch (channel) {
+	    case 1:
+		val = ADC_OVS(steering);
+		break;
+	    case 2:
+		val = ADC_OVS(throttle);
+		break;
+	    case 3:
+		val = ADC_OVS(ch3);
+		break;
+	    case 4:
+		val = adc_battery;
+		break;
+	    default:		// to eliminate compiler warning
+		val = 0;
+	}
 	// only update display every 1s
 	if (time_sec >= update_time) {
 	    update_time = time_sec + 1;

@@ -33,14 +33,15 @@ static @near u16 inactivity;
 
 // initialize timer 2 used to count seconds
 #define TIMER_5MS  (KHZ / 2 * 5)
+#define TIMER_1MS  (KHZ / 2)
 void timer_init(void) {
     BSET(CLK_PCKENR1, 5);	// enable clock to TIM2
     TIM2_CNTRH = 0;		// start at 0
     TIM2_CNTRL = 0;
     TIM2_PSCR = 1;		// clock / 2
     TIM2_IER = 0b00000001;	// enable update interrupt
-    TIM2_ARRH = hi8(TIMER_5MS - 1);	// count till 5ms time
-    TIM2_ARRL = lo8(TIMER_5MS - 1);
+    TIM2_ARRH = hi8(TIMER_1MS - 1);	// count till 1ms time
+    TIM2_ARRL = lo8(TIMER_1MS - 1);
     TIM2_CR1 = 0b00000101;	// URS-overflow, enable
 
     inactivity = cg.inactivity_alarm * 60;
@@ -50,12 +51,22 @@ void timer_init(void) {
 // count seconds from power on
 volatile u16 time_sec;
 volatile u8  time_5ms;
+volatile u8  time_1ms;
 static u16 menu_delay;		// timer for delay in MENU task
 
 
-// interrupt every 5ms
+// interrupt every 1ms
 @interrupt void timer_interrupt(void) {
     BRES(TIM2_SR1, 0);  // erase interrupt flag
+
+    // read ADC only when EOC flag (only for first it will not be ready)
+    if (input_initialized && BCHK(ADC_CSR, 7)) {
+	READ_ADC();
+    }
+
+    // increment 1ms steps
+    if (++time_1ms < 5)  return;
+    time_1ms = 0;
 
     // increment time from start
     if (++time_5ms >= 200) {
@@ -115,6 +126,10 @@ static u16 menu_delay;		// timer for delay in MENU task
 
     // wakeup INPUT task
     awake(INPUT);
+
+    // wakeup MENU task every 40ms when showing battery or at calibrate
+    if (menu_wants_adc && !(time_5ms & 0b00000111))
+	awake(MENU);
 
     // task MENU delay
     if (menu_delay && !--menu_delay)

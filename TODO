@@ -1,6 +1,4 @@
 
-ADC wakeups - only every 1/2s instead of checking time at menu code
-ADC - measure every 1ms - timer 1ms, buttons code still every 5ms
 CALC - calc at end of SYNC signal
 	- measure durations of CALC
 	- at end of CALC PPM pulse and servo pulses

@@ -64,23 +64,6 @@ extern volatile u16 buttons_long;	// >1s presses buttons
 #define btnl_all(mask)  ((buttons_long & (mask)) == (mask))
 
 
-// variables for ADC values
-extern @near volatile u16 adc_all_ovs[3];	// oversampled from 4 samples and is 4* more
-#define ADC_OVS_SHIFT 2
-#define ADC_OVS_ROUND 2
-#define adc_steering_ovs   adc_all_ovs[0]
-#define adc_throttle_ovs   adc_all_ovs[1]
-#define adc_ch3_ovs        adc_all_ovs[2]
-extern @near volatile u32 adc_battery_filt;	// battery will be filtered more times
-#define ADC_BAT_FILT  512
-extern @near volatile u16 adc_battery;	// adc_battery_filt >> ADC_BATTERY_SHIFT
-extern @near volatile u16 adc_all_last[3];	// last readed value
-#define adc_steering_last  adc_all_last[0]
-#define adc_throttle_last  adc_all_last[1]
-#define adc_ch3_last       adc_all_last[2]
-extern @near volatile u16 adc_battery_last;
-
-
 // reset pressed button(s)
 // do it after used that button in code
 extern void button_reset(u16 btn);
@@ -92,6 +75,65 @@ extern void button_reset_nolong(u16 btn);
 
 // set autorepeat
 extern void button_autorepeat(u8 btn);
+
+
+
+
+
+// variables for ADC values
+
+// define missing ADC buffer registers
+volatile u16 ADC_DB0R @0x53e0;
+volatile u16 ADC_DB1R @0x53e2;
+volatile u16 ADC_DB2R @0x53e4;
+volatile u16 ADC_DB3R @0x53e6;
+
+// last readed values
+extern @near volatile u16 adc_all_last[3];
+#define adc_steering_last  adc_all_last[0]
+#define adc_throttle_last  adc_all_last[1]
+#define adc_ch3_last       adc_all_last[2]
+extern @near volatile u16 adc_battery_last;
+
+// ADC buffers, last 4 values for each channel
+//   average will be computed when used
+#define ADC_BUFFERS  4
+extern @near u16 adc_buffer0[ADC_BUFFERS];
+extern @near u16 adc_buffer1[ADC_BUFFERS];
+extern @near u16 adc_buffer2[ADC_BUFFERS];
+#define ADC_OVS_SHIFT 2
+#define ADC_OVS_ROUND 2
+#define adc_steering_ovs   (adc_buffer0[0] + adc_buffer0[1] + adc_buffer0[2] \
+			    + adc_buffer0[3])
+#define adc_throttle_ovs   (adc_buffer1[0] + adc_buffer1[1] + adc_buffer1[2] \
+			    + adc_buffer1[3])
+#define adc_ch3_ovs        (adc_buffer2[0] + adc_buffer2[1] + adc_buffer2[2] \
+			    + adc_buffer2[3])
+#define ADC_OVS(name) \
+    ((adc_ ## name ## _ovs + ADC_OVS_ROUND) >> ADC_OVS_SHIFT)
+
+// battery will be filtered more times
+extern @near volatile u32 adc_battery_filt;
+#define ADC_BAT_FILT  512
+extern @near volatile u16 adc_battery;	// adc_battery_filt / ADC_BAT_FILT
+
+// code reading last ADC values
+//   retypes to force more optimized code produced by compiler
+extern u16 adc_buffer_pos;	// step 2 (skip 16bit values)
+#define ADC_NEWVAL(id) \
+    *(u16 *)((u8 *)adc_buffer ## id ## + adc_buffer_pos) = \
+	adc_all_last[id] = \
+	ADC_DB ## id ## R;
+#define READ_ADC() \
+    ADC_NEWVAL(0); \
+    ADC_NEWVAL(1); \
+    ADC_NEWVAL(2); \
+    adc_battery_last = ADC_DB3R; \
+    *((u8 *)&adc_buffer_pos + 1) = (u8)((u8)((u8)adc_buffer_pos + 2) & 7); \
+    BRES(ADC_CSR, 7);		/* remove EOC flag */			   \
+    BSET(ADC_CR1, 0);		// start new conversion
+
+
 
 
 
