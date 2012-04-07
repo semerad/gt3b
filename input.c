@@ -347,18 +347,21 @@ static void update_battery(void) {
 
 
 // reset inactivity timer when some steering or throttle applied
+static @near u16 last_steering = 30000;  // more that it can be
+static @near u16 last_throttle = 30000;  // more that it can be
+#define INACTIVITY_DEAD 20
 static void check_inactivity(void) {
-    u8 dead = cg.steering_dead_zone;
-    if (dead < 20)  dead = 20;  // use some minimal dead zone for this check
-    if (adc_steering_last < (cg.calib_steering_mid - dead) ||
-        adc_steering_last > (cg.calib_steering_mid + dead))
+    if (adc_steering_last < (last_steering - INACTIVITY_DEAD) ||
+        adc_steering_last > (last_steering + INACTIVITY_DEAD)) {
 	    reset_inactivity_timer();
-    else {
-	dead = cg.throttle_dead_zone;
-	if (dead < 20)  dead = 20;  // use some minimal dead zone for this check
-	if (adc_throttle_last < (cg.calib_throttle_mid - dead) ||
-	    adc_throttle_last > (cg.calib_throttle_mid + dead))
-		reset_inactivity_timer();
+	    last_steering = adc_steering_last;
+	    last_throttle = adc_throttle_last;
+    }
+    else if (adc_throttle_last < (last_throttle - INACTIVITY_DEAD) ||
+	adc_throttle_last > (last_throttle + INACTIVITY_DEAD)) {
+	    reset_inactivity_timer();
+	    last_steering = adc_steering_last;
+	    last_throttle = adc_throttle_last;
     }
 }
 

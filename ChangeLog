@@ -8,6 +8,8 @@
 	show calibration screen, because recalibration will be probably
 	needed
     added poweron beep, can be set ON/OFF in global config
+    inactivity timer compares ADC values with previous ones, so now
+	it will activate when radio is not center callibrated also
 
 *0.4.1 (17 Aug 2011)
 
