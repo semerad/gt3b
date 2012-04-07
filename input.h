@@ -139,7 +139,6 @@ extern u16 adc_buffer_pos;	// step 2 (skip 16bit values)
 
 // INPUT task
 E_TASK(INPUT);
-extern _Bool input_initialized;
 
 
 #endif

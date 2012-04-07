@@ -44,7 +44,6 @@ static void calc_loop(void);
 void calc_init(void) {
     build(CALC);
     activate(CALC, calc_loop);
-    sleep(CALC);	// nothing to do yet
 }
 
 

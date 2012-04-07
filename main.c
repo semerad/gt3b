@@ -26,6 +26,7 @@
 extern void ppm_init(void);
 extern void lcd_init(void);
 extern void input_init(void);
+extern void input_read_first_values(void);
 extern void buzzer_init(void);
 extern void timer_init(void);
 extern void task_init(void);
@@ -67,13 +68,14 @@ void main(void) {
 
     clock_init();
     task_init();
+    input_init();	// here to have time to stabilize ADC
     eeprom_init();
     buzzer_init();
     ppm_init();
-    timer_init();
     lcd_init();
     calc_init();
-    input_init();
+    input_read_first_values();
+    timer_init();
 
     // enable interrupts
     rim();

@@ -6,7 +6,6 @@ CALC - calc at end of SYNC signal
 	  without PPM pulse, after that activate CALC
 	- maybe constant length servo pulse
 
-warning when powering up and steering wheel + throttle not in center position
 beep at startup - switchable at global config
 check inactivity as compare to previous value and not center value
 shut-off low-battery beeping

@@ -4,6 +4,9 @@
     PPM length shortened to "NUM_CHANNELS x 2ms + 5ms" to send new data
 	to receiver as soon as possible
     ADC measuring every 1ms, averaging last 4 samples when used
+    after poweron, if steering or throttle are not in center dead zone,
+	show calibration screen, because recalibration will be probably
+	needed
 
 *0.4.1 (17 Aug 2011)
 

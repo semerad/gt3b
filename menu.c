@@ -81,7 +81,7 @@ void apply_model_config(void) {
     if (channels != MAX_CHANNELS) {
 	ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
 	// task CALC must be awaked to do first PPM calculation
-	if (input_initialized)  awake(CALC);
+	awake(CALC);
     }
 
     // set mixed channels to ignore them from menu_channel3_8
@@ -797,10 +797,15 @@ void menu_init(void) {
     // variables
     menu_key_mapping_prepare();
 
-    // read global config from eeprom, if calibrate values changed,
+    // read global config from eeprom, if calibrate values was set to defaults,
+    //   or if actual steering/throttle value is not in dead zone,
     //   call calibrate
-    if (config_global_read())
-	menu_calibrate();
+    if (config_global_read() ||
+	adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
+	adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
+	adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
+	adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
+	    menu_calibrate();
     apply_global_config();
 
     // read model config from eeprom, but not awake CALC yet

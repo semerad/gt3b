@@ -59,10 +59,8 @@ static u16 menu_delay;		// timer for delay in MENU task
 @interrupt void timer_interrupt(void) {
     BRES(TIM2_SR1, 0);  // erase interrupt flag
 
-    // read ADC only when EOC flag (only for first it will not be ready)
-    if (input_initialized && BCHK(ADC_CSR, 7)) {
-	READ_ADC();
-    }
+    // read ADC values every 1ms, it had enought time to end conversion
+    READ_ADC();
 
     // increment 1ms steps
     if (++time_1ms < 5)  return;

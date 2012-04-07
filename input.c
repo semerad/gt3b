@@ -367,16 +367,14 @@ static void check_inactivity(void) {
 
 
 
-// input task, awaked every 5ms
-_Bool input_initialized;
+// read first ADC values
 #define ADC_BUFINIT(id) \
     adc_buffer ## id ## [1] = adc_buffer ## id ## [2] = \
 	adc_buffer ## id ## [3] = adc_buffer ## id ## [0];
-static void input_loop(void) {
-
+void input_read_first_values(void) {
     // read initial ADC values
     BSET(ADC_CR1, 0);			// start conversion
-    while (!BCHK(ADC_CSR, 7))  pause();	// wait for end of conversion
+    while (!BCHK(ADC_CSR, 7));		// wait for end of conversion
     read_ADC();
 
     // put initial values to all buffers
@@ -385,11 +383,13 @@ static void input_loop(void) {
     ADC_BUFINIT(2);
     adc_battery = adc_battery_last;
     adc_battery_filt = (u32)adc_battery * ADC_BAT_FILT;
+}
 
-    // task CALC must be awaked to compute values before PPM will take on
-    awake(CALC);
-    input_initialized = 1;
 
+
+
+// input task, awaked every 5ms
+static void input_loop(void) {
     while (1) {
 	read_keys();
 	check_inactivity();
