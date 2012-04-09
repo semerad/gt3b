@@ -33,14 +33,16 @@ timer losikid
     1 or 2 timers on extra main screens
     ENTER selects timers settings
 	timer type
-	    lap timer - lap, stop, reset
+	    lap timer - alarm, @lap, @stop, reset (at lap times screen)
+	    lap counter - @lap, @reset, alarm after num laps
+	    count up - alarm, @pause, @reset
+	    cound down - alarm, @pause, @reset (save rest to lap timers)
 	    ? lap timer down - laps_count
-	    lap counter - lap, reset
-	    count up - alarm, pause, reset
-	    cound down - alarm, pause, reset (save rest to lap timers)
 	alarm
 	throttle start
     ENTER-long selects lap times
+	look at times
+	reset all data
 
 more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? digital/custom switches (set when some conditions are satisfied)
