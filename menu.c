@@ -800,19 +800,24 @@ void menu_init(void) {
     menu_key_mapping_prepare();
 
     // read global config from eeprom, if calibrate values was set to defaults,
-    //   or if actual steering/throttle value is not in dead zone,
     //   call calibrate
-    if (config_global_read() ||
-	adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
-	adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
-	adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
-	adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone)) {
-	    menu_calibrate(1);
-	    btnra();
+    if (config_global_read()) {
+	menu_calibrate(1);
+	btnra();
+	reset_inactivity_timer();
     }
-    else if (cg.poweron_beep)  beep(30);
-    apply_global_config();
-    reset_inactivity_timer();
+    else {
+	apply_global_config();
+	reset_inactivity_timer();
+	// if actual steering/throttle value is not in dead zone, beep 3 times
+	if (adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
+	    adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
+	    adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
+	    adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
+		buzzer_on(30, 30, 3);
+	// else beep 1 times when allowed
+	else if (cg.poweron_beep)  beep(30);
+    }
 
     // read model config from eeprom, but not awake CALC yet
     menu_load_model();
