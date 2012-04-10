@@ -225,6 +225,7 @@ Global setup menu:
 		  for values greater than 120%
     1		dead zone for steering		0...50
     2		dead zone for throttle		0...50
+    o		use last 4 or 1 ADC values	OVS/LST
     b		key beep			OFF/ON
     C		center/reset beep		OFF/ON
     P		poweron beep			OFF/ON

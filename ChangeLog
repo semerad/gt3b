@@ -3,7 +3,8 @@
     minimum battery voltage set to 2V for those experimenting with 1S cell
     PPM length shortened to "NUM_CHANNELS x 2ms + 5ms" to send new data
 	to receiver as soon as possible
-    ADC measuring every 1ms, averaging last 4 samples when used
+    ADC measuring every 1ms, averaging last 4 samples when used,
+	globally settable to use last 4/1 values
     at poweron, if steering or throttle are not in center dead zone,
 	beep 3 times
     added poweron beep, can be set ON/OFF in global config

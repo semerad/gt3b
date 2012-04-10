@@ -53,7 +53,7 @@ typedef struct {
     u8	key_beep:1;		// beep on key press
     u8	reset_beep:1;		// beep on center/reset value
     u8	poweron_beep:1;		// beep on power on
-    u8	unused:1;
+    u8	adc_ovs_last:1;		// use oversampled (0) or last (1) value in CALC
 } config_global_s;
 
 extern config_global_s config_global;

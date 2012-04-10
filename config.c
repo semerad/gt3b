@@ -55,7 +55,7 @@ u8 config_global_set_default(void) {
     cg.key_beep		= 1;
     cg.reset_beep	= 1;
     cg.poweron_beep	= 1;
-    cg.unused		= 0;
+    cg.adc_ovs_last	= 0;		// use oversampled value in CALC
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);

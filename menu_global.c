@@ -237,6 +237,18 @@ static void gs_throttle_dead(u8 change) {
 }
 
 
+static void gs_adc_ovs_last(u8 change) {
+    if (change == 0xff) {
+	lcd_set(L7SEG, LB_EMPTY);
+	return;
+    }
+    if (change)  cg.adc_ovs_last ^= 1;
+    lcd_7seg(L7_O);
+    if (cg.adc_ovs_last)  lcd_chars("LST");
+    else		  lcd_chars("OVS");
+}
+
+
 static _Bool gs_reset_flag;
 static void gs_reset_all(u8 change) {
     if (change == 0xff) {
@@ -287,6 +299,7 @@ static const global_setup_t gs_config[] = {
     gs_endpoint_max,
     gs_steering_dead,
     gs_throttle_dead,
+    gs_adc_ovs_last,
     gs_key_beep,
     gs_reset_beep,
     gs_poweron_beep,

@@ -265,12 +265,25 @@ static void calc_loop(void) {
     s16 val, val2;
     u8  i, bit;
     s16 DIG_mix;
+    u16 adc_steering, adc_throttle;  // last 4 or 1 ADC values
 
     while (1) {
 	DIG_mix = menu_DIG_mix * PPM(5);  // to -5000..5000 range
 
+	// set used ADC values
+	if (cg.adc_ovs_last) {
+	    // last value
+	    adc_steering = adc_steering_last << ADC_OVS_SHIFT;
+	    adc_throttle = adc_throttle_last << ADC_OVS_SHIFT;
+	}
+	else {
+	    // oversampled last 4 values
+	    adc_steering = adc_steering_ovs;
+	    adc_throttle = adc_throttle_ovs;
+	}
+
 	// steering
-	val = channel_calib(adc_steering_ovs,
+	val = channel_calib(adc_steering,
 			    cg.calib_steering_left << ADC_OVS_SHIFT,
 			    cg.calib_steering_mid << ADC_OVS_SHIFT,
 			    cg.calib_steering_right << ADC_OVS_SHIFT,
@@ -330,7 +343,7 @@ static void calc_loop(void) {
 
 
 	// throttle
-	val = channel_calib(adc_throttle_ovs,
+	val = channel_calib(adc_throttle,
 			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
 			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
 			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
