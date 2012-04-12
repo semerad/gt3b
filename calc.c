@@ -44,6 +44,7 @@ static void calc_loop(void);
 void calc_init(void) {
     build(CALC);
     activate(CALC, calc_loop);
+    sleep(CALC);	// no work yet, waked up after setting number of channels
 }
 
 

@@ -1,8 +1,10 @@
 *0.4.2 ()
     added global setting to disable center/reset value beep
     minimum battery voltage set to 2V for those experimenting with 1S cell
-    PPM length shortened to "NUM_CHANNELS x 2ms + 5ms" to send new data
-	to receiver as soon as possible
+    PPM signal now uses constant length of SYNC signal to get it to
+	receiver as soon as possible, also servo values are calculated
+	just before generating servo PPM signals to have lowest
+	steering/throttle to PPM signal delay
     ADC measuring every 1ms, averaging last 4 samples when used,
 	globally settable to use last 4/1 values
     at poweron, if steering or throttle are not in center dead zone,

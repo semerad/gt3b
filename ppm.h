@@ -26,8 +26,28 @@
 
 
 
+// TIM3 prescalers and multiply (1000x more) values to get raw TIM3 values
+//   also SPACE values for 300us space signal
+// about 3.5ms max for servo pulse
+#define PPM_PSC_SERVO 0x00
+#define PPM_MUL_SERVO KHZ
+#define PPM_300US_SERVO ((PPM_MUL_SERVO * 3 + 5) / 10)
+// about 28.4ms max for sync pulse
+#define PPM_PSC_SYNC  0x03
+#define PPM_MUL_SYNC  (KHZ >> 3)
+#define PPM_300US_SYNC ((PPM_MUL_SYNC * 3 + 5) / 10)
+
+
 // actual number of channels
 extern u8 channels;
+extern u8 ppm_channel2;		// next PPM channel to send (0 is SYNC), step 2
+extern _Bool ppm_enabled;	// set to 1 when first ppm values were computed
+extern u8 ppm_values[];		// as bytes for ppm_interrupt and timer_interrupt
+
+// variables for planning when start frame and when awake CALC
+extern u8 ppm_timer;		// timer incremented every 1ms
+extern u8 ppm_start;		// when to start servo pulses
+extern u8 ppm_calc_awake;	// when to awake CALC task
 
 // set actual number of channels, default is 3
 extern void ppm_set_channels(u8 n);

@@ -23,6 +23,9 @@
     use PWM mode 2 to be zero till OC2 and then one to overflow
     after overflow, set new OC2 and overflow values to preload registers
     also change prescaler for sync signal to enable longer time
+
+    ppm frame is driven by 1ms timer (in timer_interrupt), it start new
+    frame with servo pulses and wakeups calc task before end of frame
 */
 
 
@@ -31,43 +34,47 @@
 #include "calc.h"
 
 
-// TIM3 prescalers and multiply (1000x more) values to get raw TIM3 values
-//   also SPACE values for 300us space signal
-// about 3.5ms max for servo pulse
-#define PPM_PSC_SERVO 0x00
-#define PPM_MUL_SERVO KHZ
-#define PPM_300US_SERVO ((PPM_MUL_SERVO * 3 + 5) / 10)
-// about 28.4ms max for sync pulse
-#define PPM_PSC_SYNC  0x03
-#define PPM_MUL_SYNC  (KHZ >> 3)
-#define PPM_300US_SYNC ((PPM_MUL_SYNC * 3 + 5) / 10)
+// length of whole frame (frame will actually be shorter, this is safe value
+//   to not stop generating PPM signal if something goes wrong)
+#define PPM_SAFE_FRAME_LENGTH  25000
+// constant sync length in ms
+#define PPM_SYNC_LENGTH   5
+// constant frame length in ms
+#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2 + 5)
 
-// length of whole frame
-#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2000 + 5000)
 
 
 // channel variables
 u8 channels;			// number of channels
 static u8 channels2;		// number of channels * 2 (for compare in ppm_interrupt, it is quicker this way)
-static u8 ppm_channel2;		// next PPM channel to send (0 is SYNC), step 2
-static _Bool ppm_enabled;	// set to 1 when first ppm values was computed
+u8 ppm_channel2;		// next PPM channel to send (0 is SYNC), step 2
+_Bool ppm_enabled;		// set to 1 when first ppm values were computed
 // PPM values computed for direct seting to TIM3 registers
 // 0 is SYNC pulse length and then channels 1-...
-static u8 ppm_values[2*(MAX_CHANNELS + 1)];  // as bytes for ppm_interrupt
+u8 ppm_values[2*(MAX_CHANNELS + 1)];  // as bytes for ppm_interrupt and timer_interrupt
+
+// variables for planning when start frame and when awake CALC
+u8 ppm_timer;			// timer incremented every 1ms
+u8 ppm_start;			// when to start servo pulses
+u8 ppm_end;			// when must last PPM frame end (to not start again before)
+u8 ppm_calc_awake;		// when to awake CALC task
+
+
 
 
 // set number of channels
 void ppm_set_channels(u8 n) {
+    if (channels == n)  return;		// did not changed
+
     // disable PPM generation till new values will not be set
     ppm_enabled = 0;
     BRES(TIM3_CR1, 0);	// disable timer
     BSET(PD_ODR, 0);	// set PPM pin to 1
-
-    // start with generating 20ms SYNC signal
-    TIM3_CCR2H = hi8(PPM_300US_SYNC);
-    TIM3_CCR2L = hi8(PPM_300US_SYNC);
-    TIM3_ARRH = hi8(PPM_MUL_SYNC * 20);
-    TIM3_ARRL = lo8(PPM_MUL_SYNC * 20);
+    // set values for timer wakeups
+    ppm_start = ppm_timer;				// not now, CALC will compute new one
+    ppm_calc_awake = (u8)(ppm_start + PPM_SYNC_LENGTH);	// SYNC signal min length
+    ppm_end = ppm_calc_awake;
+    ppm_enabled = 1;
 
     channels = n;
     channels2 = (u8)(n << 1);  // also 2* value for compare in ppm_interrupt
@@ -85,8 +92,9 @@ void ppm_init(void) {
     TIM3_PSCR = PPM_PSC_SYNC;
     TIM3_IER = 1;             // update interrupt enable
     TIM3_CR1 = 0b10000000;    // auto-reload, URS-all, counter-disable
-    ppm_set_channels(3);
 }
+
+
 
 
 /*
@@ -98,14 +106,6 @@ void ppm_init(void) {
     BRES(TIM3_SR1, 0);	// erase interrupt flag
 
     if (ppm_channel2) {
-	if (ppm_channel2 == 2) {
-	    // will be setting channel1 servo, so we are now generating
-	    // SYNC signal in HW
-	    // wakeup CALC task to compute new PPM values
-	    // values for ARR registers will be updated after calculate done
-	    // (and when we are still generating SYNC pulse)
-	    awake(CALC);
-	}
 	// set servo channel
 	TIM3_PSCR = PPM_PSC_SERVO;
 	TIM3_CCR2H = hi8(PPM_300US_SERVO);
@@ -130,6 +130,8 @@ void ppm_init(void) {
 }
 
 
+
+
 // set new value for given servo channel (1-...), value in 0.1usec (for
 //   eliminating more rounding errors)
 static u32 ppm_microsecs01;
@@ -139,17 +141,6 @@ void ppm_set_value(u8 channel, u16 microsec01) {
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
     *(u16 *)(&ppm_values[(u8)(channel << 1)]) =
 	(u16)(((u32)microsec01 * PPM_MUL_SERVO - PPM(500)) / PPM(1000));
-    // for first channel, when we are still in HW SYNC generate, update
-    //   new ARR values to get it applied now
-    if (channel == 1) {
-	sim();
-	if (ppm_channel2 == 4) {
-	    // next will be channel2, so we have channel1 in ARR now
-	    TIM3_ARRH = ppm_values[2];
-	    TIM3_ARRL = ppm_values[3];
-	}
-	rim();
-    }
 }
 
 
@@ -157,16 +148,44 @@ void ppm_set_value(u8 channel, u16 microsec01) {
 // also sets flag for ppm_interrupt to use new values
 // also starts TIM3 at first call
 void ppm_calc_sync(void) {
+    u16 ppm_start_last = ppm_start;
+    u16 ppm_end16 = ppm_end;
+    u16 ppm_tmp;
+    u8  ppm_calc_len;
+
     // ARR must be set to computed value - 1, that is why we are substracting
     //   5000, it is quicker way to "add 5000" and then substract 1 from result
     *(u16 *)(&ppm_values[0]) =
-	(u16)(((10 * (u32)PPM_FRAME_LENGTH - ppm_microsecs01) * PPM_MUL_SYNC
+	(u16)(((PPM(1) * (u32)PPM_SAFE_FRAME_LENGTH - ppm_microsecs01) * PPM_MUL_SYNC
 	       - PPM(500)) / PPM(1000));
+
+    // calculate ppm_start and set it
+    if (ppm_end16 < ppm_start_last)  ppm_end16 += 256;	// to get linear time
+    sim();	// with disabled interrupts, timer_interrupt cannot be called now
+    ppm_tmp = ppm_calc_len = ppm_timer;
+    if (ppm_tmp < ppm_start_last)  ppm_tmp += 256;	// to get linear time
+    if (++ppm_tmp < ppm_end16)  ppm_tmp = ppm_end16;	// cannot start before frame end
+    ppm_start = (u8)ppm_tmp;				// set it
+    rim();
+
+    // calculate time of processing (from CALC wakeup till now) in ms
+    //   (ppm_calc_len now has actual timer value)
+    ppm_calc_len -= ppm_calc_awake;
+    ppm_calc_len++;
+
+    // calculate new ppm_end
+#if 0
+    // constant frame length
+    ppm_end = (u8)(ppm_start + PPM_FRAME_LENGTH)
+#else
+    // constant SYNC length, servo pulse lengths (rounded to following
+    //   whole ms) + SYNC length
+    ppm_end = (u8)(ppm_start + (u8)((ppm_microsecs01 + 9999) / 10000)
+		   + PPM_SYNC_LENGTH);
+#endif
     ppm_microsecs01 = 0;
-    // for first ppm values, enable timer
-    if (ppm_enabled)  return;
-    ppm_enabled = 1;
-    BSET(TIM3_EGR, 0);    // generate update event
-    BSET(TIM3_CR1, 0);    // enable timer
+
+    // set new ppm_calc_awake
+    ppm_calc_awake = (u8)(ppm_end - ppm_calc_len);
 }
 

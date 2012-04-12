@@ -7,7 +7,7 @@ input.o: input.c  input.h gt3b.h stm8.h  task.h menu.h \
 buzzer.o: buzzer.c  buzzer.h gt3b.h stm8.h  task.h config.h \
  eeprom.h
 timer.o: timer.c  timer.h gt3b.h stm8.h  task.h lcd.h buzzer.h \
- input.h menu.h config.h eeprom.h
+ input.h menu.h config.h eeprom.h ppm.h calc.h
 eeprom.o: eeprom.c   eeprom.h config.h gt3b.h stm8.h  \
  task.h
 config.o: config.c   config.h gt3b.h stm8.h  task.h \

@@ -24,6 +24,8 @@
 #include "input.h"
 #include "menu.h"
 #include "config.h"
+#include "ppm.h"
+#include "calc.h"
 
 
 
@@ -61,6 +63,23 @@ static u16 menu_delay;		// timer for delay in MENU task
 
     // read ADC values every 1ms, it had enought time to end conversion
     READ_ADC();
+
+    // process PPM start, CALC awake
+    if (ppm_enabled) {
+	if (++ppm_timer == ppm_start) {
+	    // load values for channel1 to registers and do timer update event
+	    TIM3_PSCR = PPM_PSC_SERVO;
+	    TIM3_CCR2H = hi8(PPM_300US_SERVO);
+	    TIM3_CCR2L = lo8(PPM_300US_SERVO);
+	    TIM3_ARRH = ppm_values[2];
+	    TIM3_ARRL = ppm_values[3];
+	    ppm_channel2 = 4;	// to channel 2 values
+	    BSET(TIM3_EGR, 0);	// generate update event
+	    BSET(TIM3_CR1, 0);	// enable timer when not running yet
+	}
+	if (ppm_timer == ppm_calc_awake)
+	    awake(CALC);
+    }
 
     // increment 1ms steps
     if (++time_1ms < 5)  return;

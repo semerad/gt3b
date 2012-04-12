@@ -1,10 +1,6 @@
 
-CALC - calc at end of SYNC signal
-	- measure durations of CALC
-	- at end of CALC PPM pulse and servo pulses
-	- after last servo pulse SYNC with time frame_len - calc_len
-	  without PPM pulse, after that activate CALC
-	- maybe constant length servo pulse
+cm.channels - number of channels for model, settable because when using
+    lower number of channels, PPM frame length will be shorter
 
 timer
     - up/down/lap

@@ -78,11 +78,7 @@ void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
     // set number of channels for this model
-    if (channels != MAX_CHANNELS) {
-	ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
-	// task CALC must be awaked to do first PPM calculation
-	awake(CALC);
-    }
+    ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
 
     // set mixed channels to ignore them from menu_channel3_8
     menu_channels_mixed = 0;
@@ -819,7 +815,7 @@ void menu_init(void) {
 	else if (cg.poweron_beep)  beep(30);
     }
 
-    // read model config from eeprom, but not awake CALC yet
+    // read model config from eeprom
     menu_load_model();
 
     // and main loop
