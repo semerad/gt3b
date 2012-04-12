@@ -32,6 +32,8 @@ Global characteristics:
 - added key mapping specific for each model memory
 - calibrate menu will be automatically invoked after first power-on with
   this firmware, so 6 menu items will start to blink
+- when radio is powered on with steering/throttle not in dead center,
+    it beeps 3 times
 
 
 Buttons:
