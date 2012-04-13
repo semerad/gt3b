@@ -839,6 +839,10 @@ static u8 menu_popup_key(u8 key_id) {
 	static @near u8 ch3_has_middle; // set to 1 if ch3 has middle state
 	u8 state;			// new button state
 	u8 value_showed = 0;
+	u16 btnx_orig = btnx;
+
+	// for CH3 button add MIDDLE state also
+	if (key_id == 0)  btnx |= BTN_CH3_MID;
 
 	while (1) {
 	    // set actual state of btnx to buttons_state_last
@@ -848,15 +852,15 @@ static u8 menu_popup_key(u8 key_id) {
 	    // check button
 	    flags = FF_NONE;
 	    state = MBS_RELEASED;
-	    if (btns(btnx)) {
-		flags |= FF_ON;
-		state = MBS_PRESSED;
-	    }
-	    if (key_id == 0 && adc_ch3_last > 256 && adc_ch3_last < 768) {
+	    if (key_id == 0 && btns(BTN_CH3_MID)) {
 		// special check for CH3 button middle
 		flags |= FF_MID;
 		state = MBS_MIDDLE;
 		ch3_has_middle = 1;
+	    }
+	    else if (btns(btnx_orig)) {
+		flags |= FF_ON;
+		state = MBS_PRESSED;
 	    }
 	    if (km->reverse)       flags |= FF_REVERSE;
 	    if (ch3_has_middle)    flags |= FF_HAS_MID;

@@ -45,12 +45,18 @@
 #define BTN_END		0x0400
 
 #define BTN_CH3		0x0800
+#define BTN_CH3_MID	0x1000
 
 #define BTN_ROT_L	0x4000
 #define BTN_ROT_R	0x8000
 #define BTN_ROT_ALL	0xc000
 
 #define BTN_ALL		0xffff
+
+
+// limits for BTN_CH3_MID
+#define BTN_CH3_LOW	256
+#define BTN_CH3_HIGH	768
 
 
 // variables representing pressed buttons

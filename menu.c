@@ -820,6 +820,10 @@ void menu_init(void) {
     // read model config from eeprom
     menu_load_model();
 
+    // wait for at least 3 buttons reads to initialize default servo values
+    //   with stable keys (for example CH3_MID)
+    while (time_sec == 0 && time_5ms < 10)  pause();
+
     // and main loop
     menu_loop();
 }

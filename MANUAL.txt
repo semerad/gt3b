@@ -289,8 +289,8 @@ CHn		- switch channel "n" value from one end value to opposite end
 		  value. There is special handling for CH3 button. When using
 		  3-position switch instead of CH3 button and momentary is
 		  selected for this button, then centre 3-pos value will also
-		  be detected and set to servo (but this was not tested yet,
-		  I wouldn't do this modification to my radio).
+		  be detected and set to servo (use 1K resistor to GND to get
+		  middle state)
 CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
 DIG		- switch DIG mix between -100 and 100 (more useable when using

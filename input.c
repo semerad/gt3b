@@ -194,8 +194,10 @@ static void read_keys(void) {
     // read actual keys status
     buttons1 = read_key_matrix();
 
-    // add CH3 button
-    if (adc_ch3_last < 50)  buttons1 |= BTN_CH3;
+    // add CH3 button, middle state will be only in buttons_state,
+    //   not in buttons
+    if (adc_ch3_last <= BTN_CH3_LOW)	   buttons1 |= BTN_CH3;
+    else if (adc_ch3_last < BTN_CH3_HIGH)  buttons1 |= BTN_CH3_MID;
 
     // combine last 3 readed buttons
     buttons_state |= buttons1 & buttons2 & buttons3;
