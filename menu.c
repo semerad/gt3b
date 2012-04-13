@@ -805,14 +805,16 @@ void menu_init(void) {
     else {
 	apply_global_config();
 	reset_inactivity_timer();
-	// if actual steering/throttle value is not in dead zone, beep 3 times
-	if (adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
-	    adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
-	    adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
-	    adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
-		buzzer_on(30, 30, 3);
-	// else beep 1 times when allowed
-	else if (cg.poweron_beep)  beep(30);
+	if (cg.poweron_beep) {
+	    // if actual steering/throttle value is not in dead zone, beep 3 times
+	    if (adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
+		adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
+		adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
+		adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
+		    buzzer_on(30, 30, 3);
+	    // else beep 1 times
+	    else beep(30);
+	}
     }
 
     // read model config from eeprom

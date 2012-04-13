@@ -33,7 +33,7 @@ Global characteristics:
 - calibrate menu will be automatically invoked after first power-on with
   this firmware, so 6 menu items will start to blink
 - when radio is powered on with steering/throttle not in dead center,
-    it beeps 3 times
+    it beeps 3 times if poweron beep is allowed
 
 
 Buttons:
@@ -231,6 +231,8 @@ Global setup menu:
     b		key beep			OFF/ON
     C		center/reset beep		OFF/ON
     P		poweron beep			OFF/ON
+		also includes warning when steering/throttle are not
+		centered at poweron
     d		long press key delay		100...1000 miliseconds
     r + ALL	global reset - change to YES to set global configuration
 			       and all models to default values
