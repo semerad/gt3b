@@ -49,7 +49,7 @@ extern u8 ppm_timer;		// timer incremented every 1ms
 extern u8 ppm_start;		// when to start servo pulses
 extern u8 ppm_calc_awake;	// when to awake CALC task
 
-// set actual number of channels, default is 3
+// set actual number of channels
 extern void ppm_set_channels(u8 n);
 
 // set channel value to microsec01 (in 0.1 microseconds)
