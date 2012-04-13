@@ -20,16 +20,20 @@ There are 2 interrupts used:
 ppm_interrupt
     - timer3 update interrupt
     - sets values for next servo channel to timer
-    - wakeups task CALC during SYNC signal
 timer_interrupt
     - timer2 overflow
-    - every 1ms read ADC values
+    - every 1ms
+	read ADC values
+	increment ppm_timer
+	start new PPM frame with servo pulses
+	wakeups CALC task few ms before start of new PPM frame
     - every 5ms
 	- increments time from start
 	- count LCD blink time and wakeups task LCD
 	- handles buzzer
 	- wakeups task INPUT
-	- wakeups task MENU when it wants ADC values (calibrate, ...)
+	- wakeups task MENU when it wants ADC values (calibrate, ...),
+	    this is done every 40ms
 	- handles task MENU delay and wakeups this task
 
 
@@ -46,8 +50,7 @@ INPUT
     - is waked up from timer every 5ms
 CALC
     - is computing values for each servo and sync signal
-    - is waked up from ppm interrupt during sync signal generation
-    - also needed to wakeup after changing number of PPM channels in MENU
+    - is waked up from timer few ms before new PPM frame starts
 MENU
     - is main program handling keys, menus, lcd
     - is waked up from timer when menu_delay expired or when ADC values needed
@@ -67,7 +70,7 @@ vector.c,h	- table of interrupt vectors
 task.c,h	- cooperative multitasking
 buzzer.c,h	- buzzer
 eeprom.c,h	- eeprom read/write
-timer.c,h	- timer 5ms
+timer.c,h	- timer 1ms, 5ms
 input.c,h	- INPUT task, reading ADC and keys
 lcd.c,h		- LCD task, writing to LCD controller, blinking
 ppm.c,h		- generating of PPM signal
