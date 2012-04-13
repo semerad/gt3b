@@ -862,9 +862,10 @@ static u8 menu_popup_key(u8 key_id) {
 		flags |= FF_ON;
 		state = MBS_PRESSED;
 	    }
-	    if (km->reverse)       flags |= FF_REVERSE;
-	    if (ch3_has_middle)    flags |= FF_HAS_MID;
-	    if (km->previous_val)  flags |= FF_PREVIOUS;
+	    if (km->reverse)	    flags |= FF_REVERSE;
+	    if (key_id == 0 && ch3_has_middle)
+				    flags |= FF_HAS_MID;
+	    if (km->previous_val)   flags |= FF_PREVIOUS;
 
 	    // end if button state didn't changed
 	    if (state == *mbs)  break;
