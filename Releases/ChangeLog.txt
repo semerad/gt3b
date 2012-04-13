@@ -1,5 +1,22 @@
+*0.4.2 (13 Apr 2012)
+    added global setting to disable center/reset value beep
+    minimum battery voltage set to 2V for those experimenting with 1S cell
+    PPM signal now uses constant length of SYNC signal to get it to
+	receiver as soon as possible, also servo values are calculated
+	just before generating servo PPM signals to have lowest
+	steering/throttle to PPM signal delay
+    ADC measuring every 1ms, averaging last 4 samples when used,
+	globally settable to use last 4/1 values
+    added poweron beep, can be set ON/OFF in global config
+    at poweron, if steering or throttle are not in center dead zone,
+	beep 3 times if poweron beep is allowed
+    inactivity timer compares ADC values with previous ones, so now
+	it will activate when radio is not center callibrated also
+    added key function BLS to shutup battery low beeper, by default is
+	assigned to END-long
+    3-pos switch instead of CH3 button now works
 
-*0.4.1 ()
+*0.4.1 (17 Aug 2011)
 
     minimum battery voltage set to 6V
     CH3 key set default to OFF
