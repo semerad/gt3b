@@ -8,7 +8,7 @@ encoder: 30 ticks/360deg
 processor pinout (i-input/o-output, f-floating/o-opencollector/p-push_pull, f-fast):
     PB0         if  AIN0 steering
     PB1         if  AIN1 throttle
-    PB2         if  AIN2 CH3 button
+    PB2         if  AIN2 CH3 button, resistor 1K to +5V
     PB3         if  AIN3 battery voltage (3:1 divider)
     PB4         oof button row B4
     PB5         oof button row B5
