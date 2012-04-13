@@ -4,7 +4,6 @@
 *                          *
 ****************************
 
-Date: May 24rd 2011
 
 
 This is a preliminary manual for alternative firmware for FlySky FS-GT3B radio
