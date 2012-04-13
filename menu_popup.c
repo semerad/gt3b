@@ -102,6 +102,7 @@ typedef struct {
 #define EF_LEFT		0b00000010
 #define EF_PERCENT	0b00000100
 #define EF_LIST		0b00001000
+#define EF_NO2CHANNELS	0b00010000
 #define EF_NOCONFIG	0b00100000
 #define EF_NOCHANNEL	0b01000000
 #define EF_BLINK	0b10000000
@@ -223,11 +224,11 @@ static const et_functions_s et_functions[] = {
 #endif
 #endif
 #endif
-    { 36, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG,
+    { 36, "4WS", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG | EF_NO2CHANNELS,
       4, &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 37, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG,
+    { 37, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG | EF_NO2CHANNELS,
       L7_D, &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 38, "MPO", 0, EF_LIST | EF_NOCONFIG, 0, &menu_MP_index,
+    { 38, "MPO", 0, EF_LIST | EF_NOCONFIG | EF_NO2CHANNELS, 0, &menu_MP_index,
       0, NUM_MULTI_POSITION - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
@@ -254,6 +255,18 @@ u8 menu_et_function_long_special(u8 n) {
 // return 1 if given function switches list of items
 u8 menu_et_function_is_list(u8 n) {
     return (u8)(et_functions[n].flags & EF_LIST);
+}
+
+// return 1 if given function is allowed
+u8 menu_et_function_is_allowed(u8 n) {
+    et_functions_s *etf = &et_functions[n];
+    if (n == 0)			    return 1;	// OFF is always allowed
+    // check number of channels
+    if ((etf->flags & EF_NO2CHANNELS) && channels == 2)
+				    return 0;	// not for 2 channels
+    if (etf->flags & EF_NOCHANNEL)  return 1;	// channel not used
+    if (etf->channel <= channels)   return 1;	// channel is OK
+    return 0;					// channel too big
 }
 
 // find function by name
@@ -584,6 +597,7 @@ typedef struct {
     u8 flags;		// bits below
     void (*func)(u8 *id, u8 *param, u8 flags, s16 *prev_val);	// function to process key, flags below
     void *param;	// param given to function
+    u8 channel;		// which channel it operates, only to eliminate excess channels
 } key_functions_s;
 // flags bits
 #define KF_NONE		0
@@ -739,37 +753,37 @@ static void kf_battery_low_shutup(u8 *id, u8 *param, u8 flags, s16 *pv) {
 
 // table of key functions
 static const key_functions_s key_functions[] = {
-    { 0, "OFF", KF_NONE, NULL, NULL },
-    { 1, "CH3", KF_2STATE, kf_set_switch, NULL },
-    { 7, "C3R", KF_NONE, kf_reset, "CH3" },
+    { 0, "OFF", KF_NONE, NULL, NULL, 0 },
+    { 1, "CH3", KF_2STATE, kf_set_switch, NULL, 3 },
+    { 7, "C3R", KF_NONE, kf_reset, "CH3", 3 },
 #if MAX_CHANNELS >= 4
-    { 2, "CH4", KF_2STATE, kf_set_switch, NULL },
-    { 8, "C4R", KF_NONE, kf_reset, "CH4" },
+    { 2, "CH4", KF_2STATE, kf_set_switch, NULL, 4 },
+    { 8, "C4R", KF_NONE, kf_reset, "CH4", 4 },
 #if MAX_CHANNELS >= 5
-    { 3, "CH5", KF_2STATE, kf_set_switch, NULL },
-    { 9, "C5R", KF_NONE, kf_reset, "CH5" },
+    { 3, "CH5", KF_2STATE, kf_set_switch, NULL, 5 },
+    { 9, "C5R", KF_NONE, kf_reset, "CH5", 5 },
 #if MAX_CHANNELS >= 6
-    { 4, "CH6", KF_2STATE, kf_set_switch, NULL },
-    { 10, "C6R", KF_NONE, kf_reset, "CH6" },
+    { 4, "CH6", KF_2STATE, kf_set_switch, NULL, 6 },
+    { 10, "C6R", KF_NONE, kf_reset, "CH6", 6 },
 #if MAX_CHANNELS >= 7
-    { 5, "CH7", KF_2STATE, kf_set_switch, NULL },
-    { 11, "C7R", KF_NONE, kf_reset, "CH7" },
+    { 5, "CH7", KF_2STATE, kf_set_switch, NULL, 7 },
+    { 11, "C7R", KF_NONE, kf_reset, "CH7", 7 },
 #if MAX_CHANNELS >= 8
-    { 6, "CH8", KF_2STATE, kf_set_switch, NULL },
-    { 12, "C8R", KF_NONE, kf_reset, "CH8" },
+    { 6, "CH8", KF_2STATE, kf_set_switch, NULL, 8 },
+    { 12, "C8R", KF_NONE, kf_reset, "CH8", 8 },
 #endif
 #endif
 #endif
 #endif
 #endif
-    { 13, "4WS", KF_2STATE, kf_4ws, NULL },
-    { 14, "DIG", KF_2STATE, kf_set_switch, NULL },
-    { 16, "MPO", KF_NONE, kf_multi_position, NULL },
-    { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL },
-    { 15, "DGR", KF_NONE, kf_reset, "DIG" },
-    { 18, "LCI", KF_NOSHOW, kf_lap_count, NULL },
-    { 19, "LCR", KF_NOSHOW, kf_lap_count_reset, NULL },
-    { 20, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL },  // default END-long
+    { 13, "4WS", KF_2STATE, kf_4ws, NULL, 3 },
+    { 14, "DIG", KF_2STATE, kf_set_switch, NULL, 3 },
+    { 15, "DGR", KF_NONE, kf_reset, "DIG", 3 },
+    { 16, "MPO", KF_NONE, kf_multi_position, NULL, 3 },
+    { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL, 3 },
+    { 18, "LCI", KF_NOSHOW, kf_lap_count, NULL, 0 },
+    { 19, "LCR", KF_NOSHOW, kf_lap_count_reset, NULL, 0 },
+    { 20, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 
@@ -790,6 +804,15 @@ s8 menu_key_function_idx(u8 n) {
 // return if it is 2-state function
 u8 menu_key_function_2state(u8 n) {
     return (u8)(key_functions[n].flags & KF_2STATE);
+}
+
+// return 1 if given function is allowed
+u8 menu_key_function_is_allowed(u8 n) {
+    key_functions_s *kf = &key_functions[n];
+    if (n == 0)			   return 1;	// OFF is always allowed
+    // check number of channels
+    if (kf->channel <= channels)   return 1;	// channel is OK
+    return 0;					// channel too big
 }
 
 // delete all symbols and clean 7seg

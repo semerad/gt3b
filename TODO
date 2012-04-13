@@ -1,6 +1,4 @@
 
-cm.channels - number of channels for model, settable because when using
-    lower number of channels, PPM frame length will be shorter
 not-centered poweron warning with separate global option
 ? linear CH3 with potentiometer
 

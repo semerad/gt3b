@@ -44,7 +44,7 @@ static u8 mix_4WS(u8 val_id, u8 action, u8 *chars_blink) {
 		// channel number/off
 		val = cm.channel_4WS;
 		if (!val)  val = 2;
-		val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 1);
+		val = (u8)menu_change_val(val, 2, channels, 1, 1);
 		if (val == 2)   cm.channel_4WS = 0;
 		else		cm.channel_4WS = val;
 		break;
@@ -103,7 +103,7 @@ static u8 mix_DIG(u8 val_id, u8 action, u8 *chars_blink) {
 		// channel number/off
 		val = cm.channel_DIG;
 		if (!val)  val = 2;
-		val = (u8)menu_change_val(val, 1, MAX_CHANNELS, 1, 1);
+		val = (u8)menu_change_val(val, 1, channels, 1, 1);
 		if (val == 2)   cm.channel_DIG = 0;
 		else		cm.channel_DIG = val;
 		break;
@@ -150,10 +150,10 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 	    // channel number/off
 	    val = cm.channel_MP;
 	    if (!val)  val = 2;
-	    else if (val == MP_DIG)  val = MAX_CHANNELS + 1;
-	    val = (u8)menu_change_val(val, 2, MAX_CHANNELS + 1, 1, 1);
+	    else if (val == MP_DIG)  val = (s8)(channels + 1);
+	    val = (u8)menu_change_val(val, 2, channels + 1, 1, 1);
 	    if (val == 2)   			cm.channel_MP = 0;
-	    else if (val == MAX_CHANNELS + 1)	cm.channel_MP = MP_DIG;
+	    else if (val == (s8)(channels + 1))	cm.channel_MP = MP_DIG;
 	    else	    			cm.channel_MP = val;
 	}
 	else {
@@ -178,7 +178,7 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 		    || ++id > (NUM_MULTI_POSITION + 1))  id = 1;
 	}
 	// allow forcing channel value
-	if (id > 1 && cm.channel_MP && cm.channel_MP <= MAX_CHANNELS) {
+	if (id > 1 && cm.channel_MP && cm.channel_MP <= channels) {
 	    menu_force_value_channel = cm.channel_MP;
 	}
 	else menu_force_value_channel = 0;

@@ -69,13 +69,15 @@ Standard menu:
     > menu MODEL will blink
     > choose memory position where to save model config
     > press ENTER/BACK to save it
-- Model reset
+- Model number of channels and Model reset
     > choose menu NAME and press ENTER-long
+    > menu NAME will blink
+    > choose "C" for number of model channels or "r" for model reset
+	- reset will show NO/YES
 - Subtrims
     > choose menu TRIM and press ENTER-long
     > menu TRIM will blink
     > set subtrims for each channel
-    > press ENTER/BACK to end this submenu
 - channel speed
     > choose menu D/R and press ENTER-long
     > menu D/R wil blink
@@ -230,7 +232,7 @@ Global setup menu:
 		    number of ADC values	A_4/A_1
     b		beeps
 		    key beep			K_N/K_Y
-		    center/reset beep		C_N/C_Y
+		    value at center/reset beep	C_N/C_Y
 		    poweron beep		P_N/P_Y
     d		long press key delay		100...1000 miliseconds
     r		global or all models reset

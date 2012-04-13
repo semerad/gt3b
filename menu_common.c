@@ -54,7 +54,7 @@ void apply_model_config(void) {
     u8 i, autorepeat = 0;
 
     // set number of channels for this model
-    ppm_set_channels(MAX_CHANNELS);
+    ppm_set_channels((u8)(cm.channels + 1));
 
     // set mixed channels to ignore them from menu_channel3_8
     menu_channels_mixed = 0;

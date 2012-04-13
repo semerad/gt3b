@@ -364,9 +364,53 @@ static void menu_name(void) {
 }
 
 
-// reset model to default values
-static void menu_reset_model(void) {
-    config_model_set_default();
+// set number of model channels
+static u8 menu_channels(u8 val_id, u8 action, u8 *chars_blink) {
+    // change value
+    if (action == 1)
+	cm.channels = (u8)(menu_change_val(cm.channels + 1, 2,
+					   MAX_CHANNELS, 1, 0) - 1);
+
+    // show value
+    lcd_7seg(L7_C);
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    lcd_char_num3(cm.channels + 1);
+
+    return 1;	// only one value
+}
+
+// reset model to defaults
+static u8 menu_reset_model(u8 val_id, u8 action, u8 *chars_blink) {
+    // change value
+    if (action == 1)
+	menu_tmp_flag ^= 1;
+
+    // select next value, reset when flag is set
+    else if (action == 2) {
+	if (menu_tmp_flag) {
+	    menu_tmp_flag = 0;
+	    config_model_set_default();
+	    buzzer_on(60, 0, 1);
+	}
+    }
+
+    // show value
+    lcd_7seg(L7_R);
+    lcd_chars(menu_tmp_flag ? "YES" : "NO ");
+
+    return 1;	// only one value
+}
+
+static const menu_func_t chanres_funcs[] = {
+    menu_channels,
+    menu_reset_model,
+};
+
+// set number of model channels, reset model to default values
+static void menu_channels_reset(void) {
+    lcd_set_blink(LMENU, LB_SPC);
+    menu_common(chanres_funcs, sizeof(chanres_funcs) / sizeof(void *), 0);
+    lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();
 }
@@ -380,7 +424,7 @@ void sf_reverse(u8 channel, u8 change) {
     else                   lcd_chars("NOR");
 }
 @inline static void menu_reverse(void) {
-    menu_channel(MAX_CHANNELS, 0, 0, sf_reverse);
+    menu_channel(channels, 0, 0, sf_reverse);
 }
 
 
@@ -393,7 +437,7 @@ void sf_endpoint(u8 channel, u8 change) {
 }
 static void menu_endpoint(void) {
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(MAX_CHANNELS, 0xff, 0xfc, sf_endpoint);
+    menu_channel(channels, 0xff, 0xfc, sf_endpoint);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
@@ -421,7 +465,7 @@ static void sf_subtrim(u8 channel, u8 change) {
 }
 static void menu_subtrim(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_channel(MAX_CHANNELS, 0, 0xfc, sf_subtrim);
+    menu_channel(channels, 0, 0xfc, sf_subtrim);
     lcd_set_blink(LMENU, LB_OFF);
 }
 
@@ -457,7 +501,7 @@ static void sf_speed(u8 channel, u8 change) {
 static void menu_speed(void) {
     lcd_set_blink(LMENU, LB_SPC);
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    menu_channel(MAX_CHANNELS, 0x3, 0, sf_speed);
+    menu_channel(channels, 0x3, 0, sf_speed);
     lcd_segment(LS_SYM_PERCENT, LS_OFF);
     lcd_set_blink(LMENU, LB_OFF);
 }
@@ -544,7 +588,7 @@ static void select_menu(void) {
 		}
 	    }
 	    else if (menu == LM_NAME) {
-		if (btnl(BTN_ENTER))	menu_reset_model();
+		if (btnl(BTN_ENTER))	menu_channels_reset();
 		else			menu_name();
 	    }
 	    else if (menu == LM_REV) {

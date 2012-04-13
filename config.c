@@ -120,6 +120,8 @@ void config_model_set_default(void) {
 	   NUM_MULTI_POSITION - 1);
     memset(&cm.speed[0], 100, MAX_CHANNELS);
     cm.stspd_return	= 100;
+    cm.channels		= MAX_CHANNELS - 1;	// it is one lower to fit also 8
+    cm.unused		= 0;
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
 }
 

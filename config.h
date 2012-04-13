@@ -57,7 +57,7 @@ typedef struct {
 } config_global_s;
 
 extern config_global_s config_global;
-#define cg config_global
+#define cg	config_global
 
 
 // threshold limits for steering/throttle
@@ -115,8 +115,8 @@ typedef struct {
 
 // change MAGIC number when changing model config
 // also add code to setting default values
-// 23 + 22(keys) + channels * 4 bytes
-#define CONFIG_MODEL_MAGIC  (0xfa20 | (MAX_CHANNELS - 1))
+// 24 + 22(keys) + channels * 4 bytes
+#define CONFIG_MODEL_MAGIC  (0xf920 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel
@@ -144,12 +144,14 @@ typedef struct {
 #define stspd_turn	speed[0]
 #define thspd		speed[1]
     u8 stspd_return;		// steering speed return
+    u8 channels:3;		// number of channels for this model - 1
+    u8 unused:5;
     config_key_mapping_s key_mapping;
 } config_model_s;
 
 extern config_model_s config_model;
-#define cm config_model
-#define ck		cm.key_mapping
+#define cm	config_model
+#define ck	cm.key_mapping
 
 
 

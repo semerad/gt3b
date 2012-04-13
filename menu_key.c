@@ -56,7 +56,7 @@ static const u8 trim_buttons[][4] = {
 static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
     config_et_map_s *etm = &ck.et_map[trim_id];
     u8 id = val_id;
-    u8 idx, btn;
+    u8 idx, btn, new_idx = 0;
 
     if (action == 1) {
 	// change value
@@ -74,12 +74,15 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		    else {
 			if (++idx > trim_functions_max)  idx = 0;
 		    }
-		    if (trim_functions[idx])  break;  // we have it
+		    new_idx = trim_functions[idx];
+		    if (!new_idx)  continue;				// empty slot
+		    new_idx--;  // was one more
+		    if (menu_et_function_is_allowed(new_idx))  break;	// we have it
 		}
 		// set values to defaults
 		((u16 *)etm)[0] = 0;
 		((u16 *)etm)[1] = 0;
-		etm->function = (u8)(trim_functions[idx] - 1);
+		etm->function = new_idx;
 		if (etm->function)
 		    etm->is_trim = etm->is_trim2 = 1;
 		break;
@@ -219,7 +222,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 static u8 km_key(u8 key_id, u8 val_id, u8 action) {
     config_key_map_s *km = &ck.key_map[key_id];
     u8 id = val_id;
-    u8 idx;
+    u8 idx, new_idx = 0;
 
     if (action == 1) {
 	// change value
@@ -236,7 +239,10 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		    else {
 			if (++idx > key_functions_max)  idx = 0;
 		    }
-		    if (key_functions[idx])  break;  // we have it
+		    new_idx = key_functions[idx];
+		    if (!new_idx)  continue;				// empty slot
+		    new_idx--;	// was one more
+		    if (menu_key_function_is_allowed(new_idx))  break;	// we have it
 		}
 		// set values to defaults
 		if (km->momentary)  *(u16 *)km = 0;  // was momentary, zero all
@@ -245,7 +251,7 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		    km->reverse = 0;
 		    km->previous_val = 0;
 		}
-		km->function = (u8)(key_functions[idx] - 1);
+		km->function = new_idx;
 		break;
 	    case 2:
 		// momentary setting
@@ -275,12 +281,15 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		    else {
 			if (++idx > key_functions_max)  idx = 0;
 		    }
-		    if (key_functions[idx])  break;  // we have it
+		    new_idx = key_functions[idx];
+		    if (!new_idx)  continue;				// empty slot
+		    new_idx--;	// was one more
+		    if (menu_key_function_is_allowed(new_idx))  break;	// we have it
 		}
 		// set values to defaults
 		km->reverse_long = 0;
 		km->previous_val_long = 0;
-		km->function_long = (u8)(key_functions[idx] - 1);
+		km->function_long = new_idx;
 		break;
 	    case 6:
 		// reverse_long

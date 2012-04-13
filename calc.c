@@ -403,7 +403,7 @@ static void calc_loop(void) {
 
 
 	// channels 3-8, exclude mixed channels in the future
-	for (i = 3, bit = 0b100; i <= MAX_CHANNELS; i++, bit <<= 1) {
+	for (i = 3, bit = 0b100; i <= channels; i++, bit <<= 1) {
 	    // check if channel was already mixed before (4WS, DIG)
 	    if (menu_channels_mixed & bit)  continue;
 	    channel_params(i, channel_speed(menu_channel3_8[i - 3] * PPM(5), i));
