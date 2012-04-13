@@ -38,9 +38,9 @@
 //   to not stop generating PPM signal if something goes wrong)
 #define PPM_SAFE_FRAME_LENGTH  25000
 // constant sync length in ms
-#define PPM_SYNC_LENGTH   5
+#define PPM_SYNC_LENGTH   4
 // constant frame length in ms
-#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2 + 5)
+#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2 + PPM_SYNC_LENGTH)
 
 
 
