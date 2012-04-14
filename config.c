@@ -44,8 +44,11 @@ u8 config_global_set_default(void) {
     cg.magic_global	= CONFIG_GLOBAL_MAGIC;
     cg.magic_model	= CONFIG_MODEL_MAGIC;
     cg.model		= 0;
+
     cg.steering_dead_zone = 2;
     cg.throttle_dead_zone = 2;
+    cg.adc_ovs_last	= 0;		// use oversampled value in CALC
+
     cg.backlight_time	= 30;
     cg.battery_calib	= 672;
     cg.battery_low	= 92;		// 9.2 V
@@ -55,7 +58,18 @@ u8 config_global_set_default(void) {
     cg.key_beep		= 1;
     cg.reset_beep	= 1;
     cg.poweron_beep	= 1;
-    cg.adc_ovs_last	= 0;		// use oversampled value in CALC
+    cg.poweron_warn	= 0;
+
+    cg.timer1_type	= 0;		// OFF
+    cg.timer2_type	= 0;
+    cg.timer1_alarm	= 0;		// OFF
+    cg.timer2_alarm	= 0;
+
+    cg.unused1		= 0;
+    cg.unused2		= 0;
+    cg.unused3		= 0;
+    cg.unused4		= 0;
+    cg.unused5		= 0;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);

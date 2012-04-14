@@ -30,8 +30,8 @@
 
 // change MAGIC number when changing global config
 // also add code to setting default values
-// 27 bytes
-#define CONFIG_GLOBAL_MAGIC  0xfa05
+// 38 bytes
+#define CONFIG_GLOBAL_MAGIC  0xf906
 typedef struct {
     u8  steering_dead_zone;
     u8  throttle_dead_zone;
@@ -54,6 +54,16 @@ typedef struct {
     u8	reset_beep:1;		// beep on center/reset value
     u8	poweron_beep:1;		// beep on power on
     u8	adc_ovs_last:1;		// use oversampled (0) or last (1) value in CALC
+    u8  timer1_type:3;		// type of timer
+    u8	timer2_type:3;
+    u8	poweron_warn:1;		// beep 3 times when not-centered poweron
+    u8	unused1:1;
+    u8	timer1_alarm;		// alarm of timer
+    u8	timer2_alarm;
+    u16 unused2;		// reserve
+    u16 unused3;
+    u16 unused4;
+    u16 unused5;
 } config_global_s;
 
 extern config_global_s config_global;
