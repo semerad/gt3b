@@ -2,6 +2,7 @@
     global menu was restructuralized
     added ability to select number of channels (2-MAX_CHANNELS) for each
 	model, less channels means less delay
+    poweron warn when not-centered now has separate global option
 
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep

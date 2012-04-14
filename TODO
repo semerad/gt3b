@@ -1,7 +1,4 @@
 
-not-centered poweron warning with separate global option
-? linear CH3 with potentiometer
-
 timer
     - up/down/lap
     - ignore lap button after press for 3 seconds to eliminate double clicks
@@ -40,6 +37,7 @@ timer losikid
 	look at times
 	reset all data
 
+? linear CH3 with potentiometer
 ? selectable frame length with constant frame/constant sync
 ? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? use also flash memory to store model configs

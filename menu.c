@@ -719,20 +719,21 @@ void menu_init(void) {
 	reset_inactivity_timer();
     }
     else {
+	u16 steering = ADC_OVS(steering);
+	u16 throttle = ADC_OVS(throttle);
+
 	apply_global_config();
 	reset_inactivity_timer();
-	if (cg.poweron_beep) {
-	    u16 steering = ADC_OVS(steering);
-	    u16 throttle = ADC_OVS(throttle);
-	    // if actual steering/throttle value is not in dead zone, beep 3 times
-	    if (steering < (cg.calib_steering_mid - cg.steering_dead_zone) ||
-		steering > (cg.calib_steering_mid + cg.steering_dead_zone) ||
-		throttle < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
-		throttle > (cg.calib_throttle_mid + cg.throttle_dead_zone))
+
+	// if actual steering/throttle value is not in dead zone, beep 3 times
+	if (cg.poweron_warn &&
+	    (steering < (cg.calib_steering_mid - cg.steering_dead_zone) ||
+	     steering > (cg.calib_steering_mid + cg.steering_dead_zone) ||
+	     throttle < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
+	     throttle > (cg.calib_throttle_mid + cg.throttle_dead_zone)))
 		    buzzer_on(30, 30, 3);
-	    // else beep 1 times
-	    else beep(30);
-	}
+	// else beep 1 times
+	else if (cg.poweron_beep)  beep(30);
     }
 
     // read model config from eeprom

@@ -237,12 +237,15 @@ static u8 gs_beep(u8 val_id, u8 action, u8 *chars_blink) {
 	    case 3:
 		cg.poweron_beep ^= 1;
 		break;
+	    case 4:
+		cg.poweron_warn ^= 1;
+		break;
 	}
     }
 
     // select next value
     else if (action == 2) {
-	if (++id > 3)  id = 1;
+	if (++id > 4)  id = 1;
     }
 
     // show values
@@ -255,12 +258,16 @@ static u8 gs_beep(u8 val_id, u8 action, u8 *chars_blink) {
 	    lcd_char(LCHR3, (u8)(cg.key_beep ? 'Y' : 'N'));
 	    break;
 	case 2:
-	    lcd_char(LCHR1, 'C');
+	    lcd_char(LCHR1, 'V');
 	    lcd_char(LCHR3, (u8)(cg.reset_beep ? 'Y' : 'N'));
 	    break;
 	case 3:
 	    lcd_char(LCHR1, 'P');
 	    lcd_char(LCHR3, (u8)(cg.poweron_beep ? 'Y' : 'N'));
+	    break;
+	case 4:
+	    lcd_char(LCHR1, 'C');
+	    lcd_char(LCHR3, (u8)(cg.poweron_warn ? 'Y' : 'N'));
 	    break;
     }
 

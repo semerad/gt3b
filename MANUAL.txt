@@ -232,8 +232,9 @@ Global setup menu:
 		    number of ADC values	A_4/A_1
     b		beeps
 		    key beep			K_N/K_Y
-		    value at center/reset beep	C_N/C_Y
+		    value at center/reset beep	V_N/V_Y
 		    poweron beep		P_N/P_Y
+		    poweron not-centered warn	C_N/C_Y
     d		long press key delay		100...1000 miliseconds
     r		global or all models reset
 		    all configs (global+model)	G_N/G_Y (No/Yes)
