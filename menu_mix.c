@@ -33,7 +33,7 @@
 
 
 
-static u8 mix_4WS(u8 val_id, u8 action) {
+static u8 mix_4WS(u8 val_id, u8 action, u8 *chars_blink) {
     u8 id = val_id;
     u8 val;
 
@@ -92,7 +92,7 @@ static u8 mix_4WS(u8 val_id, u8 action) {
 }
 
 
-static u8 mix_DIG(u8 val_id, u8 action) {
+static u8 mix_DIG(u8 val_id, u8 action, u8 *chars_blink) {
     u8 id = val_id;
     u8 val;
 
@@ -140,7 +140,7 @@ static u8 mix_DIG(u8 val_id, u8 action) {
 }
 
 
-static u8 mix_MultiPosition(u8 val_id, u8 action) {
+static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
     u8 id = val_id;
     s8 val;
 
@@ -209,7 +209,7 @@ static u8 mix_MultiPosition(u8 val_id, u8 action) {
 }
 
 
-static u8 mix_brake_off(u8 val_id, u8 action) {
+static u8 mix_brake_off(u8 val_id, u8 action, u8 *chars_blink) {
     u8 id = val_id;
     u8 val;
 

@@ -180,11 +180,12 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
     u8 id_val = 0;			// now in key_id
     u8 menu_id = 0;
     menu_func_t func = menu_funcs[0];
+    u8 chars_blink = 0b111;		// bit for each char to blink
 
     menu_clear_symbols();
 
     // show first setting for first menu id
-    func(1, 0);
+    func(1, 0, &chars_blink);
     lcd_set_blink(L7SEG, LB_SPC);
     lcd_update();
 
@@ -197,8 +198,8 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 	if (btn(BTN_ROT_ALL)) {
 	    if (id_val) {
 		// change selected setting
-		func(id_val, 1);
-		lcd_chars_blink(LB_SPC);
+		func(id_val, 1, &chars_blink);
+		lcd_chars_blink_mask(LB_SPC, chars_blink);
 		lcd_update();
 	    }
 	    else {
@@ -214,7 +215,8 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 		func = menu_funcs[menu_id];
 		// remove possible showed symbols
 		menu_clear_symbols();
-		func(1, 0);	// show first setting
+		chars_blink = 0b111;		// default to all chars
+		func(1, 0, &chars_blink);	// show first setting
 		lcd_set_blink(L7SEG, LB_SPC);
 		lcd_update();
 	    }
@@ -224,9 +226,9 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 	    // switch menu_id/menu-setting1/menu-setting2/...
 	    if (id_val) {
 		// what to do depends on what was selected in this item
-		id_val = func(id_val, 2);
+		id_val = func(id_val, 2, &chars_blink);
 		if (id_val != 1) {
-		    lcd_chars_blink(LB_SPC);
+		    lcd_chars_blink_mask(LB_SPC, chars_blink);
 		}
 		else {
 		    // switch to menu selection
@@ -241,7 +243,7 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 		id_val = 1;
 		// key setting values is already showed
 		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_chars_blink(LB_SPC);
+		lcd_chars_blink_mask(LB_SPC, chars_blink);
 	    }
 	}
     }
