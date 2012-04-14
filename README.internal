@@ -78,6 +78,7 @@ main.c,h	- initialize all and call MENU task
 
 config.c,h	- global and model configuration
 menu.c,h	- MENU task, handling keys, menus, lcd
+  menu_common.c - common menu routines
   menu_global.c	- global config menus are here
   menu_popup.c	- handling of trims/keys, showing value
   menu_service.c- calibrate and key-test menus

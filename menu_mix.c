@@ -234,95 +234,19 @@ static u8 mix_brake_off(u8 val_id, u8 action) {
 
 
 
-typedef u8 (*mix_func_t)(u8 val_id, u8 action);
-static const mix_func_t menu_funcs[] = {
+static const menu_func_t mix_funcs[] = {
     mix_4WS,
     mix_DIG,
     mix_MultiPosition,
     mix_brake_off,
 };
-#define MAX_MENU_IDS  (sizeof(menu_funcs) / sizeof(void *))
-
 
 
 void menu_mix(void) {
-    u8 id_val = 0;			// now in key_id
-    u8 menu_id = 0;
-    mix_func_t func = menu_funcs[0];
-
     lcd_set_blink(LMENU, LB_SPC);
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    func(1, 0);		// show first setting for first menu id
-    lcd_set_blink(L7SEG, LB_SPC);
-    lcd_update();
-
-    while (1) {
-	btnra();
-	menu_stop();
-
-	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
-
-	if (btn(BTN_ROT_ALL)) {
-	    if (id_val) {
-		// change selected setting
-		func(id_val, 1);
-		lcd_chars_blink(LB_SPC);
-		lcd_update();
-	    }
-	    else {
-		// change menu-id
-		menu_force_value_channel = 0;
-		if (btn(BTN_ROT_L)) {
-		    if (menu_id)  menu_id--;
-		    else	  menu_id = MAX_MENU_IDS - 1;
-		}
-		else {
-		    if (++menu_id >= MAX_MENU_IDS)  menu_id = 0;
-		}
-		func = menu_funcs[menu_id];
-		// remove possible showed symbols
-		lcd_segment(LS_SYM_PERCENT, LS_OFF);
-		lcd_segment(LS_SYM_VOLTS, LS_OFF);
-		func(1, 0);	// show first setting
-		lcd_set_blink(L7SEG, LB_SPC);
-		lcd_update();
-	    }
-	}
-
-	else if (btn(BTN_ENTER)) {
-	    // switch menu_id/menu-setting1/menu-setting2/...
-	    if (id_val) {
-		// what to do depends on what was selected in this item
-		id_val = func(id_val, 2);
-		if (id_val != 1) {
-		    lcd_chars_blink(LB_SPC);
-		}
-		else {
-		    // switch to menu selection
-		    id_val = 0;
-		    lcd_set_blink(L7SEG, LB_SPC);
-		    lcd_chars_blink(LB_OFF);
-		}
-		lcd_update();
-	    }
-	    else {
-		// switch to key settings
-		id_val = 1;
-		// key setting values is already showed
-		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_chars_blink(LB_SPC);
-	    }
-	}
-    }
-
-    menu_force_value_channel = 0;
-    key_beep();
+    menu_common(mix_funcs, sizeof(mix_funcs) / sizeof(void *));
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();
-
 }
-
 

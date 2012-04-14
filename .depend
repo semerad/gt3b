@@ -14,6 +14,8 @@ config.o: config.c   config.h gt3b.h stm8.h  task.h \
  eeprom.h input.h
 calc.o: calc.c  calc.h gt3b.h stm8.h  task.h menu.h ppm.h \
  config.h eeprom.h input.h
+menu_common.o: menu_common.c   menu.h gt3b.h stm8.h  \
+ task.h config.h eeprom.h ppm.h input.h lcd.h buzzer.h
 menu.o: menu.c   menu.h gt3b.h stm8.h  task.h config.h \
  eeprom.h calc.h timer.h ppm.h lcd.h buzzer.h input.h
 menu_service.o: menu_service.c  menu.h gt3b.h stm8.h  task.h \

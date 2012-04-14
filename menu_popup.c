@@ -794,13 +794,7 @@ u8 menu_key_function_2state(u8 n) {
 
 // delete all symbols and clean 7seg
 static void menu_key_empty_id(void) {
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_DOT, LS_OFF);
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+    menu_clear_symbols();
     lcd_set(L7SEG, LB_EMPTY);
 }
 

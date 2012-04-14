@@ -36,15 +36,6 @@
 // variables to be used in CALC task
 u8  menu_force_value_channel;	// set PPM value for this channel
 s16 menu_force_value;		//   to this value (-500..500)
-s8  menu_channel3_8[MAX_CHANNELS - 2];	// values -100..100 for channels >=3
-u8  menu_channels_mixed;	// channel with 1 here will not be set from
-				//   menu_channel3_8
-s8  menu_4WS_mix;		// mix -100..100
-_Bool menu_4WS_crab;		// when 1, crab steering
-s8  menu_DIG_mix;		// mix -100..100
-u8  menu_MP_index;		// index of MultiPosition channel
-
-
 
 
 
@@ -53,13 +44,8 @@ u8  menu_lap_count;		// lap count
 
 
 
-
 // flags for wakeup after each ADC measure
 _Bool menu_wants_adc;
-// battery low flag
-_Bool menu_battery_low;
-// raw battery ADC value for check to battery low
-u16 battery_low_raw;
 // don't stop main loop and check keys
 u8 menu_check_keys;
 
@@ -69,109 +55,12 @@ u8 menu_check_keys;
 
 
 
-
-// ****************** UTILITY FUNCTIONS ******************************
-
-
-// apply model settings to variables
-void apply_model_config(void) {
-    u8 i, autorepeat = 0;
-
-    // set number of channels for this model
-    ppm_set_channels(MAX_CHANNELS);  // maybe sometime cm.channels
-
-    // set mixed channels to ignore them from menu_channel3_8
-    menu_channels_mixed = 0;
-    if (cm.channel_4WS)
-	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_4WS - 1));
-    if (cm.channel_DIG)
-	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_DIG - 1));
-
-    // set autorepeat
-    for (i = 0; i < 4; i++) {
-	if (!ck.et_map[i].is_trim)  continue;  // trim is off, skip
-	if (ck.et_map[i].buttons == ETB_AUTORPT)
-	    autorepeat |= (u8)((u8)et_buttons[i][0] | (u8)et_buttons[i][1]);
-    }
-    button_autorepeat(autorepeat);
-}
-
-
-// load model config from eeprom and set model settings
-void menu_load_model(void) {
-    u8 i;
-    // load config
-    config_model_read();
-
-    // set values of channels >= 3 to default left state,
-    //   for channels mapped to some trims/keys, it will next be set
-    //   to corresponding centre/reset value
-    for (i = 0; i < MAX_CHANNELS - 2; i++)
-	menu_channel3_8[i] = -100;
-
-    // set 4WS, DIG, MP to defaults
-    menu_4WS_mix = 0;
-    menu_4WS_crab = 0;
-    menu_DIG_mix = 0;
-    menu_MP_index = 0;
-    if (cm.channel_MP)
-	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
-
-    // set state of buttons to do initialize
-    menu_buttons_initialize();
-
-    // apply config to radio setting
-    apply_model_config();
-}
-
-
-// apply global setting to variables
-void apply_global_config(void) {
-    backlight_set_default(cg.backlight_time);
-    backlight_on();
-    // compute raw value for battery low voltage
-    battery_low_raw = (u16)(((u32)cg.battery_calib * cg.battery_low + 50) / 100);
-}
-
-
 // show model number, extra function to handle more than 10 models
 static void show_model_number(u8 model) {
     lcd_7seg((u8)(model % 10));
     lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
     lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
 }
-
-
-// menu stop - checks low battery
-_Bool battery_low_shutup;
-void menu_stop(void) {
-    static _Bool battery_low_on;
-    stop();
-    // low_bat is disabled in calibrate, key-test and global menus,
-    //   check it by buzzer_running
-    if (menu_battery_low && !buzzer_running && !battery_low_shutup)
-	battery_low_on = 0;
-    if (battery_low_on == menu_battery_low)  return;  // no change
-
-    // battery low status changed
-    if (menu_battery_low) {
-	// battery low firstly
-	battery_low_on = 1;
-	lcd_segment(LS_SYM_LOWPWR, LS_ON);
-	lcd_segment_blink(LS_SYM_LOWPWR, LB_SPC);
-	buzzer_on(40, 160, BUZZER_MAX);
-    }
-    else {
-	// battery low now OK
-	battery_low_on = 0;
-	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-	buzzer_off();
-    }
-    lcd_update();
-}
-
-
-
 
 
 // show main screen (model number and name/battery/...)
@@ -213,6 +102,8 @@ static void main_screen(u8 item) {
     }
     lcd_update();
 }
+
+
 
 
 
@@ -373,30 +264,6 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
     menu_force_value_channel = 0;
     key_beep();
     config_model_save();
-}
-
-
-// change value based on state of rotate encoder
-s16 menu_change_val(s16 val, s16 min, s16 max, u8 amount_fast, u8 rotate) {
-    u8 amount = 1;
-
-    if (btn(BTN_ROT_L)) {
-	// left
-	if (btnl(BTN_ROT_L))  amount = amount_fast;
-	val -= amount;
-	if (val < min)
-	    if (rotate)	 val = max;
-	    else         val = min;
-    }
-    else {
-	// right
-	if (btnl(BTN_ROT_R))  amount = amount_fast;
-	val += amount;
-	if (val > max)
-	    if (rotate)  val = min;
-	    else         val = max;
-    }
-    return val;
 }
 
 

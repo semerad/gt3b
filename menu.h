@@ -93,6 +93,7 @@ extern u8 menu_check_keys;
 
 // internal functions, used in split menu files
 extern void menu_stop(void);
+extern void menu_clear_symbols(void);
 extern void menu_calibrate(u8 at_poweron);
 extern void menu_key_test(void);
 extern void menu_global_setup(void);
@@ -121,6 +122,11 @@ extern u8 menu_main_screen;
 #define MS_BATTERY	1
 #define MS_LAP_COUNT	2
 #define MS_MAX		3
+// common menus, select item in 7SEG and then modify its setting at CHR3
+//   val_id: 1..num_values - which param of this item to change
+//   action: 0=show, 1=change, 2=get_next_val_id
+typedef u8 (*menu_func_t)(u8 val_id, u8 action);
+extern void menu_common(menu_func_t *menu_funcs, u8 menu_nitems);
 
 
 #endif
