@@ -36,6 +36,7 @@
 // variables to be used in CALC task
 u8  menu_force_value_channel;	// set PPM value for this channel
 s16 menu_force_value;		//   to this value (-500..500)
+_Bool menu_tmp_flag;
 
 
 

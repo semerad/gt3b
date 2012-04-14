@@ -284,18 +284,17 @@ static u8 gs_long_press_delay(u8 val_id, u8 action, u8 *chars_blink) {
 
 
 // reset global or all models
-static _Bool gs_reset_flag;
 static u8 gs_config_reset(u8 val_id, u8 action, u8 *chars_blink) {
     u8 id = val_id;
 
     // change value
     if (action == 1)
-	gs_reset_flag ^= 1;
+	menu_tmp_flag ^= 1;
 
     // select next value, reset when flag is set
     else if (action == 2) {
-	if (gs_reset_flag) {
-	    gs_reset_flag = 0;
+	if (menu_tmp_flag) {
+	    menu_tmp_flag = 0;
 	    buzzer_on(60, 0, 1);
 	    if (id == 1)  config_global_set_default();
 	    else          cg.model = 0;
@@ -309,7 +308,7 @@ static u8 gs_config_reset(u8 val_id, u8 action, u8 *chars_blink) {
     // show values
     lcd_7seg(L7_R);
     lcd_char(LCHR2, ' ');
-    lcd_char(LCHR3, (u8)(gs_reset_flag ? 'Y' : 'N'));
+    lcd_char(LCHR3, (u8)(menu_tmp_flag ? 'Y' : 'N'));
     *chars_blink = 0b100;	// only last char will blink
     lcd_char(LCHR1, (u8)(id == 1 ? 'G' : 'M'));
 
