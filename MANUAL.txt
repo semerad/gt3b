@@ -210,33 +210,32 @@ Global setup menu:
 - now menu items MODEL and NAME will start blinking
 - select requested item by ROTATE and press ENTER
 - use ROTATE to change value and press ENTER to end value changing
-- press BACK-long or ENTER-long to end global setup menu,
+- press BACK or END or ENTER-long to end global setup menu,
     values will be saved to EEPROM
 - selected menu items are indicated by following symbols:
     F		firmware version (this of course cannot be changed :-)
     L		backlight time			5s,10s...10m...MAX
-    A		inactivity alarm		OFF,1m...10m
+    I		inactivity alarm		OFF,1m...10m
     LOW POWER!	battery low voltage		2.0...10.5V
-    E.POINT	maximum allowed endpoint value	100...150%
+    E		maximum allowed endpoint value	100...150%
 		DANGER - values greater than 120% can damage
 			    your servo or will not be possible
 			    to transmit to receiver because of
 			    2.4GHz HF module limitation
-		This danger zone will be indicated with a flashing "d" symbol
-		  for values greater than 120%
-    1		dead zone for steering		0...50
-    2		dead zone for throttle		0...50
-    o		use last 4 or 1 ADC values	OVS/LST
-    b		key beep			OFF/ON
-    C		center/reset beep		OFF/ON
-    P		poweron beep			OFF/ON
-		also includes warning when steering/throttle are not
-		centered at poweron
+		This danger zone will be indicated with a flashing
+		  '%' symbol for values greater than 120%
+    A		analog settings, dead zones, ADC samples used
+		    steering dead zone		S00..S50
+		    throttle dead zone		T00..T50
+		    number of ADC values	A_4/A_1
+    b		beeps
+		    key beep			K_N/K_Y
+		    center/reset beep		C_N/C_Y
+		    poweron beep		P_N/P_Y
     d		long press key delay		100...1000 miliseconds
-    r + ALL	global reset - change to YES to set global configuration
-			       and all models to default values
-    r + MOD	all models reset - change to YES to set all models
-				   to default values
+    r		global or all models reset
+		    all configs (global+model)	G_N/G_Y (No/Yes)
+		    all models			M_N/M_Y (No/Yes
 
 
 Main screens:

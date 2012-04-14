@@ -34,13 +34,11 @@
 
 
 // show firmware version
-static void gs_firmware(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
+static u8 gs_firmware(u8 val_id, u8 action, u8 *chars_blink) {
+    // only show, not possible to change
     lcd_7seg(L7_F);
     lcd_chars(VERSION);
+    return 1;	// only one value
 }
 
 
@@ -57,15 +55,14 @@ static void bl_num2(u8 val) {
     lcd_char(LCHR2, (u8)((u8)(val % 10) + '0'));
 
 }
-static void gs_backlight_time(u8 change) {
+
+// set backlight time
+static u8 gs_backlight_time(u8 val_id, u8 action, u8 *chars_blink) {
     s8 i;
     u16 *addr = &cg.backlight_time;
 
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
+    // change value
+    if (action == 1) {
 	if (btn(BTN_ROT_L)) {
 	    // find lower value
 	    for (i = BL_STEPS_SIZE - 1; i >= 0; i--) {
@@ -87,6 +84,8 @@ static void gs_backlight_time(u8 change) {
 		*addr = bl_steps[0];
 	}
     }
+
+    // show value
     lcd_7seg(L7_L);
     if (*addr < 60) {
 	// seconds
@@ -107,205 +106,232 @@ static void gs_backlight_time(u8 change) {
 	// max
 	lcd_chars("MAX");
     }
+
+    return 1;	// only one value
 }
 
 
-static void gs_inactivity_alarm(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change) {
+// set inactivity alarm
+static u8 gs_inactivity_alarm(u8 val_id, u8 action, u8 *chars_blink) {
+
+    // change value
+    if (action == 1) {
 	cg.inactivity_alarm = (u8)menu_change_val(cg.inactivity_alarm, 0, 10,
 						  1, 1);
 	reset_inactivity_timer();
     }
-    lcd_7seg(L7_A);
+
+    // show value
+    lcd_7seg(1);
     if (!cg.inactivity_alarm)  lcd_chars("OFF");
     else {
 	bl_num2(cg.inactivity_alarm);
 	lcd_char(LCHR3, 'M');
     }
+
+    return 1;	// only one value
 }
 
 
-static void gs_battery_low(u8 change) {
+// set battery low voltage
+static u8 gs_battery_low(u8 val_id, u8 action, u8 *chars_blink) {
     u8 *addr = &cg.battery_low;
-    if (change == 0xff) {
-	lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-	lcd_segment(LS_SYM_DOT, LS_OFF);
-	lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 20, 105, 2, 0);
+
+    // change value
+    if (action == 1)
+	*addr = (u8)menu_change_val(*addr, 20, 105, 2, 0);
+
+    // show value, it isn't at 7SEG, so do more things
+    lcd_set(L7SEG, LB_EMPTY);
     lcd_segment(LS_SYM_LOWPWR, LS_ON);
+    lcd_segment_blink(LS_SYM_LOWPWR, LS_ON);
     lcd_segment(LS_SYM_DOT, LS_ON);
     lcd_segment(LS_SYM_VOLTS, LS_ON);
     lcd_char_num3(cg.battery_low);
+
+    return 1;	// only one value
 }
 
 
-static void gs_endpoint_max(u8 change) {
+// set max endpoint value
+static u8 gs_endpoint_max(u8 val_id, u8 action, u8 *chars_blink) {
     u8 *addr = &cg.endpoint_max;
-    if (change == 0xff) {
-	lcd_segment(LS_MENU_EPO, LS_OFF);
-	lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 100, 150, 5, 0);
+
+    // change value
+    if (action == 1)
+	*addr = (u8)menu_change_val(*addr, 100, 150, 5, 0);
+
+    // show value
+    lcd_7seg(L7_E);
     lcd_segment(LS_SYM_PERCENT, LS_ON);
-    lcd_segment(LS_MENU_EPO, LS_ON);
     lcd_char_num3(*addr);
-    if (*addr > 120) {
-	lcd_7seg(L7_D);
-	lcd_set_blink(L7SEG, LB_SPC);
-    }
-    else lcd_set(L7SEG, LB_EMPTY);
+    if (*addr > 120)  lcd_segment_blink(LS_SYM_PERCENT, LS_ON);
+
+    return 1;	// only one value
 }
 
 
-static void gs_key_beep(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
+// set dead zones and ADC oversampled/last
+static u8 gs_adc(u8 val_id, u8 action, u8 *chars_blink) {
+    u8 id = val_id;
+    u8 *addr;
+
+    // change value
+    if (action == 1) {
+	switch (id) {
+	    case 1:
+		addr = &cg.steering_dead_zone;
+		*addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
+		break;
+	    case 2:
+		addr = &cg.throttle_dead_zone;
+		*addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
+		break;
+	    case 3:
+		cg.adc_ovs_last ^= 1;
+		break;
+	}
     }
-    if (change)  cg.key_beep ^= 1;
+
+    // select next value
+    else if (action == 2) {
+	if (++id > 3)  id = 1;
+    }
+
+    // show values
+    lcd_7seg(L7_A);
+    switch (id) {
+	case 1:
+	    lcd_char_num2_lbl(cg.steering_dead_zone, "SSS");
+	    *chars_blink = 0b110;	// last 2 chars will blink
+	    break;
+	case 2:
+	    lcd_char_num2_lbl(cg.throttle_dead_zone, "TTT");
+	    *chars_blink = 0b110;	// last 2 chars will blink
+	    break;
+	case 3:
+	    lcd_char(LCHR1, 'A');
+	    lcd_char(LCHR2, ' ');
+	    lcd_char(LCHR3, (u8)(cg.adc_ovs_last ? '1' : '4'));
+	    *chars_blink = 0b100;	// only last char will blink
+	    break;
+    }
+
+    return id;
+}
+
+
+// set beeps for key, center/reset, poweron
+static u8 gs_beep(u8 val_id, u8 action, u8 *chars_blink) {
+    u8 id = val_id;
+
+    // change value
+    if (action == 1) {
+	switch (id) {
+	    case 1:
+		cg.key_beep ^= 1;
+		break;
+	    case 2:
+		cg.reset_beep ^= 1;
+		break;
+	    case 3:
+		cg.poweron_beep ^= 1;
+		break;
+	}
+    }
+
+    // select next value
+    else if (action == 2) {
+	if (++id > 3)  id = 1;
+    }
+
+    // show values
     lcd_7seg(L7_B);
-    if (cg.key_beep)  lcd_chars("ON ");
-    else              lcd_chars("OFF");
-}
-
-
-static void gs_reset_beep(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
+    lcd_char(LCHR2, ' ');
+    *chars_blink = 0b100;	// only last char will blink
+    switch (id) {
+	case 1:
+	    lcd_char(LCHR1, 'K');
+	    lcd_char(LCHR3, (u8)(cg.key_beep ? 'Y' : 'N'));
+	    break;
+	case 2:
+	    lcd_char(LCHR1, 'C');
+	    lcd_char(LCHR3, (u8)(cg.reset_beep ? 'Y' : 'N'));
+	    break;
+	case 3:
+	    lcd_char(LCHR1, 'P');
+	    lcd_char(LCHR3, (u8)(cg.poweron_beep ? 'Y' : 'N'));
+	    break;
     }
-    if (change)  cg.reset_beep ^= 1;
-    lcd_7seg(L7_C);
-    if (cg.reset_beep)  lcd_chars("ON ");
-    else                lcd_chars("OFF");
+
+    return id;
 }
 
-
-static void gs_poweron_beep(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.poweron_beep ^= 1;
-    lcd_7seg(L7_P);
-    if (cg.poweron_beep)  lcd_chars("ON ");
-    else                  lcd_chars("OFF");
-}
-
-
-static void gs_long_press_delay(u8 change) {
+// set long press delay
+static u8 gs_long_press_delay(u8 val_id, u8 action, u8 *chars_blink) {
     u8 *addr = &cg.long_press_delay;
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 20, 200, 5, 0);
+
+    // change value
+    if (action == 1)
+	*addr = (u8)menu_change_val(*addr, 20, 200, 5, 0);
+
+    // show value
     lcd_7seg(L7_D);
     lcd_char_num3(*addr * 5);
+
+    return 1;	// only one value
 }
 
 
-static void gs_steering_dead(u8 change) {
-    u8 *addr = &cg.steering_dead_zone;
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
-    lcd_7seg(1);
-    lcd_char_num3(*addr);
-}
-
-
-static void gs_throttle_dead(u8 change) {
-    u8 *addr = &cg.throttle_dead_zone;
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  *addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
-    lcd_7seg(2);
-    lcd_char_num3(*addr);
-}
-
-
-static void gs_adc_ovs_last(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	return;
-    }
-    if (change)  cg.adc_ovs_last ^= 1;
-    lcd_7seg(L7_O);
-    if (cg.adc_ovs_last)  lcd_chars("LST");
-    else		  lcd_chars("OVS");
-}
-
-
+// reset global or all models
 static _Bool gs_reset_flag;
-static void gs_reset_all(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
+static u8 gs_config_reset(u8 val_id, u8 action, u8 *chars_blink) {
+    u8 id = val_id;
+
+    // change value
+    if (action == 1)
+	gs_reset_flag ^= 1;
+
+    // select next value, reset when flag is set
+    else if (action == 2) {
 	if (gs_reset_flag) {
 	    gs_reset_flag = 0;
-	    config_global_set_default();
+	    buzzer_on(60, 0, 1);
+	    if (id == 1)  config_global_set_default();
+	    else          cg.model = 0;
 	    config_global_save();
 	    eeprom_empty_models();
 	    menu_load_model();
 	}
-	return;
+	if (++id > 2)  id = 1;
     }
-    if (change)  gs_reset_flag ^= 1;
+
+    // show values
     lcd_7seg(L7_R);
-    if (gs_reset_flag)	lcd_chars("YES");
-    else		lcd_chars("ALL");
+    lcd_char(LCHR2, ' ');
+    lcd_char(LCHR3, (u8)(gs_reset_flag ? 'Y' : 'N'));
+    *chars_blink = 0b100;	// only last char will blink
+    lcd_char(LCHR1, (u8)(id == 1 ? 'G' : 'M'));
+
+    return id;
 }
 
-static void gs_reset_model_all(u8 change) {
-    if (change == 0xff) {
-	lcd_set(L7SEG, LB_EMPTY);
-	if (gs_reset_flag) {
-	    gs_reset_flag = 0;
-	    cg.model = 0;
-	    config_global_save();
-	    eeprom_empty_models();
-	    menu_load_model();
-	}
-	return;
-    }
-    if (change)  gs_reset_flag ^= 1;
-    lcd_7seg(L7_R);
-    if (gs_reset_flag)	lcd_chars("YES");
-    else		lcd_chars("MOD");
-}
+
 
 
 
 
 // array of functions for global setup items
-typedef void (*global_setup_t)(u8 change);
-static const global_setup_t gs_config[] = {
+static const menu_func_t gs_config[] = {
     gs_firmware,
     gs_backlight_time,
     gs_inactivity_alarm,
     gs_battery_low,
     gs_endpoint_max,
-    gs_steering_dead,
-    gs_throttle_dead,
-    gs_adc_ovs_last,
-    gs_key_beep,
-    gs_reset_beep,
-    gs_poweron_beep,
+    gs_adc,
+    gs_beep,
     gs_long_press_delay,
-    gs_reset_all,
-    gs_reset_model_all,
+    gs_config_reset,
 };
 #define GS_CONFIG_SIZE  (sizeof(gs_config) / sizeof(u8 *))
 
@@ -315,10 +341,6 @@ static const global_setup_t gs_config[] = {
 
 
 void menu_global_setup(void) {
-    u8 item = 0;
-    u8 item_val = 0;		// now selecting item
-    global_setup_t func = gs_config[item];
-
     // cleanup screen and disable possible low bat warning
     buzzer_off();
     key_beep();
@@ -328,60 +350,17 @@ void menu_global_setup(void) {
     backlight_on();
     lcd_clear();
 
+    // show blinking MODEL + NAME
     lcd_segment(LS_MENU_MODEL, LS_ON);
     lcd_segment_blink(LS_MENU_MODEL, LB_INV);
     lcd_segment_blink(LS_MENU_NAME, LB_INV);
-    lcd_update();
-    func(0);			// show current value
 
-    while (1) {
-	btnra();
-	stop();
+    menu_common(gs_config, sizeof(gs_config) / sizeof(void *), 1);
 
-	if (btnl(BTN_BACK | BTN_ENTER))  break;
-
-	if (btn(BTN_ENTER)) {
-	    if (item > 0) {		// not for firmware version
-		key_beep();
-		item_val = (u8)(1 - item_val);
-		if (item_val) {
-		    // changing value
-		    lcd_chars_blink(LB_SPC);
-		}
-		else {
-		    // selecting item
-		    lcd_chars_blink(LB_OFF);
-		}
-	    }
-	}
-
-	else if (btn(BTN_ROT_ALL)) {
-	    if (item_val) {
-		// change item value
-		func(1);
-		lcd_chars_blink(LB_SPC);
-	    }
-	    else {
-		// select another item
-		func(0xff);		// un-show labels
-		if (btn(BTN_ROT_L)) {
-		    if (item)  item--;
-		    else       item = GS_CONFIG_SIZE - 1;
-		}
-		else {
-		    if (++item >= GS_CONFIG_SIZE)  item = 0;
-		}
-		func = gs_config[item];
-		func(0);		// show current value
-	    }
-	    lcd_update();
-	}
-    }
-
-    func(0xff);		// un-show labels, apply resets
-    beep(60);
+    buzzer_on(60, 0, 1);	// not beep() because of key_beep() at menu_common()
     lcd_clear();
     config_global_save();
     apply_global_config();
+    btnra();
 }
 

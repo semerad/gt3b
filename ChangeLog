@@ -1,3 +1,6 @@
+*0.4.3 ()
+    global menu was restructuralized
+
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep
     minimum battery voltage set to 2V for those experimenting with 1S cell

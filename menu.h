@@ -126,7 +126,7 @@ extern u8 menu_main_screen;
 //   val_id: 1..num_values - which param of this item to change
 //   action: 0=show, 1=change, 2=get_next_val_id
 typedef u8 (*menu_func_t)(u8 val_id, u8 action, u8 *chars_blink);
-extern void menu_common(menu_func_t *menu_funcs, u8 menu_nitems);
+extern void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop);
 
 
 #endif

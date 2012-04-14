@@ -176,13 +176,14 @@ void menu_clear_symbols(void) {
 
 
 // common menu, select item at 7SEG and then set params at CHR3
-void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
+void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
     u8 id_val = 0;			// now in key_id
     u8 menu_id = 0;
     menu_func_t func = menu_funcs[0];
     u8 chars_blink = 0b111;		// bit for each char to blink
 
     menu_clear_symbols();
+    if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 
     // show first setting for first menu id
     func(1, 0, &chars_blink);
@@ -191,7 +192,8 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 
     while (1) {
 	btnra();
-	menu_stop();
+	if (use_stop)  stop();
+	else           menu_stop();
 
 	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
 
@@ -215,6 +217,7 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
 		func = menu_funcs[menu_id];
 		// remove possible showed symbols
 		menu_clear_symbols();
+		if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 		chars_blink = 0b111;		// default to all chars
 		func(1, 0, &chars_blink);	// show first setting
 		lcd_set_blink(L7SEG, LB_SPC);
@@ -249,6 +252,7 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems) {
     }
 
     menu_clear_symbols();
+    if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
     menu_force_value_channel = 0;
     key_beep();
 }

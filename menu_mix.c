@@ -238,7 +238,7 @@ static const menu_func_t mix_funcs[] = {
 
 void menu_mix(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_common(mix_funcs, sizeof(mix_funcs) / sizeof(void *));
+    menu_common(mix_funcs, sizeof(mix_funcs) / sizeof(void *), 0);
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();
