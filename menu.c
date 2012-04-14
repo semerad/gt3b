@@ -795,6 +795,10 @@ void menu_init(void) {
     // variables
     menu_key_mapping_prepare();
 
+    // wait for some time to read ADC/buttons several times and get
+    //   stable values
+    while (time_sec == 0 && time_5ms < 10)  pause();
+
     // read global config from eeprom, if calibrate values was set to defaults,
     //   call calibrate
     if (config_global_read()) {
@@ -806,11 +810,13 @@ void menu_init(void) {
 	apply_global_config();
 	reset_inactivity_timer();
 	if (cg.poweron_beep) {
+	    u16 steering = ADC_OVS(steering);
+	    u16 throttle = ADC_OVS(throttle);
 	    // if actual steering/throttle value is not in dead zone, beep 3 times
-	    if (adc_steering_last < (cg.calib_steering_mid - cg.steering_dead_zone) ||
-		adc_steering_last > (cg.calib_steering_mid + cg.steering_dead_zone) ||
-		adc_throttle_last < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
-		adc_throttle_last > (cg.calib_throttle_mid + cg.throttle_dead_zone))
+	    if (steering < (cg.calib_steering_mid - cg.steering_dead_zone) ||
+		steering > (cg.calib_steering_mid + cg.steering_dead_zone) ||
+		throttle < (cg.calib_throttle_mid - cg.throttle_dead_zone) ||
+		throttle > (cg.calib_throttle_mid + cg.throttle_dead_zone))
 		    buzzer_on(30, 30, 3);
 	    // else beep 1 times
 	    else beep(30);
@@ -819,10 +825,6 @@ void menu_init(void) {
 
     // read model config from eeprom
     menu_load_model();
-
-    // wait for at least 3 buttons reads to initialize default servo values
-    //   with stable keys (for example CH3_MID)
-    while (time_sec == 0 && time_5ms < 10)  pause();
 
     // and main loop
     menu_loop();
