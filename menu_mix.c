@@ -210,23 +210,17 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 
 
 static u8 mix_brake_off(u8 val_id, u8 action, u8 *chars_blink) {
-    u8 id = val_id;
-    u8 val;
 
     if (action == 1) {
 	// change value
 	cm.brake_off ^= 1;
-    }
-    else if (action == 2) {
-	// select next value
-	id = 1;  // only one item
     }
 
     // show value
     lcd_7seg(L7_B);
     lcd_chars(cm.brake_off ? "CUT" : "OFF");
 
-    return id;
+    return 1;
 }
 
 
