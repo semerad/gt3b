@@ -174,15 +174,12 @@ void ppm_calc_sync(void) {
     ppm_calc_len++;
 
     // calculate new ppm_end
+    ppm_end = (u8)((u8)((ppm_microsecs01 + 9999) / 10000) + PPM_SYNC_LENGTH);
 #if 0
-    // constant frame length
-    ppm_end = (u8)(ppm_start + PPM_FRAME_LENGTH)
-#else
-    // constant SYNC length, servo pulse lengths (rounded to following
-    //   whole ms) + SYNC length
-    ppm_end = (u8)(ppm_start + (u8)((ppm_microsecs01 + 9999) / 10000)
-		   + PPM_SYNC_LENGTH);
+    // constant frame length, assign only when it is longer than minimum
+    if (ppm_end < PPM_FRAME_LENGTH)  ppm_end = PPM_FRAME_LENGTH;
 #endif
+    ppm_end += ppm_start;
     ppm_microsecs01 = 0;
 
     // set new ppm_calc_awake
