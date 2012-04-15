@@ -19,8 +19,7 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Global characteristics:
 =======================
-- 14 models memory (for 6-channel firmware, for 3-channel it is little more
-		    and for 8-channel little less)
+- 17/14/12 model memories for 3/6/8 channel firmware
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
 - added Subtrims
@@ -32,7 +31,10 @@ Global characteristics:
 - calibrate menu will be automatically invoked after first power-on with
   this firmware, so 6 menu items will start to blink
 - when radio is powered on with steering/throttle not in dead center,
-    it beeps 3 times if poweron beep is allowed
+    it beeps 3 times if poweron not-centered warning is allowed
+- added inactivity alarm
+- added settable servo speed
+- added 4WS, DIG, MultiPosition functions
 
 
 Buttons:
