@@ -50,10 +50,8 @@ static @near menu_timer_s timer_lap_time[TIMER_NUM][TIMER_MAX_LAPS];
 
 // show timer value on 3-char display
 // time format  - left-chars right-chars
-//   00.0 %	- 2-minutes, 1-10ths seconds
-//   000  %	- 1-minutes, 2-seconds
-//   00.0	- 2-seconds, 1-0.1 seconds
-//   000	- 1-seconds, 2-0.01 seconds
+//   0000	- minutes:seconds
+//   0000 %	- seconds:hundredths
 static void timer_value(menu_timer_s *pt) {
     u16 tsec;
     u8  min, sec, hdr;
@@ -67,49 +65,31 @@ static void timer_value(menu_timer_s *pt) {
 
     // show value
     if (min) {
-	// show minutes
-	lcd_segment(LS_SYM_PERCENT, LS_ON);
+	// show minutes and seconds
 	// rounding up
 	if (hdr >= 50)  sec++;
 	if (sec == 60)  { sec = 0; min++; }
-	if (min >= 10) {
-	    // format 00.0 %
-	    lcd_segment(LS_SYM_DOT, LS_ON);
-	    // rounding up
-	    sec = (u8)((sec + 5) / 10);
-	    if (sec == 6)  { sec = 0; min++; }
-	    lcd_char(LCHR1, (u8)(min / 10 + '0'));
-	    lcd_char(LCHR2, (u8)(min % 10 + '0'));
-	    lcd_char(LCHR3, (u8)(sec + '0'));
-	}
-	else {
-	    // format 000 %
-	    lcd_char(LCHR1, (u8)(min + '0'));
-	    lcd_char(LCHR2, (u8)(sec / 10 + '0'));
-	    lcd_char(LCHR3, (u8)(sec % 10 + '0'));
-	}
+	lcd_7seg((u8)(min / 10));
+	lcd_char(LCHR1, (u8)(min % 10 + '0'));
+	lcd_char(LCHR2, (u8)(sec / 10 + '0'));
+	lcd_char(LCHR3, (u8)(sec % 10 + '0'));
     }
     else {
-	// show seconds only
-	if (sec >= 10) {
-	    // format 00.0
-	    lcd_segment(LS_SYM_DOT, LS_ON);
-	    // rounding up
-	    hdr = (u8)((hdr + 5) / 10);
-	    if (hdr == 10)  { hdr = 0; sec++; }
-	    lcd_char(LCHR1, (u8)(sec / 10 + '0'));
-	    lcd_char(LCHR2, (u8)(sec % 10 + '0'));
-	    lcd_char(LCHR3, (u8)(hdr + '0'));
-	}
-	else {
-	    // format 000
-	    lcd_char(LCHR1, (u8)(sec + '0'));
-	    lcd_char(LCHR2, (u8)(hdr / 10 + '0'));
-	    lcd_char(LCHR3, (u8)(hdr % 10 + '0'));
-	}
+	// show seconds and hundredths
+	lcd_segment(LS_SYM_PERCENT, LS_ON);
+	lcd_7seg((u8)(sec / 10));
+	lcd_char(LCHR1, (u8)(sec % 10 + '0'));
+	lcd_char(LCHR2, (u8)(hdr / 10 + '0'));
+	lcd_char(LCHR3, (u8)(hdr % 10 + '0'));
     }
 }
 
+
+// show timer ID as left and right arrow
+static void timer_show_id(u8 tid) {
+    if (tid)  lcd_segment(LS_SYM_RIGHT, LS_ON); \
+    else      lcd_segment(LS_SYM_LEFT, LS_ON);
+}
 
 
 
@@ -120,11 +100,12 @@ void menu_timer_show(u8 tid) {
     u8 tbit = (u8)(1 << tid);
 
     menu_clear_symbols();
-    lcd_7seg((u8)(tid + 1));
+    timer_show_id(tid);
 
     switch (type) {
 
 	case TIMER_OFF:
+	    lcd_set(L7SEG, LB_EMPTY);
 	    lcd_chars("OFF");
 	    return;
 	    break;
@@ -143,9 +124,11 @@ void menu_timer_show(u8 tid) {
 
 	case TIMER_LAP:
 	    lcd_chars("NDY");	// XXX
+	    lcd_set(L7SEG, LB_EMPTY);
 	    break;
 
 	case TIMER_LAPCNT:
+	    lcd_set(L7SEG, LB_EMPTY);
 	    lcd_char_num3(timer_lap_count[tid]);
 	    return;
 	    break;
@@ -212,6 +195,7 @@ static u8 timer_setup_throttle(u8 val_id, u8 action, u8 *chars_blink) {
     // show value
     lcd_7seg(L7_H);
     lcd_chars(menu_timer_throttle & (u8)(1 << timer_id) ? "ON " : "OFF");
+    timer_show_id(timer_id);
 
     return 1;	// only one value
 }
@@ -234,6 +218,7 @@ static u8 timer_setup_alarm(u8 val_id, u8 action, u8 *chars_blink) {
     // show value
     lcd_7seg(L7_A);
     lcd_char_num3(val);
+    timer_show_id(timer_id);
 
     return 1;	// only one value
 }
@@ -256,6 +241,7 @@ static u8 timer_setup_type(u8 val_id, u8 action, u8 *chars_blink) {
     // show value
     lcd_7seg(L7_P);
     lcd_chars(timer_type_labels[val]);
+    timer_show_id(timer_id);
 
     return 1;	// only one value
 }
