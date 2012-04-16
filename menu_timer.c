@@ -169,6 +169,7 @@ void menu_timer_clear(u8 tid, u8 laps) {
     if (type == TIMER_DOWN) {
 	// down timer
 	pt->sec = menu_timer_alarm[tid];
+	if (!pt->sec)  pt->sec = 1;	// at least 1 second alarm time
 	menu_timer_direction |= tbit;
     }
     else {
