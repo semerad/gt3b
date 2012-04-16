@@ -40,6 +40,7 @@
 #define CHANNEL_FAST	5
 #define MIX_FAST	5
 #define SPEED_FAST	5
+#define TIMER_ALARM_FAST 5
 
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5
@@ -66,11 +67,7 @@ extern s8  menu_4WS_mix;		// mix -100..100
 extern _Bool menu_4WS_crab;		// when 1, crab steering
 extern s8  menu_DIG_mix;		// mix -100..100
 extern u8  menu_MP_index;		// index of MultiPosition channel
-extern _Bool menu_tmp_flag;
 
-
-//
-extern u8  menu_lap_count;		// lap count
 
 
 
@@ -89,6 +86,8 @@ extern _Bool battery_low_shutup;  // stop bat low beeping
 extern u16 battery_low_raw;
 // don't stop main loop and check keys
 extern u8 menu_check_keys;
+// temporary flag used when doing reset (global/all models/model)
+extern _Bool menu_tmp_flag;
 
 
 
@@ -123,13 +122,58 @@ extern void menu_buttons_initialize(void);
 extern u8 menu_main_screen;
 #define MS_NAME		0
 #define MS_BATTERY	1
-#define MS_LAP_COUNT	2
-#define MS_MAX		3
+#define MS_TIMER1	2
+#define MS_TIMER2	3
+#define MS_MAX		4
 // common menus, select item in 7SEG and then modify its setting at CHR3
 //   val_id: 1..num_values - which param of this item to change
 //   action: 0=show, 1=change, 2=get_next_val_id
 typedef u8 (*menu_func_t)(u8 val_id, u8 action, u8 *chars_blink);
 extern void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop);
+
+
+
+// timers
+// types
+#define TIMER_NUM	2
+#define TIMER_OFF	0
+#define TIMER_UP	1
+#define TIMER_DOWN	2
+#define TIMER_LAP	3
+#define TIMER_LAPCNT	4
+#define TIMER_TYPE_MAX	4
+
+#define TIMER_TYPE(tid)  ((u8)(tid ? cg.timer2_type : cg.timer1_type))
+#define TIMER_TYPE_SET(tid, val) \
+    if (tid) cg.timer2_type = (u8)val; \
+    else cg.timer1_type = (u8)val;
+
+#define TIMER_ALARM(tid)  ((u8)(tid ? cg.timer2_alarm : cg.timer1_alarm))
+#define TIMER_ALARM_SET(tid, val) \
+    if (tid) cg.timer2_alarm = (u8)val; \
+    else cg.timer1_alarm = (u8)val;
+
+// menu task will be waked-up periodically to show timer value
+extern _Bool	 menu_timer_wakeup;
+extern u8	 menu_timer_running;		// running timers, one bit for one timer
+extern @near u8  menu_timer_throttle;		// throttle start, one bit for one timer
+
+typedef struct {
+    u16	sec;					// timer seconds
+    u8	hdr;					// timers 0.01 seconds
+} menu_timer_s;
+extern @near menu_timer_s menu_timer[];		// actual timer values
+#define TIMER_READ(pt, tsec, thdr) \
+    sim(); \
+    tsec = pt->sec; \
+    thdr = pt->hdr; \
+    rim();
+
+void menu_timer_show(u8 tid);
+void menu_timer_setup(u8 tid);
+void menu_timer_lap_times(u8 tid);
+void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv);
+void kf_menu_timer_reset(u8 *id, u8 *param, u8 flags, s16 *pv);
 
 
 #endif

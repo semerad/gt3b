@@ -36,12 +36,9 @@
 // variables to be used in CALC task
 u8  menu_force_value_channel;	// set PPM value for this channel
 s16 menu_force_value;		//   to this value (-500..500)
-_Bool menu_tmp_flag;
 
 
 
-//
-u8  menu_lap_count;		// lap count
 
 
 
@@ -49,6 +46,8 @@ u8  menu_lap_count;		// lap count
 _Bool menu_wants_adc;
 // don't stop main loop and check keys
 u8 menu_check_keys;
+// temporary flag used when doing reset (global/all models/model)
+_Bool menu_tmp_flag;
 
 
 
@@ -66,18 +65,17 @@ static void show_model_number(u8 model) {
 
 // show main screen (model number and name/battery/...)
 static void main_screen(u8 item) {
-    lcd_segment(LS_SYM_MODELNO, LS_ON);
-    lcd_segment(LS_SYM_CHANNEL, LS_OFF);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-    show_model_number(cg.model);
-
     menu_wants_adc = 0;
 
     // chars is item dependent
     if (item == MS_NAME) {
 	// model name
+	lcd_segment(LS_SYM_MODELNO, LS_ON);
+	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	show_model_number(cg.model);
 	lcd_chars(cm.name);
     }
     else if (item == MS_BATTERY) {
@@ -85,8 +83,12 @@ static void main_screen(u8 item) {
 	static u16 bat_time;
 
 	// battery voltage
+	lcd_segment(LS_SYM_MODELNO, LS_ON);
+	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
+	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
+	show_model_number(cg.model);
 	// calculate voltage from current raw value and calib value
 	if (time_sec >= bat_time) {
 	    bat_time = time_sec + 2;
@@ -95,11 +97,9 @@ static void main_screen(u8 item) {
 	lcd_char_num3(bat_val);
 	menu_wants_adc = 1;
     }
-    else if (item == MS_LAP_COUNT) {
-	lcd_segment(LS_SYM_DOT, LS_OFF);
-	lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	lcd_segment(LS_SYM_PERCENT, LS_ON);
-	lcd_char_num3(menu_lap_count);
+    else {
+	// timers
+	menu_timer_show((u8)(item - MS_TIMER1));
     }
     lcd_update();
 }
@@ -662,10 +662,16 @@ static void menu_loop(void) {
 
 	// don't wanted in submenus, will be set back in main_screen()
 	menu_wants_adc = 0;
+	menu_timer_wakeup = 0;
 
 	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
-	    if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
+	    if (menu_main_screen >= MS_TIMER1) {
+		key_beep();
+		menu_timer_lap_times((u8)(menu_main_screen - MS_TIMER1));
+		btnra();
+	    }
+	    else if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
 		menu_calibrate(0);
 	    else if (adc_steering_ovs < (CALIB_ST_LOW_MID << ADC_OVS_SHIFT))
 		menu_key_test();
@@ -675,7 +681,9 @@ static void menu_loop(void) {
 	// Enter key - menu
 	else if (btn(BTN_ENTER)) {
 	    key_beep();
-	    select_menu();
+	    if (menu_main_screen >= MS_TIMER1)
+		menu_timer_setup((u8)(menu_main_screen - MS_TIMER1));
+	    else select_menu();
 	    btnra();
 	}
 

@@ -126,7 +126,7 @@ typedef struct {
 // change MAGIC number when changing model config
 // also add code to setting default values
 // 24 + 22(keys) + channels * 4 bytes
-#define CONFIG_MODEL_MAGIC  (0xf920 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xf820 | (MAX_CHANNELS - 1))
 typedef struct {
     u8 name[3];
     u8 reverse;			// bit for each channel

@@ -619,7 +619,7 @@ typedef struct {
 
 #define SF_ROTATE 1
 
-// set channel value to one endpoint
+// set channel value to one endpoint (also to middle with 3-pos CH3)
 static void kf_set_switch(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
     u8 *name = param ? param : id;
     et_functions_s *etf = menu_et_function_find_name(name);
@@ -732,16 +732,6 @@ static void kf_multi_position_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
     }
 }
 
-// lap counter
-static void kf_lap_count(u8 *id, u8 *param, u8 flags, s16 *pv) {
-    menu_lap_count++;
-    menu_main_screen = MS_LAP_COUNT;
-}
-static void kf_lap_count_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
-    menu_lap_count = 0;
-    menu_main_screen = MS_LAP_COUNT;
-}
-
 // shut up battery low beeper
 static void kf_battery_low_shutup(u8 *id, u8 *param, u8 flags, s16 *pv) {
     battery_low_shutup = 1;
@@ -754,6 +744,7 @@ static void kf_battery_low_shutup(u8 *id, u8 *param, u8 flags, s16 *pv) {
 // table of key functions
 static const key_functions_s key_functions[] = {
     { 0, "OFF", KF_NONE, NULL, NULL, 0 },
+    { 22, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
     { 1, "CH3", KF_2STATE, kf_set_switch, NULL, 3 },
     { 7, "C3R", KF_NONE, kf_reset, "CH3", 3 },
 #if MAX_CHANNELS >= 4
@@ -781,9 +772,10 @@ static const key_functions_s key_functions[] = {
     { 15, "DGR", KF_NONE, kf_reset, "DIG", 3 },
     { 16, "MPO", KF_NONE, kf_multi_position, NULL, 3 },
     { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL, 3 },
-    { 18, "LCI", KF_NOSHOW, kf_lap_count, NULL, 0 },
-    { 19, "LCR", KF_NOSHOW, kf_lap_count_reset, NULL, 0 },
-    { 20, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
+    { 18, "T1S", KF_NOSHOW, kf_menu_timer_start, (u8 *)0, 0 },
+    { 19, "T1R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)0, 0 },
+    { 20, "T2S", KF_NOSHOW, kf_menu_timer_start, (u8 *)1, 0 },
+    { 21, "T2R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)1, 0 },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

@@ -28,4 +28,6 @@ menu_mix.o: menu_mix.c   menu.h gt3b.h stm8.h  task.h \
  config.h eeprom.h calc.h timer.h ppm.h lcd.h buzzer.h input.h
 menu_key.o: menu_key.c   menu.h gt3b.h stm8.h  task.h \
  config.h eeprom.h calc.h timer.h ppm.h lcd.h buzzer.h input.h
+menu_timer.o: menu_timer.c   menu.h gt3b.h stm8.h  \
+ task.h lcd.h config.h eeprom.h
 vector.o: vector.c 

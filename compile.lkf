@@ -8,7 +8,7 @@
 +seg .data -b 0x100 -m 0x6ff+1-0x100 -n .data
 +seg .bss -a .data -n .bss
 crtsi0.sm8
-task.o main.o ppm.o lcd.o input.o buzzer.o timer.o eeprom.o config.o calc.o menu_common.o menu.o menu_service.o menu_global.o menu_popup.o menu_mix.o menu_key.o
+task.o main.o ppm.o lcd.o input.o buzzer.o timer.o eeprom.o config.o calc.o menu_common.o menu.o menu_service.o menu_global.o menu_popup.o menu_mix.o menu_key.o menu_timer.o
 
 libis0.sm8
 libm0.sm8
