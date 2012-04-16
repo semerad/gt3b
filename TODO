@@ -38,11 +38,27 @@ timer losikid
 	reset all data
 
 ? linear CH3 with potentiometer
+    - global option to choose CH3 is a pot
+    - don't read CH3 key in read_keys()
+    - key mapping assign trim function and reverse
+    - at begin of CALC, convert CH3 val to assigned function
+    - calibrate low and high values at calib menu
 ? selectable frame length with constant frame/constant sync
+    - global option to choose constant frame/constant sync (9ms..)
+    - global option to set frame/sync length (3ms..)
+    - add code to ppm_calc_sync() to use global options
 ? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? use also flash memory to store model configs
     possibility to copy model stored at flash
-? PPM input for head tracking gyro (pin PD7, TLI interrupt, read timer)
+? PPM input for head tracking gyro
+    - pin PD7 TLI non-maskable interrupt at signal edge
+    - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
+	- set timer_interrupt and ppm_interrupt to lower level as it
+	  can be interrupted by PPM in signal
+    - read timer register, timer_1s, timer_5s to cyclic buffer
+    - wakeup PPM_INPUT task
+	- read values from cyclic buffer
+	- compute PPM servo signals and assign them to ppm_in variables
 
 ? digital/custom switches (set when some conditions are satisfied)
 ? not so smooth servo travel
