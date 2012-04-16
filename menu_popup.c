@@ -738,13 +738,26 @@ static void kf_battery_low_shutup(u8 *id, u8 *param, u8 flags, s16 *pv) {
     buzzer_off();
 }
 
+// change menu_brake bit
+static void kf_brake(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
+    if (flags & FF_ON)
+	menu_brake = (u8)(flags & FF_REVERSE ? 0 : 1);
+    else
+	menu_brake = (u8)(flags & FF_REVERSE ? 1 : 0);
+
+    if (flags & FF_SHOW) {
+	lcd_7seg(L7_B);
+	lcd_chars(menu_brake ? "BRK" : "OFF");
+    }
+}
+
 
 
 
 // table of key functions
 static const key_functions_s key_functions[] = {
     { 0, "OFF", KF_NONE, NULL, NULL, 0 },
-    { 22, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
+    { 23, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
     { 1, "CH3", KF_2STATE, kf_set_switch, NULL, 3 },
     { 7, "C3R", KF_NONE, kf_reset, "CH3", 3 },
 #if MAX_CHANNELS >= 4
@@ -776,6 +789,7 @@ static const key_functions_s key_functions[] = {
     { 19, "T1R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)0, 0 },
     { 20, "T2S", KF_NOSHOW, kf_menu_timer_start, (u8 *)1, 0 },
     { 21, "T2R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)1, 0 },
+    { 22, "BRK", KF_2STATE, kf_brake, NULL, 0 },
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

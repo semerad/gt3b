@@ -344,11 +344,14 @@ static void calc_loop(void) {
 
 
 	// throttle
-	val = channel_calib(adc_throttle,
-			    cg.calib_throttle_fwd << ADC_OVS_SHIFT,
-			    cg.calib_throttle_mid << ADC_OVS_SHIFT,
-			    cg.calib_throttle_bck << ADC_OVS_SHIFT,
-			    cg.throttle_dead_zone << ADC_OVS_SHIFT);
+	if (menu_brake)
+	    val = PPM(500);	// brake button overrides throttle
+	else
+	    val = channel_calib(adc_throttle,
+				cg.calib_throttle_fwd << ADC_OVS_SHIFT,
+				cg.calib_throttle_mid << ADC_OVS_SHIFT,
+				cg.calib_throttle_bck << ADC_OVS_SHIFT,
+				cg.throttle_dead_zone << ADC_OVS_SHIFT);
 	if (cm.brake_off && val > 0)  val = 0;  // throttle brake cut off
 	val = expo(val, (u8)(val < 0 ? cm.expo_forward : cm.expo_back));
 	if (cm.abs_type) {

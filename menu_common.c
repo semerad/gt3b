@@ -38,6 +38,7 @@ s8  menu_4WS_mix;		// mix -100..100
 _Bool menu_4WS_crab;		// when 1, crab steering
 s8  menu_DIG_mix;		// mix -100..100
 u8  menu_MP_index;		// index of MultiPosition channel
+_Bool menu_brake;		// when 1, full brake is applied
 
 
 
@@ -92,6 +93,7 @@ void menu_load_model(void) {
     menu_MP_index = 0;
     if (cm.channel_MP)
 	menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
+    menu_brake = 0;
 
     // set state of buttons to do initialize
     menu_buttons_initialize();

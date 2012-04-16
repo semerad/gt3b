@@ -67,6 +67,7 @@ extern s8  menu_4WS_mix;		// mix -100..100
 extern _Bool menu_4WS_crab;		// when 1, crab steering
 extern s8  menu_DIG_mix;		// mix -100..100
 extern u8  menu_MP_index;		// index of MultiPosition channel
+extern _Bool menu_brake;		// when 1, full brake is applied
 
 
 

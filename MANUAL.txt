@@ -341,5 +341,6 @@ T1S		- start/pause timer1
 T1R		- stop + reset timer1
 T2S		- start/pause timer2
 T2R		- stop + reset timer2
+BRK		- switch on full brake, this overrides throttle position
 BLS		- battery low shutup, stop beeping, predefined to END-long
 
