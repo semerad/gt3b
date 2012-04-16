@@ -136,7 +136,7 @@ extern u16 adc_buffer_pos;	// step 2 (skip 16bit values)
     ADC_NEWVAL(2); \
     adc_battery_last = ADC_DB3R; \
     *((u8 *)&adc_buffer_pos + 1) = (u8)((u8)((u8)adc_buffer_pos + 2) & 7); \
-    BRES(ADC_CSR, 7);		/* remove EOC flag */			   \
+    ADC_CSR = 0b00000011;	/* remove EOC flag, 3 channels */          \
     BSET(ADC_CR1, 0);		// start new conversion
 
 

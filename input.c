@@ -399,9 +399,6 @@ static void check_throttle_trigger(void) {
     adc_buffer ## id ## [1] = adc_buffer ## id ## [2] = \
 	adc_buffer ## id ## [3] = adc_buffer ## id ## [0];
 void input_read_first_values(void) {
-    // set end channel to 3 again, sometimes after erasing EEPROM from STVP,
-    //   calibrate is called, but only steering ADC is changing
-    ADC_CSR = 0b00000011;		// end channel 3, no interrupts
     // read initial ADC values
     BSET(ADC_CR1, 0);			// start conversion
     while (!BCHK(ADC_CSR, 7));		// wait for end of conversion
