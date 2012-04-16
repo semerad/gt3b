@@ -27,7 +27,11 @@ timer losikid
     ENTER selects timers settings
 	timer type
 	    lap timer - alarm, @lap, @stop, reset (at lap times screen)
-	    lap counter - @lap, @reset, alarm after num laps
+		ignore lap button for 3s
+		show lap time for 3s
+	    lap counter - @lap, @reset
+		alarm after num laps
+		ignore lap button for 3s
 	    count up - alarm, @pause, @reset
 	    cound down - alarm, @pause, @reset (save rest to lap timers)
 	    ? lap timer down - laps_count

@@ -85,7 +85,7 @@ static u16 menu_delay;		// timer for delay in MENU task
     if (++time_1ms < 5)  return;
     time_1ms = 0;
 
-    // increment time from start
+    // increment time from start in 5ms steps
     if (++time_5ms >= 200) {
 
 	// each 1s
@@ -141,11 +141,81 @@ static u16 menu_delay;		// timer for delay in MENU task
 	}
     }
 
+    // menu timers
+#define PROCESS_TIMER(tid) \
+    if (menu_timer_running & (u8)(1 << tid)) { \
+	if (!(time_5ms & 0b00000001)) {  /* only every 10ms */ \
+	    if (menu_timer_direction & (u8)(1 << tid)) { \
+		/* down timer */ \
+		if (menu_timer[tid].hdr) \
+		    menu_timer[tid].hdr--; \
+		else { \
+		    /* hdr is zero */ \
+		    if (--menu_timer[tid].sec == 0) { \
+			/* trigger alarm */ \
+			buzzer_cnt_on = buzzer_cnt = 60; \
+			buzzer_cnt_off = 0; \
+			buzzer_count = 1; \
+			BUZZER1; \
+			buzzer_running = 1; \
+			/* backlight on */ \
+			if (!lcd_bck_on) { \
+			    LCD_BCK1; \
+			    lcd_bck_count = 5; \
+			    lcd_bck_on = 1; \
+			} \
+			else if (lcd_bck_count < 5)  lcd_bck_count = 5; \
+			/* change timer to upcounting, disable up-count alarm */ \
+			menu_timer_alarmed |= (u8)(1 << tid); \
+			menu_timer_direction &= (u8)~(u8)(1 << tid); \
+			menu_timer_alarm[tid] = 0; \
+			/* switch main screen */ \
+			menu_main_screen = MS_TIMER ## tid ; \
+			awake(MENU); \
+		    } \
+		    else \
+			menu_timer[tid].hdr = 99; \
+		} \
+	    } \
+	    else { \
+		/* up timer */ \
+		if (++menu_timer[tid].hdr == 100) { \
+		    menu_timer[tid].hdr = 0; \
+		    if (++menu_timer[tid].sec == menu_timer_alarm[tid]) { \
+			/* trigger alarm */ \
+			buzzer_cnt_on = buzzer_cnt = 60; \
+			buzzer_cnt_off = 0; \
+			buzzer_count = 1; \
+			BUZZER1; \
+			buzzer_running = 1; \
+			/* backlight on */ \
+			if (!lcd_bck_on) { \
+			    LCD_BCK1; \
+			    lcd_bck_count = 5; \
+			    lcd_bck_on = 1; \
+			} \
+			else if (lcd_bck_count < 5)  lcd_bck_count = 5; \
+			/* flag alarm */ \
+			menu_timer_alarmed |= (u8)(1 << tid); \
+			/* switch main screen */ \
+			menu_main_screen = MS_TIMER ## tid ; \
+			awake(MENU); \
+		    } \
+		} \
+	    } \
+	} \
+    }
+    PROCESS_TIMER(0);
+    PROCESS_TIMER(1);
+
     // wakeup INPUT task
     awake(INPUT);
 
-    // wakeup MENU task every 40ms when showing battery or at calibrate
-    if (menu_wants_adc && !(time_5ms & 0b00000111))
+    // wakeup MENU task every 40ms when
+    // 	 showing battery
+    // 	 at calibrate
+    // 	 menu timer is displayed and is running
+    if ((menu_wants_adc || menu_timer_wakeup) && !(time_5ms & 0b00000111))
 	awake(MENU);
 
     // task MENU delay

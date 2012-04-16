@@ -368,6 +368,28 @@ static void check_inactivity(void) {
 }
 
 
+// check throttle trigger and start timer
+#define THROTTLE_TRIGGER_START 30
+static void check_throttle_trigger(void) {
+    u8 i, tbit, type;
+
+    // nothing when throttle is not little forward
+    if (ADC_OVS(throttle) >= (cg.calib_throttle_mid - THROTTLE_TRIGGER_START))  return;
+
+    for (i =0, tbit = 1; i < TIMER_NUM; i++, tbit <<= 1) {
+	type = TIMER_TYPE(i);
+	// check if possible
+	if (type == TIMER_OFF || type == TIMER_LAPCNT)  continue;  // not for this type
+	if (!(menu_timer_throttle & tbit))  continue;  // not set for this timer
+	// start timer
+	menu_timer_running |= tbit;
+	menu_timer_throttle &= (u8)~tbit;
+	// awake MENU to possibly display changing time
+	awake(MENU);
+    }
+}
+
+
 
 
 
@@ -400,6 +422,7 @@ void input_read_first_values(void) {
 static void input_loop(void) {
     while (1) {
 	read_keys();
+	if (menu_timer_throttle)  check_throttle_trigger();
 	check_inactivity();
 	update_battery();
 	stop();

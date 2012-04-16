@@ -122,8 +122,8 @@ extern void menu_buttons_initialize(void);
 extern u8 menu_main_screen;
 #define MS_NAME		0
 #define MS_BATTERY	1
-#define MS_TIMER1	2
-#define MS_TIMER2	3
+#define MS_TIMER0	2
+#define MS_TIMER1	3
 #define MS_MAX		4
 // common menus, select item in 7SEG and then modify its setting at CHR3
 //   val_id: 1..num_values - which param of this item to change
@@ -156,6 +156,8 @@ extern void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop);
 // menu task will be waked-up periodically to show timer value
 extern _Bool	 menu_timer_wakeup;
 extern u8	 menu_timer_running;		// running timers, one bit for one timer
+extern u8	 menu_timer_direction;		// up(0)/down(1) timer direction
+extern u8	 menu_timer_alarmed;		// down timer was over, one bit for one timer
 extern @near u8  menu_timer_throttle;		// throttle start, one bit for one timer
 
 typedef struct {
@@ -168,10 +170,12 @@ extern @near menu_timer_s menu_timer[];		// actual timer values
     tsec = pt->sec; \
     thdr = pt->hdr; \
     rim();
+extern @near u16 menu_timer_alarm[];		// alarm in seconds
 
 void menu_timer_show(u8 tid);
 void menu_timer_setup(u8 tid);
 void menu_timer_lap_times(u8 tid);
+void menu_timer_clear(u8 tid, u8 laps);
 void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv);
 void kf_menu_timer_reset(u8 *id, u8 *param, u8 flags, s16 *pv);
 

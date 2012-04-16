@@ -99,7 +99,7 @@ static void main_screen(u8 item) {
     }
     else {
 	// timers
-	menu_timer_show((u8)(item - MS_TIMER1));
+	menu_timer_show((u8)(item - MS_TIMER0));
     }
     lcd_update();
 }
@@ -666,9 +666,9 @@ static void menu_loop(void) {
 
 	// Enter long key - global/calibrate/key-test
 	if (btnl(BTN_ENTER)) {
-	    if (menu_main_screen >= MS_TIMER1) {
+	    if (menu_main_screen >= MS_TIMER0) {
 		key_beep();
-		menu_timer_lap_times((u8)(menu_main_screen - MS_TIMER1));
+		menu_timer_lap_times((u8)(menu_main_screen - MS_TIMER0));
 		btnra();
 	    }
 	    else if (adc_steering_ovs > (CALIB_ST_MID_HIGH << ADC_OVS_SHIFT))
@@ -681,8 +681,8 @@ static void menu_loop(void) {
 	// Enter key - menu
 	else if (btn(BTN_ENTER)) {
 	    key_beep();
-	    if (menu_main_screen >= MS_TIMER1)
-		menu_timer_setup((u8)(menu_main_screen - MS_TIMER1));
+	    if (menu_main_screen >= MS_TIMER0)
+		menu_timer_setup((u8)(menu_main_screen - MS_TIMER0));
 	    else select_menu();
 	    btnra();
 	}
@@ -743,6 +743,10 @@ void menu_init(void) {
 	// else beep 1 times
 	else if (cg.poweron_beep)  beep(30);
     }
+
+    // reset global timers
+    menu_timer_clear(0, 1);
+    menu_timer_clear(1, 1);
 
     // read model config from eeprom
     menu_load_model();
