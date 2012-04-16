@@ -22,6 +22,8 @@
 #include "menu.h"
 #include "lcd.h"
 #include "config.h"
+#include "buzzer.h"
+#include "timer.h"
 
 
 
@@ -176,7 +178,9 @@ void menu_timer_clear(u8 tid, u8 laps) {
     }
 
     // set alarm
-    menu_timer_alarm[tid] = TIMER_ALARM(tid) * 60;
+    if (type == TIMER_LAPCNT)
+	menu_timer_alarm[tid] = TIMER_ALARM(tid);
+    else menu_timer_alarm[tid] = TIMER_ALARM(tid) * 60;
 
     // set direction and seconds
     if (type == TIMER_DOWN) {
@@ -219,7 +223,9 @@ static u8 timer_setup_alarm(u8 val_id, u8 action, u8 *chars_blink) {
     if (action == 1) {
 	val = (u8)menu_change_val(val, 0, 255, TIMER_ALARM_FAST, 0);
 	TIMER_ALARM_SET(timer_id, val);
-	menu_timer_alarm[timer_id] = val * 60;
+	if (TIMER_TYPE(timer_id) == TIMER_LAPCNT)
+	    menu_timer_alarm[timer_id] = val;
+	else menu_timer_alarm[timer_id] = val * 60;
     }
 
     // select next value
@@ -301,6 +307,7 @@ void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv) {
     menu_timer_s *pt = &menu_timer[tid];
     u8 type = TIMER_TYPE(tid);
     u8 tbit = (u8)(1 << tid);
+    static u16 next_timer_sec[TIMER_NUM];
 
     switch (type) {
 
@@ -320,7 +327,12 @@ void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv) {
 	    break;
 
 	case TIMER_LAPCNT:
-	    timer_lap_count[tid]++;
+	    if (time_sec < next_timer_sec[tid])  return;  // pressed too early
+	    next_timer_sec[tid] = time_sec + 3;
+	    if (++timer_lap_count[tid] == menu_timer_alarm[tid]) {
+		// alarm when number of laps elapsed
+		buzzer_on(60, 0, 1);
+	    }
 	    break;
 
     }
