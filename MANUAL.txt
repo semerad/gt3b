@@ -35,6 +35,8 @@ Global characteristics:
 - added inactivity alarm
 - added settable servo speed
 - added 4WS, DIG, MultiPosition functions
+- added timers (up, down, lap count)
+
 
 
 Buttons:
@@ -51,6 +53,17 @@ Buttons:
         encoder also
     > when value set to reset_value (usualy 0), longer beep sounds to
 	attention to it and short pause is intruduced to ignore keys
+
+
+
+Main screens:
+=============
+- changeable by rotate encoder:
+    model name
+    battery voltage
+    timer1 - ENTER and ENTER-long operates this timer, not standard menu
+    timer2 - ENTER and ENTER-long operates this timer, not standard menu
+
 
 
 Standard menu:
@@ -178,6 +191,38 @@ Standard menu:
 		   
 
 
+Operating timers:
+=================
+- select timer1 or timer2 main screen with rotate encoder
+- timer1 is identified by left arrow, timer2 by right arrow
+- lap count is written to 3char LCD place
+- timer value is writen to 7seg + 3char LCD place in format:
+    0000    - MMSS  minutes, seconds
+    0000 %  - SSHH  seconds, hundredths (0.01 seconds)
+- press ENTER to set timer params, use it as usual menu:
+    H	set throttle trigger start	OFF/ON
+	    timer will start after
+	      throttle forward
+    A	set alarm			0..255
+	    in laps for lap counter
+	    in minutes for others
+    P	set timer type:
+	    OFF		timer is off
+	    UP		up timer
+			    TxS start/pause timer
+			    TxR stop + reset timer
+	    DWN		down timer
+			    TxS start/pause timer
+			    TxR stop + reset timer
+			    when alarmed at time 0, starts counting
+				up with "V" symbol blinking
+	    LAP		lap timer - not done yet
+	    LPC		lap counter
+			    TxS increment lap counter, minimum 3 seconds
+			      between presses are required to eliminate
+			      double click
+
+
 
 Calibrate menu:
 ===============
@@ -243,15 +288,6 @@ Global setup menu:
 		    all models			M_N/M_Y (No/Yes
 
 
-Main screens:
-=============
-- changeable by rotate encoder:
-    model name
-    battery voltage
-    lap count - identified by "%" sign
-
-
-
 
 
 Return to original (and modified) firmware:
@@ -301,7 +337,9 @@ DIG		- switch DIG mix between -100 and 100 (more useable when using
 DGR		- reset DIG mix to centre
 MPO		- Multi-POsition, switches position up (at END back to 1.)
 MPR		- Multi-Position Reset, switches position to first one
-LCI		- increment lap count
-LCR		- set lap count to zero
+T1S		- start/pause timer1
+T1R		- stop + reset timer1
+T2S		- start/pause timer2
+T2R		- stop + reset timer2
 BLS		- battery low shutup, stop beeping, predefined to END-long
 
