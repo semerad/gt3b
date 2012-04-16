@@ -227,6 +227,7 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
 
 	else if (btn(BTN_ENTER)) {
 	    // switch menu_id/menu-setting1/menu-setting2/...
+	    key_beep();
 	    if (id_val) {
 		// what to do depends on what was selected in this item
 		id_val = func(id_val, 2, &chars_blink);
@@ -251,6 +252,9 @@ void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
 	}
     }
 
+    // call to select next value which can do some action (such as reset)
+    if (id_val)  id_val = func(id_val, 2, &chars_blink);
+    // cleanup display
     menu_clear_symbols();
     if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
     menu_force_value_channel = 0;
