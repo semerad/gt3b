@@ -122,7 +122,7 @@ static void lcd_command(u8 cmd) {
 
 
 // LCD task and main loop
-TASK(LCD, 128);
+TASK(LCD, 40);
 static void lcd_loop(void);
 
 // initialize LCD pins and LCD controller

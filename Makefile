@@ -11,7 +11,7 @@ DEBUG	= +debug
 #DEBUG	= +debug -no
 VERBOSE	=
 #VERBOSE = -v
-ENDMEMORY = 0x5ff
+ENDMEMORY = 0x6ff
 STACK	= 0x7ff
 
 include Makefile.toolset

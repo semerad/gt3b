@@ -12,6 +12,7 @@
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% eeprom.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% config.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% calc.c
+%TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_common.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_service.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% menu_global.c

@@ -36,7 +36,7 @@
 
 
 // CALC task
-TASK(CALC, 256);
+TASK(CALC, 90);
 static void calc_loop(void);
 
 

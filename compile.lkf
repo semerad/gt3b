@@ -5,10 +5,10 @@
 +seg .ubsct -a .bsct -n .ubsct
 +seg .bit -a .ubsct -n .bit -id
 +seg .share -a .bit -n .share -is
-+seg .data -b 0x100 -m 0x5ff+1-0x100 -n .data
++seg .data -b 0x100 -m 0x6ff+1-0x100 -n .data
 +seg .bss -a .data -n .bss
 crtsi0.sm8
-task.o main.o ppm.o lcd.o input.o buzzer.o timer.o eeprom.o config.o calc.o menu.o menu_service.o menu_global.o menu_popup.o menu_mix.o menu_key.o
+task.o main.o ppm.o lcd.o input.o buzzer.o timer.o eeprom.o config.o calc.o menu_common.o menu.o menu_service.o menu_global.o menu_popup.o menu_mix.o menu_key.o
 
 libis0.sm8
 libm0.sm8
@@ -18,4 +18,4 @@ vector.o
 +def __memory=@.bss
 +def __stack=0x7ff
 +def __startmem=@.bss
-+def __endmem=0x5ff
++def __endmem=0x6ff

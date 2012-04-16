@@ -44,7 +44,7 @@
 
 
 // INPUT task, called every 5ms
-TASK(INPUT, 128);
+TASK(INPUT, 40);
 static void input_loop(void);
 
 
