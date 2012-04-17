@@ -228,7 +228,7 @@ static u8 mix_brake_off(u8 val_id, u8 action, u8 *chars_blink) {
 
 
 
-static const menu_func_t mix_funcs[] = {
+static const menu_list_t mix_funcs[] = {
     mix_4WS,
     mix_DIG,
     mix_MultiPosition,
@@ -238,7 +238,7 @@ static const menu_func_t mix_funcs[] = {
 
 void menu_mix(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_common(mix_funcs, sizeof(mix_funcs) / sizeof(void *), 0);
+    menu_list(mix_funcs, sizeof(mix_funcs) / sizeof(void *), 0);
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();

@@ -247,7 +247,7 @@ static u8 timer_setup_type(u8 val_id, u8 action, u8 *chars_blink) {
     return 1;	// only one value
 }
 
-static const menu_func_t timer_setup_funcs[] = {
+static const menu_list_t timer_setup_funcs[] = {
     timer_setup_throttle,
     timer_setup_alarm,
     timer_setup_type,
@@ -255,7 +255,7 @@ static const menu_func_t timer_setup_funcs[] = {
 
 void menu_timer_setup(u8 tid) {
     timer_id = tid;
-    menu_common(timer_setup_funcs, sizeof(timer_setup_funcs) / sizeof(void *), 0);
+    menu_list(timer_setup_funcs, sizeof(timer_setup_funcs) / sizeof(void *), 0);
     config_global_save();
 }
 

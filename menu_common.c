@@ -178,10 +178,10 @@ void menu_clear_symbols(void) {
 
 
 // common menu, select item at 7SEG and then set params at CHR3
-void menu_common(menu_func_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
+void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
     u8 id_val = 0;			// now in key_id
     u8 menu_id = 0;
-    menu_func_t func = menu_funcs[0];
+    menu_list_t func = menu_funcs[0];
     u8 chars_blink = 0b111;		// bit for each char to blink
 
     menu_clear_symbols();

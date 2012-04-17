@@ -328,7 +328,7 @@ static u8 gs_config_reset(u8 val_id, u8 action, u8 *chars_blink) {
 
 
 // array of functions for global setup items
-static const menu_func_t gs_config[] = {
+static const menu_list_t gs_config[] = {
     gs_firmware,
     gs_backlight_time,
     gs_inactivity_alarm,
@@ -361,9 +361,9 @@ void menu_global_setup(void) {
     lcd_segment_blink(LS_MENU_MODEL, LB_INV);
     lcd_segment_blink(LS_MENU_NAME, LB_INV);
 
-    menu_common(gs_config, sizeof(gs_config) / sizeof(void *), 1);
+    menu_list(gs_config, sizeof(gs_config) / sizeof(void *), 1);
 
-    buzzer_on(60, 0, 1);	// not beep() because of key_beep() at menu_common()
+    buzzer_on(60, 0, 1);	// not beep() because of key_beep() at menu_list()
     lcd_clear();
     config_global_save();
     apply_global_config();

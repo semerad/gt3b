@@ -401,7 +401,7 @@ static u8 menu_reset_model(u8 val_id, u8 action, u8 *chars_blink) {
     return 1;	// only one value
 }
 
-static const menu_func_t chanres_funcs[] = {
+static const menu_list_t chanres_funcs[] = {
     menu_channels,
     menu_reset_model,
 };
@@ -409,7 +409,7 @@ static const menu_func_t chanres_funcs[] = {
 // set number of model channels, reset model to default values
 static void menu_channels_reset(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_common(chanres_funcs, sizeof(chanres_funcs) / sizeof(void *), 0);
+    menu_list(chanres_funcs, sizeof(chanres_funcs) / sizeof(void *), 0);
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();
