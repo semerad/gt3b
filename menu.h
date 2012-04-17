@@ -79,7 +79,7 @@ extern _Bool menu_brake;		// when 1, full brake is applied
 
 
 // menu tasks will be handling ADC now (for calibrate)
-extern _Bool menu_wants_adc;
+extern _Bool menu_adc_wakeup;
 // flag low battery voltage
 extern _Bool menu_battery_low;
 extern _Bool battery_low_shutup;  // stop bat low beeping

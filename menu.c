@@ -43,7 +43,7 @@ s16 menu_force_value;		//   to this value (-500..500)
 
 
 // flags for wakeup after each ADC measure
-_Bool menu_wants_adc;
+_Bool menu_adc_wakeup;
 // don't stop main loop and check keys
 u8 menu_check_keys;
 // temporary flag used when doing reset (global/all models/model)
@@ -65,7 +65,7 @@ static void show_model_number(u8 model) {
 
 // show main screen (model number and name/battery/...)
 static void main_screen(u8 item) {
-    menu_wants_adc = 0;
+    menu_adc_wakeup = 0;
 
     // chars is item dependent
     if (item == MS_NAME) {
@@ -95,7 +95,7 @@ static void main_screen(u8 item) {
 	    bat_val = (u16)(((u32)adc_battery * 100 + 300) / cg.battery_calib);
 	}
 	lcd_char_num3(bat_val);
-	menu_wants_adc = 1;
+	menu_adc_wakeup = 1;
     }
     else {
 	// timers
@@ -170,7 +170,7 @@ static _Bool menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
 	    lcd_segment(LS_SYM_LEFT, LS_ON);
 	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
 	}
-	menu_wants_adc = 1;
+	menu_adc_wakeup = 1;
 	menu_set_adc_direction(channel);
 	return 1;
     }
@@ -178,7 +178,7 @@ static _Bool menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
 	// don't use ADC
 	lcd_segment(LS_SYM_LEFT,    LS_OFF);
 	lcd_segment(LS_SYM_RIGHT,   LS_OFF);
-	menu_wants_adc = 0;
+	menu_adc_wakeup = 0;
 	return 0;
     }
 }
@@ -261,7 +261,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 	}
     }
 
-    menu_wants_adc = 0;
+    menu_adc_wakeup = 0;
     menu_force_value_channel = 0;
     key_beep();
     config_model_save();
@@ -661,7 +661,7 @@ static void menu_loop(void) {
 	else  menu_check_keys = 0;
 
 	// don't wanted in submenus, will be set back in main_screen()
-	menu_wants_adc = 0;
+	menu_adc_wakeup = 0;
 	menu_timer_wakeup = 0;
 
 	// Enter long key - global/calibrate/key-test

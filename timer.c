@@ -215,7 +215,7 @@ static u16 menu_delay;		// timer for delay in MENU task
     // 	 showing battery
     // 	 at calibrate
     // 	 menu timer is displayed and is running
-    if ((menu_wants_adc || menu_timer_wakeup) && !(time_5ms & 0b00000111))
+    if ((menu_adc_wakeup || menu_timer_wakeup) && !(time_5ms & 0b00000111))
 	awake(MENU);
 
     // task MENU delay

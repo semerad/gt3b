@@ -40,7 +40,7 @@ void menu_calibrate(u8 at_poweron) {
     u16 update_time = 0;
     u16 update_val = 0;
 
-    menu_wants_adc = 1;
+    menu_adc_wakeup = 1;
 
     // cleanup screen and disable possible low bat warning
     buzzer_off();
@@ -190,7 +190,7 @@ void menu_calibrate(u8 at_poweron) {
 	stop();
     }
 
-    menu_wants_adc = 0;
+    menu_adc_wakeup = 0;
     beep(60);
     lcd_menu(0);
     lcd_update();
