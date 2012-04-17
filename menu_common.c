@@ -178,6 +178,124 @@ void menu_clear_symbols(void) {
 
 
 // common menu, select item at 7SEG and then set params at CHR3
+u8 menu_set;		// menu is in: 0 = menu_id, 1..X = menu setting 1..X
+u8 menu_id;		// id of selected menu
+_Bool menu_id_set;	// 0 = in menu-id, 1 = in menu-setting
+u8 menu_blink;		// what of chars should blink
+
+void menu_common(menu_common_t func, void *params, u8 flags) {
+    menu_id_set = 0;		// start at menu-id
+    menu_set = 1;		// now in menu_id
+    menu_id = 0;		// first menu item
+    menu_blink = 0xff;		// bit for each char to blink
+
+    // clear display symbols
+    menu_clear_symbols();
+    if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+
+    // init and show setting
+    func(MCA_INIT, params);
+    if (menu_id_set) {
+	lcd_chars_blink_mask(LB_SPC, menu_blink);
+    }
+    else {
+	if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
+    }
+    lcd_update();
+
+    while (1) {
+
+	// remove button flags and wait for wakeup
+	btnra();
+	if (flags & MCF_STOP)	stop();
+	else			menu_stop();
+
+	// end this menu with defined buttons
+	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
+
+	// if menu ADC was activated, call func to read for example left-right pos
+	if (menu_adc_wakeup)  func(MCA_ADC_PRE, params);
+
+	// rotate encoder changed, change menu-id or value
+	if (btn(BTN_ROT_ALL)) {
+	    if (menu_id_set) {
+		// change selected menu setting
+		func(MCA_SET_CHG, params);
+		lcd_chars_blink_mask(LB_SPC, menu_blink);
+	    }
+	    else {
+		// change menu-id
+
+		// reset some variables
+		menu_adc_wakeup = 0;
+		menu_force_value_channel = 0;
+		menu_blink = 0xff;		// default to all chars
+
+		// remove possible showed symbols
+		menu_clear_symbols();
+		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+
+		// select new menu id and show it
+		if (flags & MCF_ID_CHG)
+		    func(MCA_ID_CHG, params);	// do own change based on BTN_ROT
+		else if (btn(BTN_ROT_L))
+		    func(MCA_ID_PREV, params);	// previous menu id
+		else
+		    func(MCA_ID_NEXT, params);	// next menu id
+
+		if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
+	    }
+	    lcd_update();
+	}
+
+	// ENTER pressed, switch between menu settings
+	else if (btn(BTN_ENTER)) {
+	    // switch menu_id/menu-setting1/menu-setting2/...
+	    key_beep();
+	    if (menu_id_set) {
+		// select next menu setting
+		func(MCA_SET_NEXT, params);
+		if (menu_set != 1) {
+		    // some > 1 menu setting
+		    lcd_chars_blink_mask(LB_SPC, menu_blink);
+		}
+		else {
+		    // rotated back to setting 1, switch to menu selection
+		    menu_id_set = 0;
+		    if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
+		    lcd_chars_blink(LB_OFF);
+		}
+		lcd_update();
+	    }
+	    else {
+		// switch to first menu setting
+		menu_id_set = 1;
+		// menu setting values is already showed
+		lcd_set_blink(L7SEG, LB_OFF);
+		lcd_chars_blink_mask(LB_SPC, menu_blink);
+	    }
+	}
+
+	// if menu ADC was activated, call func to for example show other
+	//   value when left-right position changed
+	if (menu_adc_wakeup)  func(MCA_ADC_POST, params);
+    }
+
+    // call to select next value which can do some action (such as reset)
+    if (menu_id_set)  func(MCA_SET_NEXT, params);
+
+    // cleanup display
+    menu_clear_symbols();
+    if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+
+    // reset variables
+    menu_adc_wakeup = 0;
+    menu_force_value_channel = 0;
+    key_beep();
+}
+
+
+// common list menu, select item at 7SEG and then set params at CHR3
 void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
     u8 id_val = 0;			// now in key_id
     u8 menu_id = 0;
