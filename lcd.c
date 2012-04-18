@@ -667,9 +667,9 @@ void lcd_chars_blink(u8 on_off) {
 
 // lcd_set_blink() for 3 chars masked by bits
 void lcd_chars_blink_mask(u8 on_off, u8 mask) {
-    if (mask & 0b001)  lcd_set_blink(LCHR1, on_off);
-    if (mask & 0b010)  lcd_set_blink(LCHR2, on_off);
-    if (mask & 0b100)  lcd_set_blink(LCHR3, on_off);
+    if (mask & LB_CHR1)  lcd_set_blink(LCHR1, on_off);
+    if (mask & LB_CHR2)  lcd_set_blink(LCHR2, on_off);
+    if (mask & LB_CHR3)  lcd_set_blink(LCHR3, on_off);
 }
 
 

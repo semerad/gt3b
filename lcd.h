@@ -98,6 +98,9 @@ extern void lcd_7seg(u8 number);    // num 0-15 (>=10 as hexa numbers)
 extern void lcd_menu(u8 menus);     // OR-ed selected menus
 extern void lcd_chars_blink(u8 on_off);  // lcd_set_blink() for 3 chars
 extern void lcd_chars_blink_mask(u8 on_off, u8 mask);  // lcd_set_blink() for 3 chars masked by bits
+#define LB_CHR1 	0b00000001
+#define LB_CHR2 	0b00000010
+#define LB_CHR3 	0b00000100
 
 // values for lcd_menu()
 #define LM_MODEL	0x80
