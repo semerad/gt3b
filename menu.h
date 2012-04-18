@@ -144,6 +144,7 @@ extern u8 menu_blink;		// what of chars should blink
 #define MCF_LOWPWR	0b00000010
 #define MCF_ID_CHG	0b00000100
 #define MCF_ENTER	0b00001000
+#define MCF_SET_ONLY	0b00010000
 typedef void (*menu_common_t)(u8 action, void *params);
 void menu_common(menu_common_t func, void *params, u8 flags);
 // menu_common_t actions, all shows actual values

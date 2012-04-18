@@ -313,48 +313,39 @@ static void menu_model(u8 saveas) {
 
 
 // change model name
-static void menu_name(void) {
-    u8 pos = LCHR1;
-    u8 letter = cm.name[0];
+static void menu_name_func(u8 action, void *p) {
+    u8 letter;
 
-    lcd_set_blink(LCHR1, LB_SPC);
-
-    while (1) {
-	btnra();
-	menu_stop();
-
-	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
-	if (btn(BTN_ENTER)) {
-	    key_beep();
-	    // to next char
-	    lcd_set_blink(pos, LB_OFF);
-	    if (++pos > LCHR3)  pos = LCHR1;
-	    lcd_set_blink(pos, LB_SPC);
-	    lcd_update();
-	    letter = cm.name[pos];
+    if (action == MCA_SET_CHG) {
+	// change letter
+	letter = cm.name[menu_set - 1];
+	if (btn(BTN_ROT_L)) {
+	    // lower
+	    if (letter == '0')      letter = 'Z';
+	    else if (letter == 'A')	letter = '9';
+	    else                    letter--;
 	}
-	else if (btn(BTN_ROT_ALL)) {
-	    // change letter
-	    if (btn(BTN_ROT_L)) {
-		// lower
-		if (letter == '0')      letter = 'Z';
-		else if (letter == 'A')	letter = '9';
-		else                    letter--;
-	    }
-	    else {
-		// upper
-		if (letter == '9')      letter = 'A';
-		else if (letter == 'Z')	letter = '0';
-		else                    letter++;
-	    }
-	    cm.name[pos] = letter;
-	    lcd_char(pos, letter);
-	    lcd_set_blink(pos, LB_SPC);
-	    lcd_update();
+	else {
+	    // upper
+	    if (letter == '9')      letter = 'A';
+	    else if (letter == 'Z')	letter = '0';
+	    else                    letter++;
 	}
+	cm.name[menu_set - 1] = letter;
+    }
+    else if (action == MCA_SET_NEXT) {
+	// next char
+	if (++menu_set > 3)  menu_set = 1;
     }
 
-    key_beep();
+    // show name
+    menu_blink = (u8)(1 << (menu_set - 1));	// blink only selected char
+    lcd_segment(LS_SYM_MODELNO, LS_ON);
+    lcd_chars(cm.name);
+}
+
+static void menu_name(void) {
+    menu_common(menu_name_func, NULL, MCF_SET_ONLY);
     config_model_save();
 }
 
