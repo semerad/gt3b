@@ -166,15 +166,15 @@ static void gs_adc(u8 action) {
     // change value
     if (action == MLA_CHG) {
 	switch (menu_set) {
-	    case 1:
+	    case 0:
 		addr = &cg.steering_dead_zone;
 		*addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
 		break;
-	    case 2:
+	    case 1:
 		addr = &cg.throttle_dead_zone;
 		*addr = (u8)menu_change_val(*addr, 0, 50, 2, 0);
 		break;
-	    case 3:
+	    case 2:
 		cg.adc_ovs_last ^= 1;
 		break;
 	}
@@ -182,21 +182,21 @@ static void gs_adc(u8 action) {
 
     // select next value
     else if (action == MLA_NEXT) {
-	if (++menu_set > 3)  menu_set = 1;
+	if (++menu_set > 2)  menu_set = 0;
     }
 
     // show values
     lcd_7seg(L7_A);
     switch (menu_set) {
-	case 1:
+	case 0:
 	    lcd_char_num2_lbl(cg.steering_dead_zone, "SSS");
 	    menu_blink &= (u8)~MCB_CHR1;	// last 2 chars will blink
 	    break;
-	case 2:
+	case 1:
 	    lcd_char_num2_lbl(cg.throttle_dead_zone, "TTT");
 	    menu_blink &= (u8)~MCB_CHR1;	// last 2 chars will blink
 	    break;
-	case 3:
+	case 2:
 	    lcd_char(LCHR1, 'A');
 	    lcd_char(LCHR2, ' ');
 	    lcd_char(LCHR3, (u8)(cg.adc_ovs_last ? '1' : '4'));
@@ -211,16 +211,16 @@ static void gs_beep(u8 action) {
     // change value
     if (action == MLA_CHG) {
 	switch (menu_set) {
-	    case 1:
+	    case 0:
 		cg.key_beep ^= 1;
 		break;
-	    case 2:
+	    case 1:
 		cg.reset_beep ^= 1;
 		break;
-	    case 3:
+	    case 2:
 		cg.poweron_beep ^= 1;
 		break;
-	    case 4:
+	    case 3:
 		cg.poweron_warn ^= 1;
 		break;
 	}
@@ -228,7 +228,7 @@ static void gs_beep(u8 action) {
 
     // select next value
     else if (action == MLA_NEXT) {
-	if (++menu_set > 4)  menu_set = 1;
+	if (++menu_set > 3)  menu_set = 0;
     }
 
     // show values
@@ -236,19 +236,19 @@ static void gs_beep(u8 action) {
     lcd_char(LCHR2, ' ');
     menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);	// only last char will blink
     switch (menu_set) {
-	case 1:
+	case 0:
 	    lcd_char(LCHR1, 'K');
 	    lcd_char(LCHR3, (u8)(cg.key_beep ? 'Y' : 'N'));
 	    break;
-	case 2:
+	case 1:
 	    lcd_char(LCHR1, 'V');
 	    lcd_char(LCHR3, (u8)(cg.reset_beep ? 'Y' : 'N'));
 	    break;
-	case 3:
+	case 2:
 	    lcd_char(LCHR1, 'P');
 	    lcd_char(LCHR3, (u8)(cg.poweron_beep ? 'Y' : 'N'));
 	    break;
-	case 4:
+	case 3:
 	    lcd_char(LCHR1, 'C');
 	    lcd_char(LCHR3, (u8)(cg.poweron_warn ? 'Y' : 'N'));
 	    break;
@@ -281,13 +281,13 @@ static void gs_config_reset(u8 action) {
 	if (menu_tmp_flag) {
 	    menu_tmp_flag = 0;
 	    buzzer_on(60, 0, 1);
-	    if (menu_set == 1)  config_global_set_default();
-	    else          	cg.model = 0;
+	    if (menu_set)  cg.model = 0;
+	    else	   config_global_set_default();
 	    config_global_save();
 	    eeprom_empty_models();
 	    menu_load_model();
 	}
-	if (++menu_set > 2)  menu_set = 1;
+	if (++menu_set > 1)  menu_set = 0;
     }
 
     // show values
@@ -295,7 +295,7 @@ static void gs_config_reset(u8 action) {
     lcd_char(LCHR2, ' ');
     lcd_char(LCHR3, (u8)(menu_tmp_flag ? 'Y' : 'N'));
     menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);	// only last char will blink
-    lcd_char(LCHR1, (u8)(menu_set == 1 ? 'G' : 'M'));
+    lcd_char(LCHR1, (u8)(menu_set ? 'M' : 'G'));
 }
 
 

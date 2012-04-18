@@ -318,7 +318,7 @@ static void menu_name_func(u8 action, void *p) {
 
     if (action == MCA_SET_CHG) {
 	// change letter
-	letter = cm.name[menu_set - 1];
+	letter = cm.name[menu_set];
 	if (btn(BTN_ROT_L)) {
 	    // lower
 	    if (letter == '0')      letter = 'Z';
@@ -331,15 +331,15 @@ static void menu_name_func(u8 action, void *p) {
 	    else if (letter == 'Z')	letter = '0';
 	    else                    letter++;
 	}
-	cm.name[menu_set - 1] = letter;
+	cm.name[menu_set] = letter;
     }
     else if (action == MCA_SET_NEXT) {
 	// next char
-	if (++menu_set > 3)  menu_set = 1;
+	if (++menu_set > 2)  menu_set = 0;
     }
 
     // show name
-    menu_blink = (u8)(1 << (menu_set - 1));	// blink only selected char
+    menu_blink = (u8)(1 << menu_set);	// blink only selected char
     lcd_segment(LS_SYM_MODELNO, LS_ON);
     lcd_chars(cm.name);
 }

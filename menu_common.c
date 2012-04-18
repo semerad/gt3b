@@ -185,7 +185,7 @@ u8 menu_blink;		// what of chars should blink
 
 void menu_common(menu_common_t func, void *params, u8 flags) {
     menu_id_set = flags & MCF_SET_ONLY ? 1 : 0;
-    menu_set = 1;		// now in menu_id
+    menu_set = 0;		// now in menu_id
     menu_id = 0;		// first menu item
     menu_blink = 0xff;		// bit for each char to blink
 
@@ -256,8 +256,8 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	    if (menu_id_set) {
 		// select next menu setting
 		func(MCA_SET_NEXT, params);
-		if (menu_set != 1 || (flags & MCF_SET_ONLY)) {
-		    // some > 1 menu setting
+		if (menu_set || (flags & MCF_SET_ONLY)) {
+		    // some > 0 menu setting
 		    lcd_chars_blink_mask(LB_SPC, menu_blink);
 		}
 		else {
