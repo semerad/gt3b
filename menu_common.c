@@ -212,6 +212,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 
 	// end this menu with defined buttons
 	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
+	if ((flags & MCF_ENTER) && btn(BTN_ENTER))	 break;
 
 	// if menu ADC was activated, call func to read for example left-right pos
 	if (menu_adc_wakeup)  func(MCA_ADC_PRE, params);

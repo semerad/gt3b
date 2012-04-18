@@ -277,29 +277,24 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 
 // select model/save model as (to selected model position)
 #define MIN(a, b)  (a < b ? a : b)
+static void menu_model_func(u8 action, u8 *model) {
+    if (action == MCA_ID_CHG)
+	*model = (u8)menu_change_val((s16)*model, 0,
+				     MIN(CONFIG_MODEL_MAX, 40) - 1,
+				     MODEL_FAST, 1);
+
+    lcd_segment(LS_SYM_MODELNO, LS_ON);
+    show_model_number(*model);
+    lcd_chars(config_model_name(*model));
+}
+
 static void menu_model(u8 saveas) {
     u8 model = cg.model;
 
     if (saveas)  lcd_set_blink(LMENU, LB_SPC);
-    lcd_set_blink(L7SEG, LB_SPC);
 
-    while (1) {
-	btnra();
-	menu_stop();
+    menu_common(menu_model_func, &model, (u8)(MCF_ENTER | MCF_ID_CHG));
 
-	if (btn(BTN_BACK | BTN_END | BTN_ENTER))  break;
-	if (btn(BTN_ROT_ALL)) {
-	    model = (u8)menu_change_val((s16)model, 0,
-					MIN(CONFIG_MODEL_MAX, 40) - 1,
-					MODEL_FAST, 1);
-	    show_model_number(model);
-	    lcd_set_blink(L7SEG, LB_SPC);
-	    lcd_chars(config_model_name(model));
-	    lcd_update();
-	}
-    }
-
-    key_beep();
     // if new model choosed, save it
     if (model != cg.model) {
 	cg.model = model;
