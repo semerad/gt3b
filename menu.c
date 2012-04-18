@@ -110,12 +110,13 @@ static void main_screen(u8 item) {
 
 
 // common menu processing, selecting channel and then changing values
-static _Bool menu_adc_direction;
+#define menu_adc_direction	menu_tmp_flag
+// channel if from 0
 static void menu_set_adc_direction(u8 channel) {
     u16 adc, calm;
 
     // for channel 2 use throttle, for others steering
-    if (channel == 2) {
+    if (channel == 1) {
 	adc = adc_throttle_ovs;
 	calm = cg.calib_throttle_mid;
     }
@@ -139,7 +140,7 @@ static void menu_set_adc_direction(u8 channel) {
 	    lcd_segment(LS_SYM_RIGHT, LS_ON);
 	}
     }
-    else if (channel > 2 && btn(BTN_CH3)) {
+    else if (channel > 1 && btn(BTN_CH3)) {
 	// use CH3 button to toggle also
 	menu_adc_direction ^= 1;
 	lcd_segment(LS_SYM_LEFT, (u8)(menu_adc_direction ? LS_OFF : LS_ON));
@@ -151,119 +152,82 @@ static void menu_set_adc_direction(u8 channel) {
 	menu_force_value = menu_adc_direction ? PPM(500) : PPM(-500);
 }
 
-static _Bool menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
+// channel if from 0
+static void menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
     // check if force servos to positions (left/center/right)
-    if ((u8)(force_values & (1 << (channel - 1)))) {
-	menu_force_value_channel = channel;
+    if ((u8)(force_values & (u8)(1 << channel))) {
+	menu_force_value_channel = (u8)(channel + 1);
 	menu_force_value = 0;	// to center by default
     }
     else menu_force_value_channel = 0;
 
     // check use of ADC
-    if ((u8)(use_adc & (1 << (channel - 1)))) {
-	// use ADC
-	if (menu_adc_direction) {
-	    lcd_segment(LS_SYM_LEFT, LS_OFF);
-	    lcd_segment(LS_SYM_RIGHT, LS_ON);
-	}
-	else {
-	    lcd_segment(LS_SYM_LEFT, LS_ON);
-	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-	}
+    if ((u8)(use_adc & (u8)(1 << channel))) {
+	// use ADC, set arrows here, because menu_set_adc_direction
+	//   cannot change and set it
+	if (menu_adc_direction)  lcd_segment(LS_SYM_RIGHT, LS_ON);
+	else			 lcd_segment(LS_SYM_LEFT, LS_ON);
 	menu_adc_wakeup = 1;
 	menu_set_adc_direction(channel);
-	return 1;
     }
-    else {
-	// don't use ADC
-	lcd_segment(LS_SYM_LEFT,    LS_OFF);
-	lcd_segment(LS_SYM_RIGHT,   LS_OFF);
-	menu_adc_wakeup = 0;
-	return 0;
+    // don't use ADC
+    else  menu_adc_wakeup = 0;
+}
+
+typedef void (*menu_channel_subfunc_t)(u8, u8);
+typedef struct {
+    u8 end_channel;
+    u8 use_adc;
+    u8 forced_values;
+    menu_channel_subfunc_t func;
+    u8 last_direction;
+} menu_channel_t;
+
+static void menu_channel_func(u8 action, menu_channel_t *p) {
+    switch (action) {
+	case MCA_INIT:
+	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    break;
+	case MCA_SET_CHG:
+	    p->func(menu_id, 1);
+	    break;
+	case MCA_ID_PREV:
+	    if (menu_id)  menu_id--;
+	    else	  menu_id = (u8)(p->end_channel - 1);
+	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    break;
+	case MCA_ID_NEXT:
+	    if (++menu_id >= p->end_channel)  menu_id = 0;
+	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    break;
+	case MCA_ADC_PRE:
+	    menu_set_adc_direction(menu_id);
+	    break;
+	case MCA_ADC_POST:
+	    // do nothing if left-right didn't changed
+	    if (p->last_direction == menu_adc_direction)  return;
+	    // else show value
+	    menu_id_set = 1;	// flag that new value is showed
+	    break;
     }
+
+    // show value
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    lcd_7seg((u8)(menu_id + 1));
+    p->func(menu_id, 0);
+    p->last_direction = menu_adc_direction;
 }
 
 static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
-			 void (*subfunc)(u8, u8)) {
-    u8 channel = 1;
-    _Bool chan_val = 0;			// now in channel
-    _Bool adc_active;
-    u8 last_direction;
-
-    // show CHANNEL
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_CHANNEL, LS_ON);
-
-    // show channel number and possible direction
+			 menu_channel_subfunc_t subfunc) {
+    menu_channel_t p;
+	p.end_channel = end_channel;
+	p.use_adc = use_adc;
+	p.forced_values = forced_values;
+	p.func = subfunc;
     menu_adc_direction = 0;
-    lcd_7seg(channel);
-    lcd_set_blink(L7SEG, LB_SPC);
-    adc_active = menu_set_adc(channel, use_adc, forced_values);
-    subfunc((u8)(channel - 1), 0);	// show current value
-    lcd_update();
 
-    while (1) {
-	btnra();
-	menu_stop();
-
-	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
-
-	last_direction = menu_adc_direction;
-	if (adc_active)  menu_set_adc_direction(channel);
-
-	if (btn(BTN_ROT_ALL)) {
-	    if (chan_val) {
-		// change value
-		subfunc((u8)(channel - 1), 1);
-		lcd_chars_blink(LB_SPC);
-	    }
-	    else {
-		// change channel number
-		if (btn(BTN_ROT_L)) {
-		    if (!--channel)  channel = end_channel;
-		}
-		else {
-		    if (++channel > end_channel)  channel = 1;
-		}
-		lcd_7seg(channel);
-		lcd_set_blink(L7SEG, LB_SPC);
-		adc_active = menu_set_adc(channel, use_adc, forced_values);
-		subfunc((u8)(channel - 1), 0);
-	    }
-	    lcd_update();
-	    last_direction = menu_adc_direction;  // was already showed
-	}
-
-	else if (btn(BTN_ENTER)) {
-	    // switch channel/value
-	    key_beep();
-	    if (chan_val) {
-		// switch to channel number
-		lcd_set_blink(L7SEG, LB_SPC);
-		lcd_chars_blink(LB_OFF);
-		chan_val = 0;
-	    }
-	    else {
-		// switch to value
-		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_chars_blink(LB_SPC);
-		chan_val = 1;
-	    }
-	}
-
-	if (last_direction != menu_adc_direction) {
-	    // show other dir value
-	    subfunc((u8)(channel - 1), 0);
-	    lcd_update();
-	    if (chan_val) {
-		lcd_chars_blink(LB_SPC);
-	    }
-	}
-    }
-
-    menu_adc_wakeup = 0;
-    menu_force_value_channel = 0;
-    key_beep();
+    menu_common(menu_channel_func, &p, MCF_NONE);
     config_model_save();
 }
 
@@ -415,12 +379,11 @@ void sf_endpoint(u8 channel, u8 change) {
     u8 *addr = &cm.endpoint[channel][menu_adc_direction];
     if (change)  *addr = (u8)menu_change_val(*addr, 0, cg.endpoint_max,
                                              ENDPOINT_FAST, 0);
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     lcd_char_num3(*addr);
 }
-static void menu_endpoint(void) {
-    lcd_segment(LS_SYM_PERCENT, LS_ON);
+@inline static void menu_endpoint(void) {
     menu_channel(channels, 0xff, 0xfc, sf_endpoint);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 
@@ -457,12 +420,11 @@ static void sf_dualrate(u8 channel, u8 change) {
     u8 *addr = &cm.dualrate[channel];
     if (channel == 1 && menu_adc_direction)  addr = &cm.dualrate[2];
     if (change)  *addr = (u8)menu_change_val(*addr, 0, 100, DUALRATE_FAST, 0);
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     lcd_char_num3(*addr);
 }
-static void menu_dualrate(void) {
-    lcd_segment(LS_SYM_PERCENT, LS_ON);
+@inline static void menu_dualrate(void) {
     menu_channel(2, 0x2, 0, sf_dualrate);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 
@@ -477,14 +439,18 @@ static void sf_speed(u8 channel, u8 change) {
 	    cm.thspd_onlyfwd ^= 1;
 	else *addr = (u8)menu_change_val(*addr, 1, 100, SPEED_FAST, 0);
     }
-    if (thfwdonly)  lcd_chars(cm.thspd_onlyfwd ? "OFF" : "ON ");
-    else	    lcd_char_num3(*addr);
+    if (thfwdonly) {
+	lcd_chars(cm.thspd_onlyfwd ? "OFF" : "ON ");
+	lcd_segment(LS_SYM_PERCENT, LS_OFF);
+    }
+    else {
+	lcd_char_num3(*addr);
+	lcd_segment(LS_SYM_PERCENT, LS_ON);
+    }
 }
 static void menu_speed(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    lcd_segment(LS_SYM_PERCENT, LS_ON);
     menu_channel(channels, 0x3, 0, sf_speed);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
     lcd_set_blink(LMENU, LB_OFF);
 }
 
@@ -495,12 +461,11 @@ static void sf_expo(u8 channel, u8 change) {
     if (channel == 1 && menu_adc_direction)  addr = &cm.expo[2];
     if (change)  *addr = (s8)menu_change_val(*addr, -EXPO_MAX, EXPO_MAX,
                                              EXPO_FAST, 0);
+    lcd_segment(LS_SYM_PERCENT, LS_ON);
     lcd_char_num3(*addr);
 }
-static void menu_expo(void) {
-    lcd_segment(LS_SYM_PERCENT, LS_ON);
+@inline static void menu_expo(void) {
     menu_channel(2, 0x2, 0, sf_expo);
-    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 }
 
 

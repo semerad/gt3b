@@ -279,7 +279,21 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 
 	// if menu ADC was activated, call func to for example show other
 	//   value when left-right position changed
-	if (menu_adc_wakeup)  func(MCA_ADC_POST, params);
+	if (menu_adc_wakeup) {
+	    u8 mis = menu_id_set;	// save value
+	    menu_id_set = 0;		// func will set it to 1 when new val showed
+	    func(MCA_ADC_POST, params);
+	    if (menu_id_set) {
+		if (mis) {
+		    lcd_chars_blink_mask(LB_SPC, menu_blink);
+		}
+		else {
+		    if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
+		}
+		lcd_update();
+	    }
+	    menu_id_set = mis;
+	}
     }
 
     // call to select next value which can do some action (such as reset)
