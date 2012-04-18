@@ -295,89 +295,39 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 }
 
 
-// common list menu, select item at 7SEG and then set params at CHR3
-void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 use_stop) {
-    u8 id_val = 0;			// now in key_id
-    u8 menu_id = 0;
-    menu_list_t func = menu_funcs[0];
-    u8 chars_blink = 0b111;		// bit for each char to blink
+// common list menu, given by list of functions, one for each menu item
+typedef struct {
+    menu_list_t *funcs;
+    u8 nitems;
+} menu_list_params_t;
 
-    menu_clear_symbols();
-    if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-
-    // show first setting for first menu id
-    func(1, 0, &chars_blink);
-    lcd_set_blink(L7SEG, LB_SPC);
-    lcd_update();
-
-    while (1) {
-	btnra();
-	if (use_stop)  stop();
-	else           menu_stop();
-
-	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
-
-	if (btn(BTN_ROT_ALL)) {
-	    if (id_val) {
-		// change selected setting
-		func(id_val, 1, &chars_blink);
-		lcd_chars_blink_mask(LB_SPC, chars_blink);
-		lcd_update();
-	    }
-	    else {
-		// change menu-id
-		menu_force_value_channel = 0;
-		if (btn(BTN_ROT_L)) {
-		    if (menu_id)  menu_id--;
-		    else	  menu_id = (u8)(menu_nitems - 1);
-		}
-		else {
-		    if (++menu_id >= menu_nitems)  menu_id = 0;
-		}
-		func = menu_funcs[menu_id];
-		// remove possible showed symbols
-		menu_clear_symbols();
-		if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-		chars_blink = 0b111;		// default to all chars
-		func(1, 0, &chars_blink);	// show first setting
-		lcd_set_blink(L7SEG, LB_SPC);
-		lcd_update();
-	    }
-	}
-
-	else if (btn(BTN_ENTER)) {
-	    // switch menu_id/menu-setting1/menu-setting2/...
-	    key_beep();
-	    if (id_val) {
-		// what to do depends on what was selected in this item
-		id_val = func(id_val, 2, &chars_blink);
-		if (id_val != 1) {
-		    lcd_chars_blink_mask(LB_SPC, chars_blink);
-		}
-		else {
-		    // switch to menu selection
-		    id_val = 0;
-		    lcd_set_blink(L7SEG, LB_SPC);
-		    lcd_chars_blink(LB_OFF);
-		}
-		lcd_update();
-	    }
-	    else {
-		// switch to key settings
-		id_val = 1;
-		// key setting values is already showed
-		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_chars_blink_mask(LB_SPC, chars_blink);
-	    }
-	}
+static void menu_list_func(u8 action, menu_list_params_t *p) {
+    menu_list_t func = p->funcs[0];
+    switch (action) {
+	case MCA_SET_CHG:
+	    func(MLA_CHG);
+	    return;	// value already showed
+	    break;
+	case MCA_SET_NEXT:
+	    func(MLA_NEXT);
+	    return;	// value already showed
+	    break;
+	case MCA_ID_PREV:
+	    if (menu_id)  menu_id--;
+	    else	  menu_id = (u8)(p->nitems - 1);
+	    break;
+	case MCA_ID_NEXT:
+	    if (++menu_id >= p->nitems)  menu_id = 0;
+	    break;
     }
+    // show value
+    func(MLA_SHOW);
+}
 
-    // call to select next value which can do some action (such as reset)
-    if (id_val)  id_val = func(id_val, 2, &chars_blink);
-    // cleanup display
-    menu_clear_symbols();
-    if (use_stop)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-    menu_force_value_channel = 0;
-    key_beep();
+void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 flags) {
+    menu_list_params_t params;
+    params.funcs = menu_funcs;
+    params.nitems = menu_nitems;
+    menu_common(menu_list_func, &params, (u8)(flags & (MCF_STOP | MCF_LOWPWR)));
 }
 

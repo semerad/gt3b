@@ -365,9 +365,9 @@ static void menu_name(void) {
 
 
 // set number of model channels
-static u8 menu_channels(u8 val_id, u8 action, u8 *chars_blink) {
+static void menu_channels(u8 action) {
     // change value
-    if (action == 1)
+    if (action == MLA_CHG)
 	cm.channels = (u8)(menu_change_val(cm.channels + 1, 2,
 					   MAX_CHANNELS, 1, 0) - 1);
 
@@ -375,18 +375,15 @@ static u8 menu_channels(u8 val_id, u8 action, u8 *chars_blink) {
     lcd_7seg(L7_C);
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_char_num3(cm.channels + 1);
-
-    return 1;	// only one value
 }
 
 // reset model to defaults
-static u8 menu_reset_model(u8 val_id, u8 action, u8 *chars_blink) {
+static void menu_reset_model(u8 action) {
     // change value
-    if (action == 1)
-	menu_tmp_flag ^= 1;
+    if (action == MLA_CHG)  menu_tmp_flag ^= 1;
 
     // select next value, reset when flag is set
-    else if (action == 2) {
+    else if (action == MLA_NEXT) {
 	if (menu_tmp_flag) {
 	    menu_tmp_flag = 0;
 	    config_model_set_default();
@@ -397,8 +394,6 @@ static u8 menu_reset_model(u8 val_id, u8 action, u8 *chars_blink) {
     // show value
     lcd_7seg(L7_R);
     lcd_chars(menu_tmp_flag ? "YES" : "NO ");
-
-    return 1;	// only one value
 }
 
 static const menu_list_t chanres_funcs[] = {
@@ -408,8 +403,9 @@ static const menu_list_t chanres_funcs[] = {
 
 // set number of model channels, reset model to default values
 static void menu_channels_reset(void) {
+    menu_tmp_flag = 0;
     lcd_set_blink(LMENU, LB_SPC);
-    menu_list(chanres_funcs, sizeof(chanres_funcs) / sizeof(void *), 0);
+    menu_list(chanres_funcs, sizeof(chanres_funcs) / sizeof(void *), MCF_NONE);
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();

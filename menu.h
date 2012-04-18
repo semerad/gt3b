@@ -129,15 +129,17 @@ extern u8 menu_main_screen;
 
 
 // common menu, select item at 7SEG and then set params at CHR3
+//   all symbols are set to OFF before calling select menu-id
 extern u8 menu_set;		// menu is in: 0 = menu_id, 1..X = menu setting 1..X
 extern u8 menu_id;		// id of selected menu
 extern _Bool menu_id_set;	// 0 = in menu-id, 1 = in menu-setting
 extern u8 menu_blink;		// what of chars should blink
-#define MCB_CHR1	0b0001
-#define MCB_CHR2	0b0010
-#define MCB_CHR3	0b0100
+#define MCB_CHR1	LB_CHR1
+#define MCB_CHR2	LB_CHR2
+#define MCB_CHR3	LB_CHR3
 #define MCB_7SEG	0b1000
 // menu_common flags
+#define MCF_NONE	0
 #define MCF_STOP	0b00000001
 #define MCF_LOWPWR	0b00000010
 #define MCF_ID_CHG	0b00000100
@@ -154,14 +156,16 @@ void menu_common(menu_common_t func, void *params, u8 flags);
 #define MCA_ADC_POST	7
 
 
-// common list menus, select item in 7SEG and then modify its setting at CHR3
-//   XXX val_id: 1..num_values - which param of this item to change
-typedef u8 (*menu_list_t)(u8 val_id, u8 action, u8 *chars_blink);
-void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 flags);
+// common list menu, given by list of functions, one for each menu item
+typedef void (*menu_list_t)(u8 action);
 // menu_list_t actions
 #define MLA_SHOW	0
 #define MLA_CHG		1
 #define MLA_NEXT	2
+void menu_list(menu_list_t *menu_funcs, u8 menu_nitems, u8 flags);
+
+
+
 
 
 // timers

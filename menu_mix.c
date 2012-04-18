@@ -33,13 +33,12 @@
 
 
 
-static u8 mix_4WS(u8 val_id, u8 action, u8 *chars_blink) {
-    u8 id = val_id;
+static void mix_4WS(u8 action) {
     u8 val;
 
-    if (action == 1) {
+    if (action == MLA_CHG) {
 	// change value
-	switch (id) {
+	switch (menu_set) {
 	    case 1:
 		// channel number/off
 		val = cm.channel_4WS;
@@ -58,47 +57,39 @@ static u8 mix_4WS(u8 val_id, u8 action, u8 *chars_blink) {
 		menu_4WS_crab ^= 1;
 	}
     }
-    else if (action == 2) {
+    else if (action == MLA_NEXT) {
 	// select next value
-	if (++id > 3)  id = 1;
-	if (!cm.channel_4WS)  id = 1;
+	if (++menu_set > 3)   menu_set = 1;
+	if (!cm.channel_4WS)  menu_set = 1;
     }
 
     // show value
     lcd_7seg(4);
-    switch (id) {
+    switch (menu_set) {
 	case 1:
 	    // channel number/OFF
 	    if (!cm.channel_4WS)  lcd_chars("OFF");
 	    else		  lcd_char_num3(cm.channel_4WS);
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
 	case 2:
 	    // mix value
 	    lcd_char_num3(menu_4WS_mix);
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
 	case 3:
 	    // crab/no-crab
 	    lcd_chars(menu_4WS_crab ? "CRB" : "NOC");
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
     }
-
-    return id;
-
 }
 
 
-static u8 mix_DIG(u8 val_id, u8 action, u8 *chars_blink) {
-    u8 id = val_id;
+static void mix_DIG(u8 action) {
     u8 val;
 
-    if (action == 1) {
+    if (action == MLA_CHG) {
 	// change value
-	switch (id) {
+	switch (menu_set) {
 	    case 1:
 		// channel number/off
 		val = cm.channel_DIG;
@@ -114,20 +105,19 @@ static u8 mix_DIG(u8 val_id, u8 action, u8 *chars_blink) {
 		break;
 	}
     }
-    else if (action == 2) {
+    else if (action == MLA_NEXT) {
 	// select next value
-	if (++id > 2)  id = 1;
-	if (!cm.channel_DIG)  id = 1;
+	if (++menu_set > 2)   menu_set = 1;
+	if (!cm.channel_DIG)  menu_set = 1;
     }
 
     // show value
     lcd_7seg(L7_D);
-    switch (id) {
+    switch (menu_set) {
 	case 1:
 	    // channel number/OFF
 	    if (!cm.channel_DIG)  lcd_chars("OFF");
 	    else		  lcd_char_num3(cm.channel_DIG);
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    break;
 	case 2:
 	    // mix value
@@ -135,18 +125,15 @@ static u8 mix_DIG(u8 val_id, u8 action, u8 *chars_blink) {
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    break;
     }
-
-    return id;
 }
 
 
-static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
-    u8 id = val_id;
+static void mix_MultiPosition(u8 action) {
     s8 val;
 
-    if (action == 1) {
+    if (action == MLA_CHG) {
 	// change value
-	if (id == 1) {
+	if (menu_set == 1) {
 	    // channel number/off
 	    val = cm.channel_MP;
 	    if (!val)  val = 2;
@@ -158,27 +145,27 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 	}
 	else {
 	    // position value + END state (END not for first position)
-	    val = cm.multi_position[id - 2];
+	    val = cm.multi_position[menu_set - 2];
 	    if (val == MULTI_POSITION_END)  val = -101;
-	    val = (s8)menu_change_val(val, id == 2 ? -100 : -101, 100,
+	    val = (s8)menu_change_val(val, menu_set == 2 ? -100 : -101, 100,
 				      CHANNEL_FAST, 0);
 	    if (val == -101) {
 		// set all from this to END value
-		memset(&cm.multi_position[id - 2], (u8)MULTI_POSITION_END,
-		       NUM_MULTI_POSITION + 2 - id);
+		memset(&cm.multi_position[menu_set - 2], (u8)MULTI_POSITION_END,
+		       NUM_MULTI_POSITION + 2 - menu_set);
 	    }
-	    else cm.multi_position[id - 2] = val;
+	    else cm.multi_position[menu_set - 2] = val;
 	}
     }
-    else if (action == 2) {
+    else if (action == MLA_NEXT) {
 	// select next value
 	if (cm.channel_MP) {
-	    if (id == 1)  id = 2;
-	    else if (cm.multi_position[id - 2] == MULTI_POSITION_END
-		    || ++id > (NUM_MULTI_POSITION + 1))  id = 1;
+	    if (menu_set == 1)  menu_set = 2;
+	    else if (cm.multi_position[menu_set - 2] == MULTI_POSITION_END
+		    || ++menu_set > (NUM_MULTI_POSITION + 1))  menu_set = 1;
 	}
 	// allow forcing channel value
-	if (id > 1 && cm.channel_MP && cm.channel_MP <= channels) {
+	if (menu_set > 1 && cm.channel_MP && cm.channel_MP <= channels) {
 	    menu_force_value_channel = cm.channel_MP;
 	}
 	else menu_force_value_channel = 0;
@@ -186,7 +173,7 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 
     // show value
     lcd_7seg(L7_P);
-    if (id == 1) {
+    if (menu_set == 1) {
 	// channel number/OFF
 	if (!cm.channel_MP)	lcd_chars("OFF");
 	else if (cm.channel_MP == MP_DIG)
@@ -195,7 +182,7 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
     }
     else {
 	// position value
-	val = cm.multi_position[id - 2];
+	val = cm.multi_position[menu_set - 2];
 	if (val == MULTI_POSITION_END) {
 	    lcd_chars("END");
 	    val = -100;
@@ -204,23 +191,16 @@ static u8 mix_MultiPosition(u8 val_id, u8 action, u8 *chars_blink) {
 	if (cm.channel_MP == MP_DIG)	menu_DIG_mix = val;
 	else				menu_force_value = val * PPM(5);
     }
-
-    return id;
 }
 
 
-static u8 mix_brake_off(u8 val_id, u8 action, u8 *chars_blink) {
-
-    if (action == 1) {
-	// change value
-	cm.brake_off ^= 1;
-    }
+static void mix_brake_off(u8 action) {
+    // change value
+    if (action == MLA_CHG)  cm.brake_off ^= 1;
 
     // show value
     lcd_7seg(L7_B);
     lcd_chars(cm.brake_off ? "CUT" : "OFF");
-
-    return 1;
 }
 
 
@@ -238,7 +218,7 @@ static const menu_list_t mix_funcs[] = {
 
 void menu_mix(void) {
     lcd_set_blink(LMENU, LB_SPC);
-    menu_list(mix_funcs, sizeof(mix_funcs) / sizeof(void *), 0);
+    menu_list(mix_funcs, sizeof(mix_funcs) / sizeof(void *), MCF_NONE);
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();

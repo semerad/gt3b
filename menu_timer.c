@@ -185,66 +185,61 @@ void menu_timer_clear(u8 tid, u8 laps) {
 // setup timer
 
 static u8 timer_id;	// for setup to know which timer to operate
-static u8 timer_setup_throttle(u8 val_id, u8 action, u8 *chars_blink) {
+static void timer_setup_throttle(u8 action) {
     // change value
-    if (action == 1)
+    if (action == MLA_CHG)
 	menu_timer_throttle ^= (u8)(1 << timer_id);
 
     // select next value
-    else if (action == 2)  menu_timer_clear(timer_id, 2);
+    else if (action == MLA_NEXT)  menu_timer_clear(timer_id, 2);
 
     // show value
     lcd_7seg(L7_H);
     lcd_chars(menu_timer_throttle & (u8)(1 << timer_id) ? "ON " : "OFF");
     timer_show_id(timer_id);
-
-    return 1;	// only one value
 }
 
-static u8 timer_setup_alarm(u8 val_id, u8 action, u8 *chars_blink) {
+static void timer_setup_alarm(u8 action) {
     u8 val = TIMER_ALARM(timer_id);
 
     // change value
-    if (action == 1) {
+    if (action == MLA_CHG) {
 	val = (u8)menu_change_val(val, 0, 255, TIMER_ALARM_FAST, 0);
 	TIMER_ALARM_SET(timer_id, val);
+	// set value to global var as lap counts or as minutes
 	if (TIMER_TYPE(timer_id) == TIMER_LAPCNT)
 	    menu_timer_alarm[timer_id] = val;
 	else menu_timer_alarm[timer_id] = val * 60;
     }
 
     // select next value
-    else if (action == 2)  menu_timer_clear(timer_id, 2);
+    else if (action == MLA_NEXT)  menu_timer_clear(timer_id, 2);
 
     // show value
     lcd_7seg(L7_A);
     lcd_char_num3(val);
     timer_show_id(timer_id);
-
-    return 1;	// only one value
 }
 
 static const u8 timer_type_labels[][4] = {
     "OFF", "UP ", "DWN", "LPT", "LPC"
 };
-static u8 timer_setup_type(u8 val_id, u8 action, u8 *chars_blink) {
+static void timer_setup_type(u8 action) {
     u8 val = TIMER_TYPE(timer_id);
 
     // change value
-    if (action == 1) {
+    if (action == MLA_CHG) {
 	val = (u8)menu_change_val(val, 0, TIMER_TYPE_MAX, 1, 1);
 	TIMER_TYPE_SET(timer_id, val);
     }
 
     // select next value
-    else if (action == 2)  menu_timer_clear(timer_id, 1);
+    else if (action == MLA_NEXT)  menu_timer_clear(timer_id, 1);
 
     // show value
     lcd_7seg(L7_P);
     lcd_chars(timer_type_labels[val]);
     timer_show_id(timer_id);
-
-    return 1;	// only one value
 }
 
 static const menu_list_t timer_setup_funcs[] = {
@@ -255,7 +250,7 @@ static const menu_list_t timer_setup_funcs[] = {
 
 void menu_timer_setup(u8 tid) {
     timer_id = tid;
-    menu_list(timer_setup_funcs, sizeof(timer_setup_funcs) / sizeof(void *), 0);
+    menu_list(timer_setup_funcs, sizeof(timer_setup_funcs) / sizeof(void *), MCF_NONE);
     config_global_save();
 }
 
