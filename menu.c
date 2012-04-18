@@ -510,33 +510,20 @@ static const u8 abs_labels[][4] = {
     "OFF", "SLO", "NOR", "FAS"
 };
 #define ABS_LABEL_SIZE  (sizeof(abs_labels) / 4)
-static void menu_abs(void) {
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_segment(LS_SYM_CHANNEL, LS_ON);
 
+static void menu_abs_func(u8 action, void *p) {
+    // change value
+    if (action == MCA_SET_CHG)
+	cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_SIZE-1, 1, 1);
+    
+    // show value
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg(2);
     lcd_chars(abs_labels[cm.abs_type]);
-    lcd_chars_blink(LB_SPC);
-    lcd_update();
+}
 
-    while (1) {
-	btnra();
-	menu_stop();
-
-	if (btn(BTN_BACK | BTN_END | BTN_ENTER))  break;
-
-	if (btn(BTN_ROT_ALL)) {
-	    cm.abs_type = (u8)menu_change_val(cm.abs_type, 0, ABS_LABEL_SIZE-1,
-	                                      1, 1);
-	    lcd_chars(abs_labels[cm.abs_type]);
-	    lcd_chars_blink(LB_SPC);
-	    lcd_update();
-	}
-    }
-
-    key_beep();
+static void menu_abs(void) {
+    menu_common(menu_abs_func, NULL, (u8)(MCF_ENTER | MCF_SET_ONLY));
     config_model_save();
 }
 
