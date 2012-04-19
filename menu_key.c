@@ -53,15 +53,14 @@ static const u8 trim_buttons[][4] = {
 //              MOM	     -> 	reverse              -> prev_val
 //           NOL/RPT/RES/END -> step -> reverse -> opp_reset             -> rotate
 // id:        %                  % V     V          V blink      % blink    % V blink
-static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
-    config_et_map_s *etm = &ck.et_map[trim_id];
-    u8 id = val_id;
+static void km_trim(u8 action) {
+    config_et_map_s *etm = &ck.et_map[menu_id];
     u8 idx, btn, new_idx = 0;
 
     if (action == 1) {
 	// change value
-	switch (id) {
-	    case 1:
+	switch (menu_set) {
+	    case 0:
 		// function
 		// select new function, map through trim_functions
 		if (!etm->is_trim)  etm->function = 0;
@@ -86,7 +85,7 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		if (etm->function)
 		    etm->is_trim = etm->is_trim2 = 1;
 		break;
-	    case 2:
+	    case 1:
 		// buttons
 		// show special ("SPC") only when selected function has it
 		if (menu_et_function_long_special(etm->function))
@@ -103,24 +102,24 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 		}
 		etm->buttons = btn;
 		break;
-	    case 3:
+	    case 2:
 		// step
 		etm->step = (u8)menu_change_val(etm->step, 0,
 						STEPS_MAP_SIZE - 1, 1, 0);
 		break;
-	    case 4:
+	    case 3:
 		// reverse
 		etm->reverse ^= 1;
 		break;
-	    case 5:
+	    case 4:
 		// opposite reset
 		etm->opposite_reset ^= 1;
 		break;
-	    case 6:
+	    case 5:
 		// return to previous value
 		etm->previous_val ^= 1;
 		break;
-	    case 7:
+	    case 6:
 		etm->rotate ^= 1;
 		break;
 	}
@@ -128,23 +127,23 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 
     else if (action == 2) {
 	// switch to next setting
-	if (id != 1 || etm->is_trim) {
+	if (menu_set || etm->is_trim) {
 	    if (etm->buttons == ETB_MOMENTARY) {
-		if (++id > 6)       id = 1;
-		else if (id == 3)   id = 4;  // skip "step" for momentary
-		else if (id == 5)   id = 6;  // skip "opposite_reset"
+		if (++menu_set > 5)       menu_set = 0;
+		else if (menu_set == 2)   menu_set = 3;  // skip "step" for momentary
+		else if (menu_set == 4)   menu_set = 5;  // skip "opposite_reset"
 	    }
 	    else {
-		if (++id > 5)  id = 1;
+		if (++menu_set > 4)  menu_set = 0;
 		else if (menu_et_function_is_list(etm->function)) {
-		    if (id == 3) {
+		    if (menu_set == 2) {
 			// skip "step"
-			id++;
+			menu_set++;
 			etm->step = 0;
 		    }
-		    else if (id == 5) {
+		    else if (menu_set == 4) {
 			// skip "opposite reset"
-			id = 7;
+			menu_set = 6;
 			etm->opposite_reset = 0;
 		    }
 		}
@@ -152,42 +151,42 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	}
     }
 
-    // show value of val_id
-    switch (id) {
-	case 1:
+    // show value of menu_set
+    switch (menu_set) {
+	case 0:
 	    if (!etm->is_trim)  lcd_chars("OFF");
 	    else  lcd_chars(menu_et_function_name(etm->function));
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
-	case 2:
+	case 1:
 	    lcd_chars(trim_buttons[etm->buttons]);
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
-	case 3:
+	case 2:
 	    lcd_char_num3(steps_map[etm->step]);
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 4:
+	case 3:
 	    lcd_chars(etm->reverse ? "REV" : "NOR");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 5:
+	case 4:
 	    lcd_chars(etm->opposite_reset ? "ORS" : "NOO");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
 	    break;
-	case 6:
+	case 5:
 	    lcd_chars(etm->previous_val ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 	    break;
-	case 7:
+	case 6:
 	    lcd_chars(etm->rotate ? "ROT" : "NOR");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
@@ -195,7 +194,6 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
 	    break;
     }
-    return id;
 }
 
 
@@ -219,15 +217,14 @@ static u8 km_trim(u8 trim_id, u8 val_id, u8 action) {
 //   2STATE -> reverse (V) -> prev_val (% blink)
 //             (NOR/REV)      (NPV/PRV)
 //   other
-static u8 km_key(u8 key_id, u8 val_id, u8 action) {
-    config_key_map_s *km = &ck.key_map[key_id];
-    u8 id = val_id;
+static void km_key(u8 action) {
+    config_key_map_s *km = &ck.key_map[menu_id - NUM_TRIMS];
     u8 idx, new_idx = 0;
 
     if (action == 1) {
 	// change value
-	switch (id) {
-	    case 1:
+	switch (menu_set) {
+	    case 0:
 		// function
 		// select new function, map through key_functions
 		idx = menu_key_function_idx(km->function);
@@ -253,7 +250,7 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		}
 		km->function = new_idx;
 		break;
-	    case 2:
+	    case 1:
 		// momentary setting
 		km->momentary ^= 1;
 		// after change momentary, reset long setting
@@ -261,15 +258,15 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		km->reverse_long = 0;
 		km->previous_val_long = 0;
 		break;
-	    case 3:
+	    case 2:
 		// reverse
 		km->reverse ^= 1;
 		break;
-	    case 4:
+	    case 3:
 		// previous_val
 		km->previous_val ^= 1;
 		break;
-	    case 5:
+	    case 4:
 		// function long
 		// select new function, map through key_functions
 		idx = menu_key_function_idx(km->function_long);
@@ -291,11 +288,11 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 		km->previous_val_long = 0;
 		km->function_long = new_idx;
 		break;
-	    case 6:
+	    case 5:
 		// reverse_long
 		km->reverse_long ^= 1;
 		break;
-	    case 7:
+	    case 6:
 		// previous_val_long
 		km->previous_val_long ^= 1;
 		break;
@@ -304,74 +301,74 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 
     else if (action == 2) {
 	// switch to next setting
-	switch (id) {
+	switch (menu_set) {
+	    case 0:
+		if (menu_key_function_2state(km->function))  menu_set = 1;
+		else  menu_set = 4;
+		break;
 	    case 1:
-		if (menu_key_function_2state(km->function))  id = 2;
-		else  id = 5;
+		menu_set = 2;
 		break;
 	    case 2:
-		id = 3;
+		menu_set = 3;
 		break;
 	    case 3:
-		id = 4;
+		if (km->momentary)  menu_set = 0;
+		else  menu_set = 4;
 		break;
 	    case 4:
-		if (km->momentary)  id = 1;
-		else  id = 5;
+		if (menu_key_function_2state(km->function_long))  menu_set = 5;
+		else  menu_set = 0;
 		break;
 	    case 5:
-		if (menu_key_function_2state(km->function_long))  id = 6;
-		else  id = 1;
+		menu_set = 6;
 		break;
 	    case 6:
-		id = 7;
-		break;
-	    case 7:
-		id = 1;
+		menu_set = 0;
 		break;
 	}
     }
 
-    // show value of val_id
-    switch (id) {
-	case 1:
+    // show value of menu_set
+    switch (menu_set) {
+	case 0:
 	    // function
 	    lcd_chars(menu_key_function_name(km->function));
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
-	case 2:
+	case 1:
 	    // momentary setting
 	    lcd_chars(km->momentary ? "MOM" : "SWI");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
-	case 3:
+	case 2:
 	    // reverse
 	    lcd_chars(km->reverse ? "REV" : "NOR");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 4:
+	case 3:
 	    // previous_val
 	    lcd_chars(km->previous_val ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 	    break;
-	case 5:
+	case 4:
 	    // function long
 	    lcd_chars(menu_key_function_name(km->function_long));
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 6:
+	case 5:
 	    // reverse_long
 	    lcd_chars(km->reverse_long ? "REV" : "NOR");
 	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
-	case 7:
+	case 6:
 	    // previous_val_long
 	    lcd_chars(km->previous_val_long ? "PRV" : "NPV");
 	    lcd_segment(LS_SYM_PERCENT, LS_ON);
@@ -379,7 +376,6 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
 	    break;
     }
-    return id;
 }
 
 
@@ -388,9 +384,9 @@ static u8 km_key(u8 key_id, u8 val_id, u8 action) {
 
 
 
-static u8 km_trim_key(u8 key_id, u8 val_id, u8 action) {
-    if (key_id < NUM_TRIMS)  return km_trim(key_id, val_id, action);
-    else  return km_key((u8)(key_id - NUM_TRIMS), val_id, action);
+@inline static void km_trim_key(u8 action) {
+    if (menu_id < NUM_TRIMS)  km_trim(action);
+    else		      km_key(action);
 }
 
 static const u8 key_ids[] = {
@@ -399,11 +395,11 @@ static const u8 key_ids[] = {
 
 void menu_key_mapping_func(u8 action, void *p) {
     if (action == MCA_SET_CHG) {
-	km_trim_key(menu_id, (u8)(menu_set + 1), 1);
+	km_trim_key(1);
 	return;		// value already showed
     }
     else if (action == MCA_SET_NEXT) {
-	menu_set = (u8)(km_trim_key(menu_id, (u8)(menu_set + 1), 2) - 1);
+	km_trim_key(2);
 	return;		// value already showed
     }
     else if (action == MCA_ID_CHG) {
@@ -439,7 +435,7 @@ void menu_key_mapping_func(u8 action, void *p) {
 	    // left trim key
 	    lcd_segment(LS_SYM_LEFT, LS_ON);
     }
-    km_trim_key(menu_id, (u8)(menu_set + 1), 0);
+    km_trim_key(0);
 }
 
 void menu_key_mapping(void) {
