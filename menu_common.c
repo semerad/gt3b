@@ -251,9 +251,29 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 
 	// ENTER pressed, switch between menu settings
 	else if (btn(BTN_ENTER)) {
-	    // switch menu_id/menu-setting1/menu-setting2/...
+	    // switch menu_id/menu-setting0/menu-setting1/...
 	    key_beep();
-	    if (menu_id_set) {
+	    if (flags & MCF_SWITCH) {
+		// switch will be done by function
+		menu_blink = 0xff;		// default to all chars
+		// remove possible showed symbols
+		menu_clear_symbols();
+		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+		// select next menu setting
+		func(MCA_SWITCH, params);
+		if (menu_set == 255)  break;	// exit menu when requested
+		// blinking
+		if (menu_id_set) {
+		    lcd_chars_blink_mask(LB_SPC, menu_blink);
+		    lcd_set_blink(L7SEG, LB_OFF);
+		}
+		else {
+		    if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
+		    lcd_chars_blink(LB_OFF);
+		}
+		lcd_update();
+	    }
+	    else if (menu_id_set) {
 		menu_blink = 0xff;		// default to all chars
 		// remove possible showed symbols
 		menu_clear_symbols();
@@ -265,7 +285,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		    lcd_chars_blink_mask(LB_SPC, menu_blink);
 		}
 		else {
-		    // rotated back to setting 1, switch to menu selection
+		    // rotated back to setting 0, switch to menu selection
 		    menu_id_set = 0;
 		    if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
 		    lcd_chars_blink(LB_OFF);
