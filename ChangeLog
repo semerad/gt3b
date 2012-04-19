@@ -5,6 +5,8 @@
     poweron warn when not-centered now has separate global option
     added up/down timers with throttle trigger start
     added BRK button function to override throttle and apply full brake
+    big internal changes handling different menus, key mapping uses
+	2-char option identification instead of various symbols
 
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep

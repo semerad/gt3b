@@ -43,7 +43,7 @@ Buttons:
 ========
 - it is now possible to differentiate between long press (>1 second) to
   normal button press (short) and it will be recognized like "ENTER-long"
-- Trims and DualRate
+- Trims, DualRate and other popup informations
     > now shows changed value only temporaly (5 seconds or till another
 	key press), values are saved to EEPROm automatically when it disappears
     > when autorepeat disabled on trims (default), reset trim to 0
@@ -72,6 +72,7 @@ Standard menu:
     next value and END (+ ENTER-long) will end editing items
 - ENTER-long on ABS will leave menu also (as BACK)
 - Trims are now only for steering and throttle
+    > trim move center position without moving endpoint positions
 - Expo
     > value for channel 2 is splitted to forward and back and is indicated
 	by arrows
@@ -90,6 +91,7 @@ Standard menu:
     > choose "C" for number of model channels or "r" for model reset
 	- reset will show NO/YES
 - Subtrims
+    > subtrim moves center position together with endpoint positions
     > choose menu TRIM and press ENTER-long
     > menu TRIM will blink
     > set subtrims for each channel
@@ -121,7 +123,7 @@ Standard menu:
 	    0%   is default and means both channels have same max steering/throttle
 	    100% means 100% reduce on rear steering/throttle (eg. no steering)
 	    -100% means 100% reduce on front steering/throttle (eg. no steering)
-	> for 4WS press ENTER and select crab (CRB) or no-crab (NOC)
+	> for 4WS press ENTER and select crab (CR1) or no-crab (CR0)
       for Multi-Position:
 	> press ENTER and choose channel for this function or OFF
 	> press ENTER and set channel value for first position
