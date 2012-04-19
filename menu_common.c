@@ -255,6 +255,9 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	    key_beep();
 	    if (menu_id_set) {
 		menu_blink = 0xff;		// default to all chars
+		// remove possible showed symbols
+		menu_clear_symbols();
+		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 		// select next menu setting
 		func(MCA_SET_NEXT, params);
 		if (menu_set || (flags & MCF_SET_ONLY)) {
@@ -318,7 +321,7 @@ typedef struct {
 } menu_list_params_t;
 
 static void menu_list_func(u8 action, menu_list_params_t *p) {
-    menu_list_t func = p->funcs[0];
+    menu_list_t func = p->funcs[menu_id];
     switch (action) {
 	case MCA_SET_CHG:
 	    func(MLA_CHG);
@@ -331,9 +334,11 @@ static void menu_list_func(u8 action, menu_list_params_t *p) {
 	case MCA_ID_PREV:
 	    if (menu_id)  menu_id--;
 	    else	  menu_id = (u8)(p->nitems - 1);
+	    func = p->funcs[menu_id];
 	    break;
 	case MCA_ID_NEXT:
 	    if (++menu_id >= p->nitems)  menu_id = 0;
+	    func = p->funcs[menu_id];
 	    break;
     }
     // show value
