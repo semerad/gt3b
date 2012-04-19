@@ -70,6 +70,7 @@ static void mix_4WS(u8 action) {
 	    // channel number/OFF
 	    if (!cm.channel_4WS)  lcd_chars("OFF");
 	    else		  lcd_char_num3(cm.channel_4WS);
+	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
 	    break;
 	case 1:
 	    // mix value
@@ -78,8 +79,9 @@ static void mix_4WS(u8 action) {
 	    break;
 	case 2:
 	    // crab/no-crab
-	    lcd_chars(menu_4WS_crab ? "CRB" : "NOC");
-	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    lcd_chars("CR");
+	    lcd_char(LCHR3, (u8)(menu_4WS_crab + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
     }
 }
 
@@ -118,6 +120,7 @@ static void mix_DIG(u8 action) {
 	    // channel number/OFF
 	    if (!cm.channel_DIG)  lcd_chars("OFF");
 	    else		  lcd_char_num3(cm.channel_DIG);
+	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
 	    break;
 	case 1:
 	    // mix value
@@ -179,6 +182,7 @@ static void mix_MultiPosition(u8 action) {
 	else if (cm.channel_MP == MP_DIG)
 				lcd_chars("DIG");
 	else			lcd_char_num3(cm.channel_MP);
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
     }
     else {
 	// position value
