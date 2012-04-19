@@ -224,7 +224,7 @@ static u8 timer_setup_alarm(u8 val_id, u8 action, u8 *chars_blink) {
     return 1;	// only one value
 }
 
-static const u8 timer_type_labels[][5] = {
+static const u8 timer_type_labels[][4] = {
     "OFF", "UP ", "DWN", "LPT", "LPC"
 };
 static u8 timer_setup_type(u8 val_id, u8 action, u8 *chars_blink) {
