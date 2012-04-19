@@ -41,6 +41,7 @@
 #define MIX_FAST	5
 #define SPEED_FAST	5
 #define TIMER_ALARM_FAST 5
+#define LAP_SHOW_FAST	5
 
 // delay in seconds of popup menu (trim, dualrate, ...)
 #define POPUP_DELAY	5

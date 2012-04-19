@@ -24,6 +24,7 @@
 #include "config.h"
 #include "buzzer.h"
 #include "timer.h"
+#include "input.h"
 
 
 
@@ -40,10 +41,13 @@ u8	  menu_timer_alarmed;		// down timer was over, one bit for one timer
 @near menu_timer_s menu_timer[TIMER_NUM];	// actual timer values
 @near u16 menu_timer_alarm[TIMER_NUM];		// alarm in seconds
 // number of laps
+#define TIMER_MAX_LAPCNT 255
 static @near u8  timer_lap_count[TIMER_NUM];
 // time for each lap
 #define TIMER_MAX_LAPS 100
 static @near menu_timer_s timer_lap_time[TIMER_NUM][TIMER_MAX_LAPS];
+// time when lap button can be pressed (to eliminate double-clicks)
+static @near u16 next_timer_sec[TIMER_NUM];
 
 
 
@@ -57,7 +61,13 @@ static void timer_value(menu_timer_s *pt) {
     u8  min, sec, hdr;
 
     // atomically read timer value
-    TIMER_READ(pt, tsec, hdr);
+    if (pt) {
+	TIMER_READ(pt, tsec, hdr);
+    }
+    else {
+	tsec = 0;
+	hdr = 0;
+    }
 
     // convert to minutes, seconds, 0.01 seconds
     min = (u8)(tsec / 60);
@@ -98,6 +108,7 @@ void menu_timer_show(u8 tid) {
     menu_timer_s *pt = &menu_timer[tid];
     u8 type = TIMER_TYPE(tid);
     u8 tbit = (u8)(1 << tid);
+    u8 lap;
 
     menu_clear_symbols();
     timer_show_id(tid);
@@ -123,8 +134,19 @@ void menu_timer_show(u8 tid) {
 	    break;
 
 	case TIMER_LAP:
-	    lcd_chars("NDY");	// XXX
-	    lcd_set(L7SEG, LB_EMPTY);
+	    // if several seconds from last LAP press, show actual timer value
+	    if (time_sec >= next_timer_sec[tid]) {
+		timer_value(pt);
+		break;
+	    }
+	    // show last lap time for several seconds
+	    lap = timer_lap_count[tid];
+	    if (lap) {
+		lap--;  // to last lap id
+		while (lap >= TIMER_MAX_LAPS)  lap -= TIMER_MAX_LAPS;
+		timer_value(&timer_lap_time[tid][lap]);
+	    }
+	    else  timer_value(NULL);
 	    break;
 
 	case TIMER_LAPCNT:
@@ -142,6 +164,11 @@ void menu_timer_show(u8 tid) {
 
 
 
+// lap times clear
+static void lap_times_clear(u8 tid) {
+    timer_lap_count[tid] = 0;
+    memset(&timer_lap_time[tid], 0, TIMER_MAX_LAPS * sizeof(menu_timer_s));
+}
 
 // clear timer
 void menu_timer_clear(u8 tid, u8 laps) {
@@ -155,10 +182,8 @@ void menu_timer_clear(u8 tid, u8 laps) {
     // zero values, laps only when requested
     pt->hdr = 0;
     menu_timer_alarmed &= (u8)~tbit;
-    if (laps == 1 || (laps == 2 && type != TIMER_DOWN)) {
-	timer_lap_count[tid] = 0;
-	memset(&timer_lap_time[tid], 0, TIMER_MAX_LAPS * sizeof(menu_timer_s));
-    }
+    if (laps == 1 || (laps == 2 && type != TIMER_DOWN))
+	lap_times_clear(tid);
 
     // set alarm
     if (type == TIMER_LAPCNT)
@@ -260,6 +285,108 @@ void menu_timer_setup(u8 tid) {
 
 
 // show timer lap times
+//   menu_id:
+//   	0       first lap
+//   	1       second lap
+//   	....
+//   	nlap    RES reset and end menu, after last lap
+//   	nlap+1  AVG average time
+//   	nlap+2  TOT total time
+static void lap_times_func(u8 action, u8 *ptid) {
+    u8 tid = *ptid;
+    u8 laps = timer_lap_count[tid];
+    menu_timer_s *pt, tm;
+    u8 type = TIMER_TYPE(tid);
+
+    // max 100 laps
+    if (laps > TIMER_MAX_LAPS)  laps = TIMER_MAX_LAPS;
+
+    switch (action) {
+	case MCA_INIT:
+	    // to TOTal item when not down timer
+	    if (type != TIMER_DOWN)  menu_id = (u8)(laps + 2);
+	    break;
+	case MCA_SET_CHG:
+	case MCA_ID_CHG:
+	    // change to other lap, skip TOT ang AVG for down timer
+	    menu_id = (u8)menu_change_val(menu_id, 0,
+		      laps + (type != TIMER_DOWN ? 2 : 0), LAP_SHOW_FAST, 0);
+	    break;
+	case MCA_SWITCH:
+	    // switch between lap numbers and times
+	    if (menu_id == laps) {
+		// if RESset selected, delete all values end exit
+		lap_times_clear(tid);
+		menu_set = 255;		// flag to exit
+		return;
+	    }
+	    // actual switch
+	    menu_id_set ^= 1;
+	    break;
+    }
+
+    // show value
+    menu_blink = 0;	// no blinking
+    timer_show_id(tid);
+
+    // show lap number
+    if (!menu_id_set) {
+	lcd_7seg('L');
+	if (menu_id == laps)
+	    lcd_chars("RES");
+	else if (menu_id == laps + 1)
+	    lcd_chars("AVG");
+	else if (menu_id == laps + 2)
+	    lcd_chars("TOT");
+	else lcd_char_num3(menu_id + 1);
+	return;
+    }
+
+    // show timer value
+    if (menu_id == laps) {
+	// reset
+	lcd_set(L7SEG, LB_EMPTY);
+	lcd_chars("RES");
+	return;
+    }
+    else if (menu_id == laps + 1) {
+	// average XXX
+	lcd_set(L7SEG, LB_EMPTY);
+	lcd_chars("NDY");
+	return;
+    }
+    else if (menu_id == laps + 2)
+	// total, read time of last lap
+	if (laps) pt = &timer_lap_time[tid][laps - 1];
+	else {
+	    // no laps, show zero
+	    tm.sec = 0;
+	    tm.hdr = 0;
+	    pt = &tm;
+	}
+    else {
+	// show lap time
+	if (menu_id == 0)
+	    // first lap
+	    pt = &timer_lap_time[tid][0];
+	else {
+	    // calculate lap time as difference between lap and lap -1
+	    menu_timer_s *pt2 = &timer_lap_time[tid][menu_id - 1];
+	    s16 hdr;
+	    pt = &timer_lap_time[tid][menu_id];
+	    tm.sec = pt->sec - pt2->sec;
+	    hdr = pt->hdr - pt2->hdr;
+	    if (hdr < 0) {
+		tm.sec--;
+		hdr += 100;
+	    }
+	    tm.hdr = (u8)hdr;
+	    pt = &tm;
+	}
+    }
+    timer_value(pt);
+}
+
 void menu_timer_lap_times(u8 tid) {
     u8 type = TIMER_TYPE(tid);
 
@@ -279,9 +406,38 @@ void menu_timer_lap_times(u8 tid) {
 
     }
 
-    // show lap times XXX
+    // show lap times
+    menu_common(lap_times_func, &tid, (u8)(MCF_ID_CHG | MCF_SWITCH));
 }
 
+
+
+// save lap time
+static void timer_lap_time_save(u8 tid) {
+    menu_timer_s *pt;
+    u8  *plc = &timer_lap_count[tid];
+    u16 tsec;
+    u8  thdr;
+    u8  lap;
+
+    // read timer
+    pt = &menu_timer[tid];
+    TIMER_READ(pt, tsec, thdr);
+
+    // find lap position where to save it
+    //   if over, start from zero
+    lap = *plc;
+    if (lap == TIMER_MAX_LAPCNT)  return;  // too many laps
+    while (lap >= TIMER_MAX_LAPS)  lap -= TIMER_MAX_LAPS;
+
+    // save value
+    pt = &timer_lap_time[tid][lap];
+    pt->sec = tsec;
+    pt->hdr = thdr;
+
+    // increment lap count
+    (*plc)++;
+}
 
 
 
@@ -291,7 +447,6 @@ void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv) {
     menu_timer_s *pt = &menu_timer[tid];
     u8 type = TIMER_TYPE(tid);
     u8 tbit = (u8)(1 << tid);
-    static u16 next_timer_sec[TIMER_NUM];
 
     switch (type) {
 
@@ -307,12 +462,28 @@ void kf_menu_timer_start(u8 *id, u8 *param, u8 flags, s16 *pv) {
 	    break;
 
 	case TIMER_LAP:
-	    // XXX
+	    if (time_sec < next_timer_sec[tid])  return;  // pressed too early
+	    next_timer_sec[tid] = time_sec + 3;
+	    // when not running, start it
+	    if (!(menu_timer_running & tbit)) {
+		menu_timer_running |= tbit;
+		break;
+	    }
+	    // when alarmed already, stop timer
+	    if (menu_timer_alarmed & tbit) {
+		menu_timer_running &= (u8)~tbit;
+		menu_timer_throttle &= (u8)~tbit;
+		break;
+	    }
+	    // save to lap times
+	    timer_lap_time_save(tid);
 	    break;
 
 	case TIMER_LAPCNT:
 	    if (time_sec < next_timer_sec[tid])  return;  // pressed too early
 	    next_timer_sec[tid] = time_sec + 3;
+	    // max 255 laps
+	    if (timer_lap_count[tid] == TIMER_MAX_LAPCNT)  break;
 	    if (++timer_lap_count[tid] == menu_timer_alarm[tid]) {
 		// alarm when number of laps elapsed
 		buzzer_on(60, 0, 1);
@@ -344,15 +515,23 @@ void kf_menu_timer_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
 
 	case TIMER_DOWN:
 	    // stop and reset timer
-	    menu_timer_running &= (u8)~(u8)(1 << tid);
-	    // save rest value to lap count XXX
+	    menu_timer_running &= (u8)~tbit;
+	    // save rest value to lap count
+	    if (menu_timer_alarmed & tbit) {
+		// if alarmed, save zeroes
+		pt->sec = 0;
+		pt->hdr = 0;
+	    }
+	    timer_lap_time_save(tid);
 	    // reset timer
 	    menu_timer_clear(tid, 0);
 	    menu_timer_throttle &= (u8)~tbit;
 	    break;
 
 	case TIMER_LAP:
-	    // XXX
+	    // stop timer
+	    menu_timer_running &= (u8)~tbit;
+	    menu_timer_throttle &= (u8)~tbit;
 	    break;
 
 	case TIMER_LAPCNT:
