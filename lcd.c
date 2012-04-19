@@ -595,7 +595,7 @@ void lcd_char(u8 id, u8 c) {
 void lcd_chars(u8 *chars) {
     lcd_char(LCHR1, *chars++);
     lcd_char(LCHR2, *chars++);
-    lcd_char(LCHR3, *chars);
+    if (*chars)  lcd_char(LCHR3, *chars);  // to allow 2 char strings
 }
 
 
