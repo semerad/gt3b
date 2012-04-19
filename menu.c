@@ -125,27 +125,20 @@ static void menu_set_adc_direction(u8 channel) {
 	calm = cg.calib_steering_mid;
     }
 
-    // if over threshold to one side, set menu_adc_direction
-    if (adc < ((calm - 40) << ADC_OVS_SHIFT)) {
-	if (menu_adc_direction) {
-	    menu_adc_direction = 0;
-	    lcd_segment(LS_SYM_LEFT, LS_ON);
-	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-	}
-    }
-    else if (adc > ((calm + 40) << ADC_OVS_SHIFT)) {
-	if (!menu_adc_direction) {
-	    menu_adc_direction = 1;
-	    lcd_segment(LS_SYM_LEFT, LS_OFF);
-	    lcd_segment(LS_SYM_RIGHT, LS_ON);
-	}
-    }
-    else if (channel > 1 && btn(BTN_CH3)) {
-	// use CH3 button to toggle also
-	menu_adc_direction ^= 1;
-	lcd_segment(LS_SYM_LEFT, (u8)(menu_adc_direction ? LS_OFF : LS_ON));
-	lcd_segment(LS_SYM_RIGHT, (u8)(menu_adc_direction ? LS_ON : LS_OFF));
-    }
+    // check steering firstly
+    if (adc_steering_ovs < ((cg.calib_steering_mid - 40) << ADC_OVS_SHIFT))
+	menu_adc_direction = 0;
+    else if (adc_steering_ovs > ((cg.calib_steering_mid + 40) << ADC_OVS_SHIFT))
+	menu_adc_direction = 1;
+
+    // then check throttle
+    if (adc_throttle_ovs < ((cg.calib_throttle_mid - 40) << ADC_OVS_SHIFT))
+	menu_adc_direction = 0;
+    else if (adc_throttle_ovs > ((cg.calib_throttle_mid + 40) << ADC_OVS_SHIFT))
+	menu_adc_direction = 1;
+
+    // and then CH3 button
+    else if (btn(BTN_CH3))  menu_adc_direction ^= 1;
 
     // if this channel is using forced values, set it to left/right
     if (menu_force_value_channel)
@@ -153,7 +146,7 @@ static void menu_set_adc_direction(u8 channel) {
 }
 
 // channel if from 0
-static void menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
+static void menu_set_adc_force(u8 channel, u8 use_adc, u8 force_values) {
     // check if force servos to positions (left/center/right)
     if ((u8)(force_values & (u8)(1 << channel))) {
 	menu_force_value_channel = (u8)(channel + 1);
@@ -163,10 +156,6 @@ static void menu_set_adc(u8 channel, u8 use_adc, u8 force_values) {
 
     // check use of ADC
     if ((u8)(use_adc & (u8)(1 << channel))) {
-	// use ADC, set arrows here, because menu_set_adc_direction
-	//   cannot change and set it
-	if (menu_adc_direction)  lcd_segment(LS_SYM_RIGHT, LS_ON);
-	else			 lcd_segment(LS_SYM_LEFT, LS_ON);
 	menu_adc_wakeup = 1;
 	menu_set_adc_direction(channel);
     }
@@ -186,7 +175,7 @@ typedef struct {
 static void menu_channel_func(u8 action, menu_channel_t *p) {
     switch (action) {
 	case MCA_INIT:
-	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    menu_set_adc_force(menu_id, p->use_adc, p->forced_values);
 	    break;
 	case MCA_SET_CHG:
 	    p->func(menu_id, 1);
@@ -194,14 +183,15 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
 	case MCA_ID_PREV:
 	    if (menu_id)  menu_id--;
 	    else	  menu_id = (u8)(p->end_channel - 1);
-	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    menu_set_adc_force(menu_id, p->use_adc, p->forced_values);
 	    break;
 	case MCA_ID_NEXT:
 	    if (++menu_id >= p->end_channel)  menu_id = 0;
-	    menu_set_adc(menu_id, p->use_adc, p->forced_values);
+	    menu_set_adc_force(menu_id, p->use_adc, p->forced_values);
 	    break;
 	case MCA_ADC_PRE:
 	    menu_set_adc_direction(menu_id);
+	    return;	// show nothing at ADC_PRE
 	    break;
 	case MCA_ADC_POST:
 	    // do nothing if left-right didn't changed
@@ -215,6 +205,17 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg((u8)(menu_id + 1));
     if (action != MCA_SET_CHG)  p->func(menu_id, 0);  // skip if changed
+    if (menu_adc_wakeup) {
+	// show arrow
+	if (menu_adc_direction) {
+	    lcd_segment(LS_SYM_RIGHT, LS_ON);
+	    lcd_segment(LS_SYM_LEFT, LS_OFF);
+	}
+	else {
+	    lcd_segment(LS_SYM_LEFT, LS_ON);
+	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
+	}
+    }
     p->last_direction = menu_adc_direction;
 }
 
