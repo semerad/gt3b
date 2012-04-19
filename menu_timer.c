@@ -269,6 +269,7 @@ void menu_timer_lap_times(u8 tid) {
 	case TIMER_UP:
 	case TIMER_LAPCNT:
 	    // no lap times
+	    menu_timer_setup(tid);
 	    return;
 	    break;
 
