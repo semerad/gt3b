@@ -393,102 +393,60 @@ static u8 km_trim_key(u8 key_id, u8 val_id, u8 action) {
     else  return km_key((u8)(key_id - NUM_TRIMS), val_id, action);
 }
 
-void menu_key_mapping(void) {
-    u8 key_id = 0;			// trims, keys, trim-keys
-    u8 id_val = 0;			// now in key_id
-    static const u8 key_ids[] = {
-	1, 2, 3, L7_D, L7_C, L7_B, L7_E
-    };
+static const u8 key_ids[] = {
+    1, 2, 3, L7_D, L7_C, L7_B, L7_E
+};
 
-    lcd_set_blink(LMENU, LB_SPC);
-    lcd_segment(LS_SYM_MODELNO, LS_OFF);
-    lcd_segment(LS_SYM_LEFT, LS_OFF);
-    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-    lcd_7seg(key_ids[0]);
-    lcd_set_blink(L7SEG, LB_SPC);
-    km_trim_key(0, 1, 0);		// show first setting for first trim
-    lcd_update();
-
-    while (1) {
-	btnra();
-	menu_stop();
-
-	if (btn(BTN_BACK | BTN_END) || btnl(BTN_ENTER))  break;
-
-	if (btn(BTN_ROT_ALL)) {
-	    if (id_val) {
-		// change selected key setting
-		km_trim_key(key_id, id_val, 1);
-		lcd_chars_blink(LB_SPC);
-		lcd_update();
+void menu_key_mapping_func(u8 action, void *p) {
+    if (action == MCA_SET_CHG) {
+	km_trim_key(menu_id, (u8)(menu_set + 1), 1);
+	return;		// value already showed
+    }
+    else if (action == MCA_SET_NEXT) {
+	menu_set = (u8)(km_trim_key(menu_id, (u8)(menu_set + 1), 2) - 1);
+	return;		// value already showed
+    }
+    else if (action == MCA_ID_CHG) {
+	while (1) {
+	    // select prev/next menu_id
+	    if (btn(BTN_ROT_L)) {
+		if (menu_id)	menu_id--;
+		else		menu_id = 3 * NUM_TRIMS + NUM_KEYS - 1;
 	    }
 	    else {
-		// change key-id
-		while (1) {
-		    if (btn(BTN_ROT_L)) {
-			if (key_id)	key_id--;
-			else		key_id = 3 * NUM_TRIMS + NUM_KEYS - 1;
-		    }
-		    else {
-			if (++key_id >= 3 * NUM_TRIMS + NUM_KEYS)  key_id = 0;
-		    }
-		    if (key_id < NUM_TRIMS + NUM_KEYS) {
-			// trims and 3keys (CH3/BACK/END) always
-			lcd_7seg(key_ids[key_id]);
-			lcd_segment(LS_SYM_LEFT, LS_OFF);
-			lcd_segment(LS_SYM_RIGHT, LS_OFF);
-			break;
-		    }
-		    // check trim keys and use them only when corresponding
-		    //   trim is off
-		    if (ck.key_map[key_id - NUM_TRIMS].is_trim)  continue;
-
-		    lcd_7seg(key_ids[(u8)((u8)(key_id - NUM_TRIMS - NUM_KEYS) >> 1)]);
-		    if ((u8)(key_id - NUM_TRIMS - NUM_KEYS) & 1) {
-			// right trim key
-			lcd_segment(LS_SYM_RIGHT, LS_ON);
-			lcd_segment(LS_SYM_LEFT, LS_OFF);
-		    }
-		    else {
-			// left trim key
-			lcd_segment(LS_SYM_RIGHT, LS_OFF);
-			lcd_segment(LS_SYM_LEFT, LS_ON);
-		    }
-		    break;
-		}
-		km_trim_key(key_id, 1, 0);	// show first key setting
-		lcd_set_blink(L7SEG, LB_SPC);
-		lcd_update();
+		if (++menu_id >= 3 * NUM_TRIMS + NUM_KEYS)  menu_id = 0;
 	    }
-	}
-
-	else if (btn(BTN_ENTER)) {
-	    // switch key-id/key-setting1/key-setting2/...
-	    if (id_val) {
-		// what to do depends on what was selected in this item
-		id_val = km_trim_key(key_id, id_val, 2);
-		if (id_val != 1) {
-		    lcd_chars_blink(LB_SPC);
-		}
-		else {
-		    // switch to key selection
-		    id_val = 0;
-		    lcd_set_blink(L7SEG, LB_SPC);
-		    lcd_chars_blink(LB_OFF);
-		}
-		lcd_update();
-	    }
-	    else {
-		// switch to key settings
-		id_val = 1;
-		// key setting values is already showed
-		lcd_set_blink(L7SEG, LB_OFF);
-		lcd_chars_blink(LB_SPC);
-	    }
+	    // trims and 3keys (CH3/BACK/END) always
+	    if (menu_id < NUM_TRIMS + NUM_KEYS)  break;
+	    // check trim keys and use them only when corresponding
+	    //   trim is off
+	    if (ck.key_map[menu_id - NUM_TRIMS].is_trim)  continue;
+	    break;
 	}
     }
 
-    key_beep();
+    // show value
+    if (menu_id < NUM_TRIMS + NUM_KEYS)
+	// standard trims and buttons
+	lcd_7seg(key_ids[0]);
+    else {
+	// trims as buttons, use arrows to show them
+	lcd_7seg(key_ids[(u8)((u8)(menu_id - NUM_TRIMS - NUM_KEYS) >> 1)]);
+	if ((u8)(menu_id - NUM_TRIMS - NUM_KEYS) & 1)
+	    // right trim key
+	    lcd_segment(LS_SYM_RIGHT, LS_ON);
+	else
+	    // left trim key
+	    lcd_segment(LS_SYM_LEFT, LS_ON);
+    }
+    km_trim_key(menu_id, (u8)(menu_set + 1), 0);
+}
+
+void menu_key_mapping(void) {
+    lcd_set_blink(LMENU, LB_SPC);
+
+    menu_common(menu_key_mapping_func, NULL, MCF_ID_CHG);
+
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();

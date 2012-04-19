@@ -214,7 +214,7 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
     // show value
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
     lcd_7seg((u8)(menu_id + 1));
-    p->func(menu_id, 0);
+    if (action != MCA_SET_CHG)  p->func(menu_id, 0);  // skip if changed
     p->last_direction = menu_adc_direction;
 }
 
