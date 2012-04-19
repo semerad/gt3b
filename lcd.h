@@ -92,6 +92,7 @@ extern void lcd_set_blink(u8 id, u8 on_off);
 #define L7SEG_MAX 15
 extern void lcd_char(u8 id, u8 c);  // id the same as in lcd_set()
 extern void lcd_chars(u8 *chars);   // 3 chars
+extern void lcd_chars2(u8 *chars);  // 2 chars to chars 2+3
 extern void lcd_char_num3(s16 num); // num -199...1099 to 3 chars
 extern void lcd_char_num2_lbl(s8 num, u8 *labels);  // num -99..99 with labels for <0, =0, >0
 extern void lcd_7seg(u8 number);    // num 0-15 (>=10 as hexa numbers)

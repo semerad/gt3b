@@ -599,6 +599,13 @@ void lcd_chars(u8 *chars) {
 }
 
 
+// write 2 chars to chars 2+3
+void lcd_chars2(u8 *chars) {
+    lcd_char(LCHR2, *chars++);
+    lcd_char(LCHR3, *chars++);
+}
+
+
 // common conversion to 2 chars
 static u8 chr[3];  // results of number->string conversions
 static void lcd_num2char(u8 num) {
