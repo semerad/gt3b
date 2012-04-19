@@ -206,16 +206,14 @@ static void km_trim(u8 action) {
 // chars:
 // function
 //   OFF    -> function_long
-//   2STATE -> momentary (%)
-//               SWI -> reverse (V) -> prev_val (% blink) -> function_long
-//               MOM -> reverse (V) -> prev_val (% blink)
-//                      (NOR/REV)      (NPV/PRV)
+//   2STATE -> momentary
+//               switch    -> reverse -> prev_val -> function_long
+//               momentary -> reverse -> prev_val
 //   other  -> function_long
 //
-// function_long (% V)
+// function_long (identified by symbol V)
 //   OFF
-//   2STATE -> reverse (V) -> prev_val (% blink)
-//             (NOR/REV)      (NPV/PRV)
+//   2STATE -> reverse -> prev_val
 //   other
 static void km_key(u8 action) {
     config_key_map_s *km = &ck.key_map[menu_id - NUM_TRIMS];
@@ -330,50 +328,48 @@ static void km_key(u8 action) {
     }
 
     // show value of menu_set
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
     switch (menu_set) {
 	case 0:
 	    // function
 	    lcd_chars(menu_key_function_name(km->function));
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
 	case 1:
 	    // momentary setting
-	    lcd_chars(km->momentary ? "MOM" : "SWI");
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	    lcd_chars("MO");
+	    lcd_char(LCHR3, (u8)(km->momentary + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 2:
 	    // reverse
-	    lcd_chars(km->reverse ? "REV" : "NOR");
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    lcd_chars("RE");
+	    lcd_char(LCHR3, (u8)(km->reverse + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 3:
 	    // previous_val
-	    lcd_chars(km->previous_val ? "PRV" : "NPV");
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    lcd_chars("PV");
+	    lcd_char(LCHR3, (u8)(km->previous_val + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 4:
 	    // function long
 	    lcd_chars(menu_key_function_name(km->function_long));
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
 	case 5:
 	    // reverse_long
-	    lcd_chars(km->reverse_long ? "REV" : "NOR");
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
+	    lcd_chars("RE");
+	    lcd_char(LCHR3, (u8)(km->reverse_long + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
 	case 6:
 	    // previous_val_long
-	    lcd_chars(km->previous_val_long ? "PRV" : "NPV");
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    lcd_chars("PV");
+	    lcd_char(LCHR3, (u8)(km->previous_val_long + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
+	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
     }
 }

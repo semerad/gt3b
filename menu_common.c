@@ -254,6 +254,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	    // switch menu_id/menu-setting1/menu-setting2/...
 	    key_beep();
 	    if (menu_id_set) {
+		menu_blink = 0xff;		// default to all chars
 		// select next menu setting
 		func(MCA_SET_NEXT, params);
 		if (menu_set || (flags & MCF_SET_ONLY)) {

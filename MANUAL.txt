@@ -172,22 +172,22 @@ Standard menu:
     steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
 	- sequence:
 	  function -> momentary -> reverse -> prev_val -> function_long -> reverse_long -> prev_val_long
-	  id:          %            V          % blink     % V              V               % blink
 	- function: selected function listed at the end of manual
-	- momentary: only available for 2-state functions (channel, ...)
-	    SWI - key press will switch something (channel value, ...)
-	    MOM - value change will be active only while key is pressed
-	- reverse: only available for 2-state functions
-	    NOR - no-press or default value is left endpoint
-	    REV - no-press or default value is right endpoint
-	- prev_val: only available for 2-state functions
-	    NPV - key release or OFF state sets value to left endpoint (noREV)
-	    PRV - key release or OFF state sets value to value active before
+	- MO momentary: only available for 2-state functions (channel, ...)
+	    0 - switch, key press will switch something (channel value, ...)
+	    1 - momentary, value change will be active only while key is pressed
+	- RE reverse: only available for 2-state functions
+	    0 - normal, no-press or default value is left endpoint
+	    1 - reverse, no-press or default value is right endpoint
+	- PV prev_val: only available for 2-state functions
+	    0 - key release or OFF state sets value to left endpoint (noREV)
+	    1 - key release or OFF state sets value to value active before
 		  key press or ON state
 	- function_long: function applied when long press of key happens,
-	                 choose from the same list as function
-	- reverse_long: same as "reverse"
-	- prev_val_long: same as "prev_val"
+	                 choose from the same list as function,
+			 identified by "V" symbol
+	- reverse_long: same as "reverse" + "V" symbol
+	- prev_val_long: same as "prev_val" + "V" symbol
 		   
 
 
