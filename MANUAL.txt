@@ -132,7 +132,7 @@ Standard menu:
 - Key mapping specific for each model:
     > choose menu REV and press ENTER-long
     > menu REV will blink
-    > choose trims (id 1 2 3 d) or other keys (CH3-C, Back-b, End-E) or
+    > choose trims (id: 1 2 3 d) or other keys (CH3: C, Back: b, End: E) or
         if trim is OFF, then also trim keys (id 1 2 3 d with left/right arrow)
     > press ENTER and modify first setting
     > press ENTER and modify next setting
@@ -141,33 +141,33 @@ Standard menu:
     steps of settings of trims (1 2 3 and D/R):
 	- sequence:
 	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val -> rotate
-	  id:          %          % V     V          V blinking        % blinking      % V blinking
 	- function: selected function listed at the end of manual
-	- buttons:
-	    MOM - momentary, hold left/right trim key to get end values,
-		  when nothing pressed, servo is at centre
-	    NOL - no long keys, long press is the same as short press
-	    RPT - autorepeat is on
-	    RES - long press of one of trim keys will reset to
-		  centre/reset value
-	    END - long press of trim key will set to coresponding end value
+	- B buttons:
+	    MO - momentary, hold left/right trim key to get end values,
+		 when nothing pressed, servo is at center
+	    NL - no long keys, long press is the same as short press
+	    AR - autorepeat is on
+	    RS - long press of one of trim keys will reset to
+		 centre/reset value
+	    EN - long press of trim key will set to coresponding end value
 	- step: select trim step for one trim key press (1, 2, ... 100, 200),
-		not available when buttons MOM or fuction is list of items (MPO)
-	- reverse:
-	    NOR - no change
-	    REV - swap left/right trim keys
-	- opposite_reset: not available when buttons MOM
-	    NOO - no change
-	    ORS - when trim key is pressed and value is at opposite
-		  side of centre/reset, set value to centre/reset,
-	- previous_val: available only when buttons MOM or fuction is list of
-			items (MPO)
-	    NPV - no change
-	    PRV - instead of setting value to centre/reset when key is released,
-		  it is set to previous value, which was active before key press
-	- rotate: available only if fuction is list of items (MPO)
-	    NOR - no rotate
-	    ROT - rotate from max item to 1.item and back
+		not available when buttons MO or fuction is list of items (MPO)
+		is identified by symbol "V"
+	- RE reverse:
+	    0 - no change
+	    1 - swap left/right trim keys
+	- OR opposite_reset: not available when buttons MO
+	    0 - no change
+	    1 - when trim key is pressed and value is at opposite
+		side of center/reset, set value to centre/reset,
+	- PV previous_val: available only when buttons MO or fuction is list of
+			   items (MPO)
+	    0 - no change
+	    1 - instead of setting value to centre/reset when key is released,
+		it is set to previous value, which was active before key press
+	- RO rotate: available only if fuction is list of items (MPO)
+	    0 - no rotate
+	    1 - rotate from max item to first item and back
     -----
     steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
 	- sequence:

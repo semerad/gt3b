@@ -41,18 +41,18 @@
 #define TRIM_FUNCTIONS_SIZE  128
 @near static u8 trim_functions[TRIM_FUNCTIONS_SIZE];
 @near static u8 trim_functions_max;
-static const u8 trim_buttons[][4] = {
-    "NOL", "RPT", "MOM", "RES", "END", "SPC"
+static const u8 trim_buttons[][3] = {
+    "NL", "AR", "MO", "RS", "EN", "SP"
 };
 #define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / 4)
 // 7seg:  1 2 3 d
 // chars:
 // function
-//   OFF			        (NOR/REV)  (NOO/ORS)    (NPV/PRV)   (NOR/ROT)
+//   OFF
 //   other -> buttons
-//              MOM	     -> 	reverse              -> prev_val
-//           NOL/RPT/RES/END -> step -> reverse -> opp_reset             -> rotate
-// id:        %                  % V     V          V blink      % blink    % V blink
+//              MO	 -> 	    reverse              -> prev_val
+//           NL/RP/RE/EN -> step -> reverse -> opp_reset             -> rotate
+// id:                       V
 static void km_trim(u8 action) {
     config_et_map_s *etm = &ck.et_map[menu_id];
     u8 idx, btn, new_idx = 0;
@@ -87,7 +87,7 @@ static void km_trim(u8 action) {
 		break;
 	    case 1:
 		// buttons
-		// show special ("SPC") only when selected function has it
+		// show special ("SP") only when selected function has it
 		if (menu_et_function_long_special(etm->function))
 			idx = 1;
 		else	idx = 2;
@@ -152,46 +152,47 @@ static void km_trim(u8 action) {
     }
 
     // show value of menu_set
+    lcd_segment(LS_SYM_VOLTS, LS_OFF);
     switch (menu_set) {
 	case 0:
+	    // function
 	    if (!etm->is_trim)  lcd_chars("OFF");
 	    else  lcd_chars(menu_et_function_name(etm->function));
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	    break;
 	case 1:
-	    lcd_chars(trim_buttons[etm->buttons]);
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
+	    // buttons
+	    lcd_char(LCHR1, 'B');
+	    lcd_chars2(trim_buttons[etm->buttons]);
+	    menu_blink &= (u8)~MCB_CHR1;
 	    break;
 	case 2:
+	    // step
 	    lcd_char_num3(steps_map[etm->step]);
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
 	    lcd_segment(LS_SYM_VOLTS, LS_ON);
 	    break;
 	case 3:
-	    lcd_chars(etm->reverse ? "REV" : "NOR");
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_ON);
+	    // reverse
+	    lcd_chars("RE");
+	    lcd_char(LCHR3, (u8)(etm->reverse + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 4:
-	    lcd_chars(etm->opposite_reset ? "ORS" : "NOO");
-	    lcd_segment(LS_SYM_PERCENT, LS_OFF);
-	    lcd_segment(LS_SYM_VOLTS, LS_ON);
-	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
+	    // opposite reset
+	    lcd_chars("OR");
+	    lcd_char(LCHR3, (u8)(etm->opposite_reset + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 5:
-	    lcd_chars(etm->previous_val ? "PRV" : "NPV");
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_OFF);
-	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
+	    // previous val
+	    lcd_chars("PV");
+	    lcd_char(LCHR3, (u8)(etm->previous_val + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
 	case 6:
-	    lcd_chars(etm->rotate ? "ROT" : "NOR");
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	    lcd_segment(LS_SYM_VOLTS, LS_ON);
-	    lcd_segment_blink(LS_SYM_PERCENT, LB_SPC);
-	    lcd_segment_blink(LS_SYM_VOLTS, LB_SPC);
+	    // rotate
+	    lcd_chars("RO");
+	    lcd_char(LCHR3, (u8)(etm->rotate + '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
 	    break;
     }
 }
