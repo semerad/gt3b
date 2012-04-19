@@ -225,7 +225,8 @@ static const u8 timer_type_labels[][4] = {
     "OFF", "UP ", "DWN", "LPT", "LPC"
 };
 static void timer_setup_type(u8 action) {
-    u8 val = TIMER_TYPE(timer_id);
+    u8 tid = timer_id;	// compiler hack
+    u8 val = TIMER_TYPE(tid);
 
     // change value
     if (action == MLA_CHG) {
