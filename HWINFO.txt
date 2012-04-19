@@ -1,7 +1,11 @@
 
 microcontroller: STM8S105K6T6C LQFP32, crystal 18.432 MHz
 		 at my unit is written STM8S105K4T6C, but it has 32KB so
-		 this must be wrong sign
+		   this must be wrong sign
+		 crystal frequency 18.432 MHz is more then max specified
+		   for this microcontroller (16Mhz) and is good for UART
+		   to get exact frequencies, but UART is not used at this
+		   radio
 LCD driver: HOLTEK HT1621B
 encoder: 30 ticks/360deg
 
