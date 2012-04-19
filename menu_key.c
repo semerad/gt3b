@@ -397,7 +397,6 @@ void menu_key_mapping_func(u8 action, void *p) {
     }
     else if (action == MCA_SET_NEXT) {
 	km_trim_key(2);
-	return;		// value already showed
     }
     else if (action == MCA_ID_CHG) {
 	while (1) {
@@ -421,7 +420,7 @@ void menu_key_mapping_func(u8 action, void *p) {
     // show value
     if (menu_id < NUM_TRIMS + NUM_KEYS)
 	// standard trims and buttons
-	lcd_7seg(key_ids[0]);
+	lcd_7seg(key_ids[menu_id]);
     else {
 	// trims as buttons, use arrows to show them
 	lcd_7seg(key_ids[(u8)((u8)(menu_id - NUM_TRIMS - NUM_KEYS) >> 1)]);
@@ -432,7 +431,7 @@ void menu_key_mapping_func(u8 action, void *p) {
 	    // left trim key
 	    lcd_segment(LS_SYM_LEFT, LS_ON);
     }
-    km_trim_key(0);
+    if (action != MCA_SET_NEXT)  km_trim_key(0);
 }
 
 void menu_key_mapping(void) {
