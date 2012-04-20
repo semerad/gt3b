@@ -187,13 +187,12 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
 	case MCA_ADC_PRE:
 	    menu_set_adc_direction(menu_id);
 	    return;	// show nothing at ADC_PRE
-	    break;
 	case MCA_ADC_POST:
 	    // do nothing if left-right didn't changed
 	    if (p->last_direction == menu_adc_direction)  return;
-	    // else show value
+	    // else flag it to show value
 	    menu_id_set = 1;	// flag that new value is showed
-	    break;
+	    return;
     }
 
     // show value
@@ -202,14 +201,10 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
     if (action != MCA_SET_CHG)  p->func(menu_id, 0);  // skip if changed
     if (menu_adc_wakeup) {
 	// show arrow
-	if (menu_adc_direction) {
+	if (menu_adc_direction)
 	    lcd_segment(LS_SYM_RIGHT, LS_ON);
-	    lcd_segment(LS_SYM_LEFT, LS_OFF);
-	}
-	else {
+	else
 	    lcd_segment(LS_SYM_LEFT, LS_ON);
-	    lcd_segment(LS_SYM_RIGHT, LS_OFF);
-	}
     }
     p->last_direction = menu_adc_direction;
 }
@@ -435,10 +430,8 @@ static void sf_speed(u8 channel, u8 change) {
 	    cm.thspd_onlyfwd ^= 1;
 	else *addr = (u8)menu_change_val(*addr, 1, 100, SPEED_FAST, 0);
     }
-    if (thfwdonly) {
+    if (thfwdonly)
 	lcd_chars(cm.thspd_onlyfwd ? "OFF" : "ON ");
-	lcd_segment(LS_SYM_PERCENT, LS_OFF);
-    }
     else {
 	lcd_char_num3(*addr);
 	lcd_segment(LS_SYM_PERCENT, LS_ON);

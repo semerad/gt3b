@@ -146,7 +146,6 @@ static void km_trim(u8 action) {
     }
 
     // show value of menu_set
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
     switch (menu_set) {
 	case 0:
 	    // function
@@ -311,7 +310,6 @@ static void km_key(u8 action) {
     }
 
     // show value of menu_set
-    lcd_segment(LS_SYM_VOLTS, LS_OFF);
     switch (menu_set) {
 	case 0:
 	    // function
@@ -375,7 +373,6 @@ static const u8 key_ids[] = {
 void menu_key_mapping_func(u8 action, void *p) {
     if (action == MCA_SET_CHG) {
 	km_trim_key(1);
-	return;		// value already showed
     }
     else if (action == MCA_SET_NEXT) {
 	km_trim_key(2);
@@ -408,7 +405,8 @@ void menu_key_mapping_func(u8 action, void *p) {
 	    // left trim key
 	    lcd_segment(LS_SYM_LEFT, LS_ON);
     }
-    if (action != MCA_SET_NEXT)  km_trim_key(0);
+    if (action != MCA_SET_NEXT && action != MCA_SET_CHG)
+	km_trim_key(0);
 }
 
 void menu_key_mapping(void) {

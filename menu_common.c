@@ -183,17 +183,22 @@ u8 menu_id;		// id of selected menu
 _Bool menu_id_set;	// 0 = in menu-id, 1 = in menu-setting
 u8 menu_blink;		// what of chars should blink
 
-void menu_common(menu_common_t func, void *params, u8 flags) {
-    menu_id_set = flags & MCF_SET_ONLY ? 1 : 0;
-    menu_set = 0;		// now in menu_id
-    menu_id = 0;		// first menu item
-    menu_blink = 0xff;		// bit for each char to blink
+static void func_init(u8 flags) {
+    // blink all
+    menu_blink = 0xff;
 
     // clear display symbols
     menu_clear_symbols();
     if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+}
+
+void menu_common(menu_common_t func, void *params, u8 flags) {
+    menu_id_set = flags & MCF_SET_ONLY ? 1 : 0;
+    menu_set = 0;		// now in menu_id
+    menu_id = 0;		// first menu item
 
     // init and show setting
+    func_init(flags);
     func(MCA_INIT, params);
     if (menu_id_set) {
 	lcd_chars_blink_mask(LB_SPC, menu_blink);
@@ -220,7 +225,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	// rotate encoder changed, change menu-id or value
 	if (btn(BTN_ROT_ALL)) {
 	    if (menu_id_set) {
-		// change selected menu setting
+		func_init(flags);
 		func(MCA_SET_CHG, params);
 		lcd_chars_blink_mask(LB_SPC, menu_blink);
 	    }
@@ -230,13 +235,9 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		// reset some variables
 		menu_adc_wakeup = 0;
 		menu_force_value_channel = 0;
-		menu_blink = 0xff;		// default to all chars
-
-		// remove possible showed symbols
-		menu_clear_symbols();
-		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 
 		// select new menu id and show it
+		func_init(flags);
 		func(MCA_ID_CHG, params);	// do own change based on BTN_ROT
 
 		if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
@@ -250,11 +251,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	    key_beep();
 	    if (flags & MCF_SWITCH) {
 		// switch will be done by function
-		menu_blink = 0xff;		// default to all chars
-		// remove possible showed symbols
-		menu_clear_symbols();
-		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
-		// select next menu setting
+		func_init(flags);
 		func(MCA_SWITCH, params);
 		if (menu_set == 255)  break;	// exit menu when requested
 		// blinking
@@ -269,11 +266,8 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		lcd_update();
 	    }
 	    else if (menu_id_set) {
-		menu_blink = 0xff;		// default to all chars
-		// remove possible showed symbols
-		menu_clear_symbols();
-		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 		// select next menu setting
+		func_init(flags);
 		func(MCA_SET_NEXT, params);
 		if (menu_set || (flags & MCF_SET_ONLY)) {
 		    // some > 0 menu setting
@@ -296,14 +290,18 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 	    }
 	}
 
-	// if menu ADC was activated, call func to for example show other
-	//   value when left-right position changed
+	// if menu ADC was activated, call func to check if to show for example
+	//   other value when left-right position changed
 	if (menu_adc_wakeup) {
 	    u8 mis = menu_id_set;	// save value
-	    menu_id_set = 0;		// func will set it to 1 when new val showed
+	    menu_id_set = 0;		// func will set it to 1 when show call needed
 	    func(MCA_ADC_POST, params);
 	    if (menu_id_set) {
-		if (mis) {
+		menu_id_set = mis;
+		// show changed value
+		func_init(flags);
+		func(MCA_SHOW, params);
+		if (menu_id_set) {
 		    lcd_chars_blink_mask(LB_SPC, menu_blink);
 		}
 		else {
@@ -311,7 +309,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		}
 		lcd_update();
 	    }
-	    menu_id_set = mis;
+	    else menu_id_set = mis;
 	}
     }
 
@@ -319,8 +317,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
     if (menu_id_set)  func(MCA_SET_NEXT, params);
 
     // cleanup display
-    menu_clear_symbols();
-    if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
+    func_init(flags);
 
     // reset variables
     menu_adc_wakeup = 0;
@@ -341,11 +338,9 @@ static void menu_list_func(u8 action, menu_list_params_t *p) {
 	case MCA_SET_CHG:
 	    func(MLA_CHG);
 	    return;	// value already showed
-	    break;
 	case MCA_SET_NEXT:
 	    func(MLA_NEXT);
 	    return;	// value already showed
-	    break;
 	case MCA_ID_CHG:
 	    menu_id = (u8)menu_change_val(menu_id, 0, p->nitems - 1, 1, 1);
 	    func = p->funcs[menu_id];
