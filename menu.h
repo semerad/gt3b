@@ -143,22 +143,19 @@ extern u8 menu_blink;		// what of chars should blink
 #define MCF_NONE	0
 #define MCF_STOP	0b00000001
 #define MCF_LOWPWR	0b00000010
-#define MCF_ID_CHG	0b00000100
-#define MCF_ENTER	0b00001000
-#define MCF_SET_ONLY	0b00010000
-#define MCF_SWITCH	0b00100000
+#define MCF_ENTER	0b00000100
+#define MCF_SET_ONLY	0b00001000
+#define MCF_SWITCH	0b00010000
 typedef void (*menu_common_t)(u8 action, void *params);
 void menu_common(menu_common_t func, void *params, u8 flags);
 // menu_common_t actions, all shows actual values
 #define MCA_INIT	0
 #define MCA_SET_CHG	1
 #define MCA_SET_NEXT	2
-#define MCA_ID_PREV	3
-#define MCA_ID_NEXT	4
-#define MCA_ID_CHG	5
-#define MCA_ADC_PRE	6
-#define MCA_ADC_POST	7
-#define MCA_SWITCH	8
+#define MCA_ID_CHG	3
+#define MCA_ADC_PRE	4
+#define MCA_ADC_POST	5
+#define MCA_SWITCH	6
 
 
 // common list menu, given by list of functions, one for each menu item

@@ -407,7 +407,7 @@ void menu_timer_lap_times(u8 tid) {
     }
 
     // show lap times
-    menu_common(lap_times_func, &tid, (u8)(MCF_ID_CHG | MCF_SWITCH));
+    menu_common(lap_times_func, &tid, MCF_SWITCH);
 }
 
 

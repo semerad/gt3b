@@ -180,13 +180,8 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
 	case MCA_SET_CHG:
 	    p->func(menu_id, 1);
 	    break;
-	case MCA_ID_PREV:
-	    if (menu_id)  menu_id--;
-	    else	  menu_id = (u8)(p->end_channel - 1);
-	    menu_set_adc_force(menu_id, p->use_adc, p->forced_values);
-	    break;
-	case MCA_ID_NEXT:
-	    if (++menu_id >= p->end_channel)  menu_id = 0;
+	case MCA_ID_CHG:
+	    menu_id = (u8)menu_change_val(menu_id, 0, p->end_channel - 1, 1, 1);
 	    menu_set_adc_force(menu_id, p->use_adc, p->forced_values);
 	    break;
 	case MCA_ADC_PRE:
@@ -258,7 +253,7 @@ static void menu_model(u8 saveas) {
 
     if (saveas)  lcd_set_blink(LMENU, LB_SPC);
 
-    menu_common(menu_model_func, &model, (u8)(MCF_ENTER | MCF_ID_CHG));
+    menu_common(menu_model_func, &model, MCF_ENTER);
 
     // if new model choosed, save it
     if (model != cg.model) {
@@ -631,15 +626,9 @@ static void menu_loop(void) {
 	    menu_check_keys = 1;
 
 	// rotate encoder - change model name/battery/...
-	else if (btn(BTN_ROT_ALL)) {
-	    if (btn(BTN_ROT_L)) {
-		if (menu_main_screen)  menu_main_screen--;
-		else		       menu_main_screen = MS_MAX - 1;
-	    }
-	    else {
-		if (++menu_main_screen >= MS_MAX)  menu_main_screen = 0;
-	    }
-	}
+	else if (btn(BTN_ROT_ALL))
+	    menu_main_screen =
+		(u8)menu_change_val(menu_main_screen, 0, MS_MAX - 1, 1, 1);
     }
 }
 

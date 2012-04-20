@@ -66,13 +66,7 @@ static void km_trim(u8 action) {
 		if (!etm->is_trim)  etm->function = 0;
 		idx = menu_et_function_idx(etm->function);
 		while (1) {
-		    if (btn(BTN_ROT_L)) {
-			if (idx)  idx--;
-			else      idx = trim_functions_max;
-		    }
-		    else {
-			if (++idx > trim_functions_max)  idx = 0;
-		    }
+		    idx = (u8)menu_change_val(idx, 0, trim_functions_max, 1, 1);
 		    new_idx = trim_functions[idx];
 		    if (!new_idx)  continue;				// empty slot
 		    new_idx--;  // was one more
@@ -228,13 +222,7 @@ static void km_key(u8 action) {
 		// select new function, map through key_functions
 		idx = menu_key_function_idx(km->function);
 		while (1) {
-		    if (btn(BTN_ROT_L)) {
-			if (idx)  idx--;
-			else      idx = key_functions_max;
-		    }
-		    else {
-			if (++idx > key_functions_max)  idx = 0;
-		    }
+		    idx = (u8)menu_change_val(idx, 0, key_functions_max, 1, 1);
 		    new_idx = key_functions[idx];
 		    if (!new_idx)  continue;				// empty slot
 		    new_idx--;	// was one more
@@ -270,13 +258,7 @@ static void km_key(u8 action) {
 		// select new function, map through key_functions
 		idx = menu_key_function_idx(km->function_long);
 		while (1) {
-		    if (btn(BTN_ROT_L)) {
-			if (idx)  idx--;
-			else      idx = key_functions_max;
-		    }
-		    else {
-			if (++idx > key_functions_max)  idx = 0;
-		    }
+		    idx = (u8)menu_change_val(idx, 0, key_functions_max, 1, 1);
 		    new_idx = key_functions[idx];
 		    if (!new_idx)  continue;				// empty slot
 		    new_idx--;	// was one more
@@ -401,13 +383,8 @@ void menu_key_mapping_func(u8 action, void *p) {
     else if (action == MCA_ID_CHG) {
 	while (1) {
 	    // select prev/next menu_id
-	    if (btn(BTN_ROT_L)) {
-		if (menu_id)	menu_id--;
-		else		menu_id = 3 * NUM_TRIMS + NUM_KEYS - 1;
-	    }
-	    else {
-		if (++menu_id >= 3 * NUM_TRIMS + NUM_KEYS)  menu_id = 0;
-	    }
+	    menu_id = (u8)menu_change_val(menu_id, 0,
+			    3 * NUM_TRIMS + NUM_KEYS - 1, 1, 1);
 	    // trims and 3keys (CH3/BACK/END) always
 	    if (menu_id < NUM_TRIMS + NUM_KEYS)  break;
 	    // check trim keys and use them only when corresponding
@@ -437,7 +414,7 @@ void menu_key_mapping_func(u8 action, void *p) {
 void menu_key_mapping(void) {
     lcd_set_blink(LMENU, LB_SPC);
 
-    menu_common(menu_key_mapping_func, NULL, MCF_ID_CHG);
+    menu_common(menu_key_mapping_func, NULL, MCF_NONE);
 
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();

@@ -72,14 +72,7 @@ void menu_calibrate(u8 at_poweron) {
 	if (btn(BTN_END | BTN_ROT_ALL)) {
 	    if (btn(BTN_END))  key_beep();
 	    // change channel number
-	    if (btn(BTN_ROT_L)) {
-		// down
-		if (!--channel)  channel = 4;
-	    }
-	    else {
-		// up
-		if (++channel > 4)  channel = 1;
-	    }
+	    channel = (u8)menu_change_val(channel, 1, 4, 1, 1);
 	    lcd_7seg(channel);
 	    lcd_update();
 	    update_time = 0;

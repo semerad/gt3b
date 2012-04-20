@@ -237,12 +237,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		if (flags & MCF_LOWPWR)  lcd_segment(LS_SYM_LOWPWR, LS_OFF);
 
 		// select new menu id and show it
-		if (flags & MCF_ID_CHG)
-		    func(MCA_ID_CHG, params);	// do own change based on BTN_ROT
-		else if (btn(BTN_ROT_L))
-		    func(MCA_ID_PREV, params);	// previous menu id
-		else
-		    func(MCA_ID_NEXT, params);	// next menu id
+		func(MCA_ID_CHG, params);	// do own change based on BTN_ROT
 
 		if (menu_blink & MCB_7SEG)  lcd_set_blink(L7SEG, LB_SPC);
 	    }
@@ -351,13 +346,8 @@ static void menu_list_func(u8 action, menu_list_params_t *p) {
 	    func(MLA_NEXT);
 	    return;	// value already showed
 	    break;
-	case MCA_ID_PREV:
-	    if (menu_id)  menu_id--;
-	    else	  menu_id = (u8)(p->nitems - 1);
-	    func = p->funcs[menu_id];
-	    break;
-	case MCA_ID_NEXT:
-	    if (++menu_id >= p->nitems)  menu_id = 0;
+	case MCA_ID_CHG:
+	    menu_id = (u8)menu_change_val(menu_id, 0, p->nitems - 1, 1, 1);
 	    func = p->funcs[menu_id];
 	    break;
     }
