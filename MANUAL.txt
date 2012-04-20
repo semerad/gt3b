@@ -35,7 +35,7 @@ Global characteristics:
 - added inactivity alarm
 - added settable servo speed
 - added 4WS, DIG, MultiPosition functions
-- added timers (up, down, lap count)
+- added timers (up, down, lap, lap count)
 
 
 
@@ -204,7 +204,7 @@ Operating timers:
 - press ENTER to set timer params, use it as usual menu:
     H	set throttle trigger start	OFF/ON
 	    timer will start after
-	      throttle forward
+	      throttle forward applied
     A	set alarm			0..255
 	    in laps for lap counter
 	    in minutes for others
@@ -215,14 +215,33 @@ Operating timers:
 			    TxR stop + reset timer
 	    DWN		down timer
 			    TxS start/pause timer
-			    TxR stop + reset timer
+			    TxR stop + reset timer and save rest time
+				to lap times
 			    when alarmed at time 0, starts counting
 				up with "V" symbol blinking
-	    LAP		lap timer - not done yet
-	    LPC		lap counter
+	    LAP		lap timer - 100 lap times are saved
+			    TxS record lap time, show it for 3s blinking
+				  and during this time presses are ignored
+				  to eliminate double click
+				when timer not running, start timer
+				when timer alarmed, stop timer and save
+				  lap time
+			    TxR stop timer
+	    LPC		lap counter - till 255 laps
 			    TxS increment lap counter, minimum 3 seconds
-			      between presses are required to eliminate
-			      double click
+				between presses are required to eliminate
+				double click
+			    TxR zero lap counter
+- pres ENTER-long to show saved lap times (only for LAP and DWN timers):
+    > It is possible to see lap number (indicated by 'L' at 7seg number)
+      or time showed as other timer values. Press ENTER to switch between
+      lap number and time value
+    > use rotate encoder to switch between lap numbers or lap times
+    > there are special lap number identificators also at 3char display:
+	- Txx	- total time, 'xx' is number of laps
+	- Axx	- average time, 'xx' is number of laps
+	- RES	- pres ENTER and lap times will be erased, it is also
+		  displayed when showing lap time
 
 
 

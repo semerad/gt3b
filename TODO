@@ -1,59 +1,20 @@
 
-timer
-    - up/down/lap
-    - ignore lap button after press for 3 seconds to eliminate double clicks
-    - lap time - after press show last time for 3s and then current time
-	       - somewhere show list of lap times
-    - start with throttle
-    - main screens - ENTER stops and allows to set alarm/throttle start/
-		     show lap counts
-    - TimerUpReset - stop+reset to 0
-    - TimerUpStart - start/stop
-	- alarm
-    - TimerDownReset - stop+reset to alarm time
-    - TimerDownStart - reset to alarm time+restart
-	- alarm - then count up
-    - TimerLapReset - stop/reset
-    - TimerLapInc - start/count/stop after alarm
-	- alarm
-    - LapCountInc - count
-    - time format
-	00.0 % - 2-minutes, 1-10ths seconds
-	000  % - 1-minutes, 2-seconds
-	00.0   - 2-seconds, 1-0.1 seconds
-	000    - 1-seconds, 2-0.01 seconds
-timer losikid
-    1 or 2 timers on extra main screens
-    ENTER selects timers settings
-	timer type
-	    lap timer - alarm, @lap, @stop, reset (at lap times screen)
-		ignore lap button for 3s
-		show lap time for 3s
-	    lap counter - @lap, @reset
-		alarm after num laps
-		ignore lap button for 3s
-	    count up - alarm, @pause, @reset
-	    cound down - alarm, @pause, @reset (save rest to lap timers)
-	    ? lap timer down - laps_count
-	alarm
-	throttle start
-    ENTER-long selects lap times
-	look at times
-	reset all data
-
-? linear CH3 with potentiometer
+linear CH3 with potentiometer
     - global option to choose CH3 is a pot
     - don't read CH3 key in read_keys()
     - key mapping assign trim function and reverse
     - at begin of CALC, convert CH3 val to assigned function
     - calibrate low and high values at calib menu
-? selectable frame length with constant frame/constant sync
+selectable frame length with constant frame/constant sync
     - global option to choose constant frame/constant sync (9ms..)
     - global option to set frame/sync length (3ms..)
     - add code to ppm_calc_sync() to use global options
-? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
+CH3-8 position settable from menu
+
 ? use also flash memory to store model configs
     possibility to copy model stored at flash
+    ? do it transparent, model configs at 128B blocks
+? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
@@ -71,7 +32,6 @@ timer losikid
 
 Some suggestions taken from manuals of other radios:
 
-? CH3-8 position settable from menu
 programmable mixes
 throttle speed 1-3 SPEED 1-100%, trigger points 1-100
 throttle acceleration
@@ -93,14 +53,6 @@ throttle mode FWD50/BRK50 or FWD70/BRK30
 throttle Idle-Up 0-50%
 
 
-beemerfan:
-indications of more than 10 models
-backlight_time in seconds and than bigger steps
-
-
 other:
-lights, winch, transmission, horn
-modes - onroad+offroad/expedition/crawler/ship
-? is "all model reset" needed
 PC editor
 

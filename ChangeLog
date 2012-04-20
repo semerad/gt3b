@@ -3,7 +3,7 @@
     added ability to select number of channels (2-MAX_CHANNELS) for each
 	model, less channels means less delay
     poweron warn when not-centered now has separate global option
-    added up/down timers with throttle trigger start
+    added up/down/lap timers with throttle trigger start
     added BRK button function to override throttle and apply full brake
     big internal changes handling different menus, key mapping uses
 	2-char option identification instead of various symbols
