@@ -1,15 +1,17 @@
 
+global option to reverse rotate encoder
+    - just generate opposite buttons than now
+selectable frame length with constant frame/constant sync
+    - global option to choose constant frame/constant sync (9ms..)
+    - global option to set frame/sync length (3ms..)
+    - add code to ppm_calc_sync() to use global options
+CH3-8 position settable from menu
 linear CH3 with potentiometer
     - global option to choose CH3 is a pot
     - don't read CH3 key in read_keys()
     - key mapping assign trim function and reverse
     - at begin of CALC, convert CH3 val to assigned function
     - calibrate low and high values at calib menu
-selectable frame length with constant frame/constant sync
-    - global option to choose constant frame/constant sync (9ms..)
-    - global option to set frame/sync length (3ms..)
-    - add code to ppm_calc_sync() to use global options
-CH3-8 position settable from menu
 
 ? use also flash memory to store model configs
     possibility to copy model stored at flash
