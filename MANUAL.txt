@@ -1,12 +1,12 @@
 ****************************
 *                          *
-*  Flysky GT3B-PSX manual  *
+*  Flysky GT3B/C-PSX manual  *
 *                          *
 ****************************
 
 
 
-This is a preliminary manual for alternative firmware for FlySky FS-GT3B radio
+This is a preliminary manual for alternative firmware for FlySky FS-GT3B/C radio
 and clones. This manual is written as differences to original firmware.
 
 This firmware is completely written from scratch and is not compatible with the
