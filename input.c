@@ -276,16 +276,19 @@ static void read_keys(void) {
     if (encoder_timer)  encoder_timer--;
     if (TIM1_CNTRL) {
 	// encoder changed
+	u16 btn;
 	if ((s8)TIM1_CNTRL >= 0) {
 	    // left
-	    buttons |= BTN_ROT_L;
-	    if (encoder_timer)  buttons_long |= BTN_ROT_L;
+	    if (cg.rotate_reverse)  btn = BTN_ROT_R;
+	    else		    btn = BTN_ROT_L;
 	}
 	else {
 	    // right
-	    buttons |= BTN_ROT_R;
-	    if (encoder_timer)  buttons_long |= BTN_ROT_R;
+	    if (cg.rotate_reverse)  btn = BTN_ROT_L;
+	    else		    btn = BTN_ROT_R;
 	}
+	buttons |= btn;
+	if (encoder_timer)  buttons_long |= btn;
 	// set it back to default value
 	TIM1_CNTRL = 0;
 	// init timer

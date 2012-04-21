@@ -304,6 +304,8 @@ Global setup menu:
 		    poweron beep		P_N/P_Y
 		    poweron not-centered warn	C_N/C_Y
     d		long press key delay		100...1000 miliseconds
+    H		setting of hardware features
+		    reverse rotate encoder	E_N/E_Y (No/Yes) - for GT3C
     r		global or all models reset
 		    all configs (global+model)	G_N/G_Y (No/Yes)
 		    all models			M_N/M_Y (No/Yes

@@ -270,6 +270,35 @@ static void gs_long_press_delay(u8 action) {
 }
 
 
+// hardware settings
+static void gs_hardware(u8 action) {
+    // change value
+    if (action == MLA_CHG) {
+	switch (menu_set) {
+	    case 0:
+		cg.rotate_reverse ^= 1;
+		break;
+	}
+    }
+
+    // select next value
+    else if (action == MLA_NEXT) {
+	if (++menu_set > 0)  menu_set = 0;
+    }
+
+    // show values
+    lcd_7seg(L7_H);
+    lcd_char(LCHR2, ' ');
+    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);	// only last char will blink
+    switch (menu_set) {
+	case 0:
+	    lcd_char(LCHR1, 'E');
+	    lcd_char(LCHR3, (u8)(cg.rotate_reverse ? 'Y' : 'N'));
+	    break;
+    }
+}
+
+
 // reset global or all models
 static void gs_config_reset(u8 action) {
     // change value
@@ -313,6 +342,7 @@ static const menu_list_t gs_config[] = {
     gs_adc,
     gs_beep,
     gs_long_press_delay,
+    gs_hardware,
     gs_config_reset,
 };
 #define GS_CONFIG_SIZE  (sizeof(gs_config) / sizeof(u8 *))

@@ -57,7 +57,7 @@ typedef struct {
     u8  timer1_type:3;		// type of timer
     u8	timer2_type:3;
     u8	poweron_warn:1;		// beep 3 times when not-centered poweron
-    u8	unused1:1;
+    u8	rotate_reverse:1;	// reverse rotate encoder sense
     u8	timer1_alarm;		// alarm of timer
     u8	timer2_alarm;
     u16 unused2;		// reserve

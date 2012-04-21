@@ -1,6 +1,4 @@
 
-global option to reverse rotate encoder
-    - just generate opposite buttons than now
 selectable frame length with constant frame/constant sync
     - global option to choose constant frame/constant sync (9ms..)
     - global option to set frame/sync length (3ms..)

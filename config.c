@@ -59,13 +59,13 @@ u8 config_global_set_default(void) {
     cg.reset_beep	= 1;
     cg.poweron_beep	= 1;
     cg.poweron_warn	= 0;
+    cg.rotate_reverse	= 0;		// not-reversed
 
     cg.timer1_type	= 0;		// OFF
     cg.timer2_type	= 0;
     cg.timer1_alarm	= 0;		// OFF
     cg.timer2_alarm	= 0;
 
-    cg.unused1		= 0;
     cg.unused2		= 0;
     cg.unused3		= 0;
     cg.unused4		= 0;
