@@ -60,7 +60,11 @@ typedef struct {
     u8	rotate_reverse:1;	// reverse rotate encoder sense
     u8	timer1_alarm;		// alarm of timer
     u8	timer2_alarm;
-    u16 unused2;		// reserve
+    u8	ppm_length:4;		// length of PPM sync signal (3..) or frame length (9..)
+    u8	ppm_sync_frame:1;	// 0 = constant SYNC length, 1 = constant frame length
+
+    u8  unused1:3;		// reserve
+    u8  unused2;
     u16 unused3;
     u16 unused4;
     u16 unused5;

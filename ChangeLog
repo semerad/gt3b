@@ -9,6 +9,8 @@
 	2-char option identification instead of various symbols
     added global option rotate_reverse to switch direction of rotate
 	endoder at GT3C
+    added globally settable PPM constant sync/constant frame + selection
+	of length
 
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep

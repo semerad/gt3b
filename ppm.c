@@ -32,15 +32,14 @@
 #include <string.h>
 #include "ppm.h"
 #include "calc.h"
+#include "config.h"
 
 
 // length of whole frame (frame will actually be shorter, this is safe value
 //   to not stop generating PPM signal if something goes wrong)
 #define PPM_SAFE_FRAME_LENGTH  25000
 // constant sync length in ms
-#define PPM_SYNC_LENGTH   4
-// constant frame length in ms
-#define PPM_FRAME_LENGTH  (MAX_CHANNELS * 2 + PPM_SYNC_LENGTH)
+#define PPM_SYNC_LENGTH_MIN   3
 
 
 
@@ -72,7 +71,7 @@ void ppm_set_channels(u8 n) {
     BSET(PD_ODR, 0);	// set PPM pin to 1
     // set values for timer wakeups
     ppm_start = ppm_timer;				// not now, CALC will compute new one
-    ppm_calc_awake = (u8)(ppm_start + PPM_SYNC_LENGTH);	// SYNC signal min length
+    ppm_calc_awake = (u8)(ppm_start + PPM_SYNC_LENGTH_MIN);	// SYNC signal min length
     ppm_end = ppm_calc_awake;
     ppm_enabled = 1;
 
@@ -174,11 +173,17 @@ void ppm_calc_sync(void) {
     ppm_calc_len++;
 
     // calculate new ppm_end
-    ppm_end = (u8)((u8)((ppm_microsecs01 + 9999) / 10000) + PPM_SYNC_LENGTH);
-#if 0
-    // constant frame length, assign only when it is longer than minimum
-    if (ppm_end < PPM_FRAME_LENGTH)  ppm_end = PPM_FRAME_LENGTH;
-#endif
+    ppm_end = (u8)((ppm_microsecs01 + 9999) / 10000);
+    if (cg.ppm_sync_frame) {
+	// constant frame length
+	u8 fl = (u8)(cg.ppm_length + 9);
+	ppm_end += PPM_SYNC_LENGTH_MIN;		// minimal frame with SYNC signal
+	if (ppm_end < fl)  ppm_end = fl;
+    }
+    else {
+	// constant sync length
+	ppm_end += (u8)(cg.ppm_length + 3);
+    }
     ppm_end += ppm_start;
     ppm_microsecs01 = 0;
 

@@ -278,22 +278,50 @@ static void gs_hardware(u8 action) {
 	    case 0:
 		cg.rotate_reverse ^= 1;
 		break;
+	    case 1:
+		if (cg.ppm_sync_frame) {
+		    cg.ppm_sync_frame = 0;
+		    cg.ppm_length = 1;   // 4ms SYNC
+		}
+		else {
+		    cg.ppm_sync_frame = 1;
+		    cg.ppm_length = 11;  // 20ms frame
+		}
+		break;
+	    case 2:
+		if (cg.ppm_sync_frame)
+		    // constant frame length
+		    cg.ppm_length =
+			(u8)(menu_change_val(cg.ppm_length + 9, 9, 24, 1, 0) - 9);
+		else
+		    // constant SYNC length
+		    cg.ppm_length =
+			(u8)(menu_change_val(cg.ppm_length + 3, 3, 18, 1, 0) - 3);
+		break;
 	}
     }
 
     // select next value
     else if (action == MLA_NEXT) {
-	if (++menu_set > 0)  menu_set = 0;
+	if (++menu_set > 2)  menu_set = 0;
     }
 
     // show values
     lcd_7seg(L7_H);
-    lcd_char(LCHR2, ' ');
     menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);	// only last char will blink
     switch (menu_set) {
 	case 0:
-	    lcd_char(LCHR1, 'E');
-	    lcd_char(LCHR3, (u8)(cg.rotate_reverse ? 'Y' : 'N'));
+	    lcd_chars("E ");
+	    lcd_char(LCHR3, (u8)(cg.rotate_reverse ? 'R' : 'N'));
+	    break;
+	case 1:
+	    lcd_chars("PT");
+	    lcd_char(LCHR3, (u8)(cg.ppm_sync_frame ? 'F' : 'S'));
+	    break;
+	case 2:
+	    lcd_char_num3(cg.ppm_length + (u8)(cg.ppm_sync_frame ? 9 : 3));
+	    lcd_char(LCHR1, 'L');
+	    menu_blink |= MCB_CHR2;	// blink char2 too
 	    break;
     }
 }

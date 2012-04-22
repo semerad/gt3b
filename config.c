@@ -66,6 +66,10 @@ u8 config_global_set_default(void) {
     cg.timer1_alarm	= 0;		// OFF
     cg.timer2_alarm	= 0;
 
+    cg.ppm_sync_frame	= 0;		// to constant SYNC length
+    cg.ppm_length	= 1;		// 4ms constant SYNC length
+
+    cg.unused1		= 0;
     cg.unused2		= 0;
     cg.unused3		= 0;
     cg.unused4		= 0;

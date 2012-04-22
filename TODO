@@ -1,8 +1,4 @@
 
-selectable frame length with constant frame/constant sync
-    - global option to choose constant frame/constant sync (9ms..)
-    - global option to set frame/sync length (3ms..)
-    - add code to ppm_calc_sync() to use global options
 CH3-8 position settable from menu
 linear CH3 with potentiometer
     - global option to choose CH3 is a pot
