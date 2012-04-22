@@ -197,8 +197,10 @@ static void menu_channel_func(u8 action, menu_channel_t *p) {
 
     // show value
     lcd_segment(LS_SYM_CHANNEL, LS_ON);
-    lcd_7seg((u8)(menu_id + 1));
-    if (action != MCA_SET_CHG)  p->func(menu_id, 0);  // skip if changed
+    if (action != MCA_SET_CHG) {  // already showed
+	lcd_7seg((u8)(menu_id + 1));
+	p->func(menu_id, 0);
+    }
     if (menu_adc_wakeup) {
 	// show arrow
 	if (menu_adc_direction)
@@ -458,6 +460,23 @@ static void sf_expo(u8 channel, u8 change) {
 }
 
 
+// set channel value, exclude 4WS and DIG channels
+//   for channels 3..8 so add 2 to channel number
+static void sf_channel_val(u8 channel, u8 change) {
+    s8 *addr = &menu_channel3_8[channel];
+    if (change && !(menu_channels_mixed & (u8)(1 << (channel + 2))))
+	*addr = (s8)menu_change_val(*addr, -100, 100, CHANNEL_FAST, 0);
+
+    // show value
+    lcd_7seg((u8)(channel + 2 + 1));
+    lcd_char_num3(*addr);
+}
+@inline static void menu_channel_value(void) {
+    if (channels > 2)
+	menu_channel((u8)(channels - 2), 0, 0, sf_channel_val);
+}
+
+
 // set abs: OFF, SLO(6), NOR(4), FAS(3)
 // pulses between full brake and 1/2 brake and only when enought brake applied
 static const u8 abs_labels[][4] = {
@@ -530,7 +549,10 @@ static void select_menu(void) {
 		if (btnl(BTN_ENTER))	menu_speed();
 		else			menu_dualrate();
 	    }
-	    else if (menu == LM_EXP)	menu_expo();
+	    else if (menu == LM_EXP) {
+		if (btnl(BTN_ENTER))	menu_channel_value();
+		else			menu_expo();
+	    }
 	    else {
 		if (btnl(BTN_ENTER))	break;
 		else			menu_abs();

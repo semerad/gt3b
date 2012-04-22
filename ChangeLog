@@ -11,6 +11,7 @@
 	endoder at GT3C
     added globally settable PPM constant sync/constant frame + selection
 	of length
+    added new menu to directly set channel 3-8 value
 
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep

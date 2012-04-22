@@ -1,5 +1,4 @@
 
-CH3-8 position settable from menu
 linear CH3 with potentiometer
     - global option to choose CH3 is a pot
     - don't read CH3 key in read_keys()

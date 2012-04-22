@@ -97,7 +97,7 @@ Standard menu:
     > set subtrims for each channel
 - channel speed
     > choose menu D/R and press ENTER-long
-    > menu D/R wil blink
+    > menu D/R will blink
     > select channel
     > for channels 1 and 2 (steering and throttle)
 	- turn wheel left to show left arrow
@@ -108,6 +108,13 @@ Standard menu:
     > select required speed 1...100%
 	- 100% means no delay
 	-   1% means above 4s delay end to end
+- directly setting channel value of channels 3..8
+    > values for 4WS and DIG channels cannot be changed
+    > this can be used instead of mapping some key to appropriate function
+    > choose menu EXPO and press ENTER-long
+    > menu EXPO will blink
+    > select channel and press ENTER
+    > select value in range -100..100 and press enter
 - mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
   throttle), Multi-Position (to set arbitrary up to 8 positions)
     > choose menu EPOINT and press ENTER-long
