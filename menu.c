@@ -471,9 +471,11 @@ static void sf_channel_val(u8 channel, u8 change) {
     lcd_7seg((u8)(channel + 2 + 1));
     lcd_char_num3(*addr);
 }
-@inline static void menu_channel_value(void) {
-    if (channels > 2)
-	menu_channel((u8)(channels - 2), 0, 0, sf_channel_val);
+static void menu_channel_value(void) {
+    if (channels < 3)  return;
+    lcd_set_blink(LMENU, LB_SPC);
+    menu_channel((u8)(channels - 2), 0, 0, sf_channel_val);
+    lcd_set_blink(LMENU, LB_OFF);
 }
 
 
