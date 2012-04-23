@@ -1,3 +1,18 @@
+*0.5.0 (23 Apr 2012)
+    global menu was restructuralized
+    added ability to select number of channels (2-MAX_CHANNELS) for each
+	model, less channels means less delay
+    poweron warn when not-centered now has separate global option
+    added up/down/lap timers with throttle trigger start
+    added BRK button function to override throttle and apply full brake
+    big internal changes handling different menus, key mapping uses
+	2-char option identification instead of various symbols
+    added global option rotate_reverse to switch direction of rotate
+	endoder at GT3C
+    added globally settable PPM constant sync/constant frame + selection
+	of length
+    added new menu to directly set channel 3-8 value
+
 *0.4.2 (13 Apr 2012)
     added global setting to disable center/reset value beep
     minimum battery voltage set to 2V for those experimenting with 1S cell

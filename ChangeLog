@@ -1,4 +1,4 @@
-*0.5.0 ()
+*0.5.0 (23 Apr 2012)
     global menu was restructuralized
     added ability to select number of channels (2-MAX_CHANNELS) for each
 	model, less channels means less delay
