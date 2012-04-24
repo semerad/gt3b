@@ -5,11 +5,18 @@ linear CH3 with potentiometer
     - key mapping assign trim function and reverse
     - at begin of CALC, convert CH3 val to assigned function
     - calibrate low and high values at calib menu
-
 ? use also flash memory to store model configs
-    possibility to copy model stored at flash
-    ? do it transparent, model configs at 128B blocks
+    - some models in EEPROM
+    - other models in FLASH, one empty place
+    - table in EEPROM mapping model numbers to EEPROM/FLASH pos
+    - order table of used EEPROM models
+    - when FLASH model requested, move least used EEPROM model to empty
+	FLASH pos and requested FLASH model to this EEPROM pos
+    - use Word FLASH/EEPROM programming
+    - do one 8-channel fw with global default channels setting
+    - check if STVP erases whole flash
 ? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
+
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
@@ -19,9 +26,6 @@ linear CH3 with potentiometer
     - wakeup PPM_INPUT task
 	- read values from cyclic buffer
 	- compute PPM servo signals and assign them to ppm_in variables
-
-? digital/custom switches (set when some conditions are satisfied)
-? not so smooth servo travel
 
 
 
@@ -50,4 +54,5 @@ throttle Idle-Up 0-50%
 
 other:
 PC editor
+digital/custom switches (set when some conditions are satisfied)
 
