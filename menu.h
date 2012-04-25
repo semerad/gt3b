@@ -90,6 +90,8 @@ extern u16 battery_low_raw;
 extern u8 menu_check_keys;
 // temporary flag used when doing reset (global/all models/model)
 extern _Bool menu_tmp_flag;
+// temporary disable ch3 potentiometer when in key mapping menu
+extern _Bool menu_ch3_pot_disabled;
 
 
 
@@ -114,6 +116,7 @@ extern u8 *menu_key_function_name(u8 n);
 extern s8 menu_key_function_idx(u8 n);
 extern u8 menu_key_function_2state(u8 n);
 extern u8 menu_key_function_is_allowed(u8 n);
+extern void menu_et_function_set_from_linear(u8 n, s16 val);
 extern const u8 steps_map[];
 #define STEPS_MAP_SIZE  11
 extern const u16 et_buttons[][2];

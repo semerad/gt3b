@@ -64,6 +64,13 @@ void menu_calibrate(u8 at_poweron) {
     lcd_7seg(channel);
     lcd_menu(LM_MODEL | LM_NAME | LM_REV | LM_TRIM | LM_DR | LM_EXP);
     lcd_set_blink(LMENU, LB_SPC);
+    // blink arrows for ch3 potentiometer also
+    if (cg.ch3_pot) {
+	lcd_segment(LS_SYM_LEFT, LS_ON);
+	lcd_segment(LS_SYM_RIGHT, LS_ON);
+	lcd_segment_blink(LS_SYM_LEFT, LB_SPC);
+	lcd_segment_blink(LS_SYM_RIGHT, LB_SPC);
+    }
 
     while (1) {
 	// check keys
@@ -79,7 +86,7 @@ void menu_calibrate(u8 at_poweron) {
 	}
 
 	else if (btn(BTN_ENTER)) {
-	    // save calibrate value for channels 1 and 2
+	    // save calibrate value for channels 1 and 2 (and 3 if ch3_pot)
 	    // select actual voltage for channel 4
 	    if (channel == 1) {
 		key_beep();
@@ -113,6 +120,21 @@ void menu_calibrate(u8 at_poweron) {
 		else {
 		    cg.calib_throttle_bck = val;
 		    seg = LS_MENU_EXP;
+		}
+		lcd_segment(seg, LS_OFF);  // set corresponding LCD off
+		lcd_update();
+	    }
+	    else if (channel == 3 && cg.ch3_pot) {
+		// only if ch3 is potentiometer
+		key_beep();
+		val = ADC_OVS(ch3);
+		if (val < 512) {
+		    cg.calib_ch3_left = val;
+		    seg = LS_SYM_LEFT;
+		}
+		else {
+		    cg.calib_ch3_right = val;
+		    seg = LS_SYM_RIGHT;
 		}
 		lcd_segment(seg, LS_OFF);  // set corresponding LCD off
 		lcd_update();

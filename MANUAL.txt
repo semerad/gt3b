@@ -197,6 +197,14 @@ Standard menu:
 			 identified by "V" symbol
 	- reverse_long: same as "reverse" + "V" symbol
 	- prev_val_long: same as "prev_val" + "V" symbol
+    -----
+    steps of settings of ch3 potentiometer (if enabled at global config):
+	- sequence:
+	  function -> reverse
+	- function: selected function listed at the end of manual
+	- RE reverse:
+	    0 - no change
+	    1 - swap left/right sides
 		   
 
 
@@ -255,14 +263,22 @@ Operating timers:
 Calibrate menu:
 ===============
 - enter it by wheel right-turn and ENTER-long
-- 6 menu items starts to blink
+- 6 menu items starts to blink (+ 2 arrows if CH3 is potentiometer)
 - use END or ROTATE to change channels
 - there is also channel 3 representing CH3 button (for those who will do
     some 3-position switch/potentiometer modification)
+    > There is 1K resistor connected between CH3 button and +5V, so
+      simply connecting linear potentiometer instead of CH3 button
+      will not work. Usefull results can be done with logarithmic
+      potentiometer 10K which has 1K at half of turn. Or eliminate
+      internal resistor to +5V, connect potentiometer between +5V
+      and GND and potentiometer output instead of CH3 button.
 - there is also channal 4 representing battery voltage
 - calibrate as usual (for channel 1/2 left+mid+right and ENTER)
     > calibrated value will disappear from menu
     > it is not needed to calibrate all values
+- calibrate CH3 potentiometer (if selected at global config)
+    > only left + right positions
 - calibrate battery (it will not be probably needed to use this)
     > select channel 4
     > press ENTER
@@ -313,6 +329,7 @@ Global setup menu:
     d		long press key delay		100...1000 miliseconds
     H		setting of hardware features
 		    reverse rotate encoder	E_N/E_R (Normal/Reverse) - for GT3C
+		    ch3 is potentiometer	P3N/P3Y (No/Yes)
 		    select ppm sync/frame	PTS/PTF (constant SYNC/frame length)
 		    select ppm length		Lxx - 3-18ms for constant SYNC length
 						      9-24ms for constant frame length

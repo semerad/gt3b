@@ -59,7 +59,6 @@ u8 config_global_set_default(void) {
     cg.reset_beep	= 1;
     cg.poweron_beep	= 1;
     cg.poweron_warn	= 0;
-    cg.rotate_reverse	= 0;		// not-reversed
 
     cg.timer1_type	= 0;		// OFF
     cg.timer2_type	= 0;
@@ -68,12 +67,12 @@ u8 config_global_set_default(void) {
 
     cg.ppm_sync_frame	= 0;		// to constant SYNC length
     cg.ppm_length	= 1;		// 4ms constant SYNC length
+    cg.rotate_reverse	= 0;		// not-reversed
+    cg.ch3_pot		= 0;		// CH3 is button
 
     cg.unused1		= 0;
     cg.unused2		= 0;
     cg.unused3		= 0;
-    cg.unused4		= 0;
-    cg.unused5		= 0;
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);
@@ -82,6 +81,8 @@ u8 config_global_set_default(void) {
     cc |= check_val(&cg.calib_throttle_fwd, 0, CALIB_TH_LOW_MID, 0);
     cc |= check_val(&cg.calib_throttle_mid, CALIB_TH_LOW_MID, CALIB_TH_MID_HIGH, 600);
     cc |= check_val(&cg.calib_throttle_bck, CALIB_TH_MID_HIGH, 1023, 1023);
+    check_val(&cg.calib_ch3_left, 0, 512, 0);
+    check_val(&cg.calib_ch3_right, 512, 1023, 1023);
     return cc;
 }
 
@@ -141,6 +142,10 @@ void config_model_set_default(void) {
     cm.channels		= MAX_CHANNELS - 1;	// it is one lower to fit also 8
     cm.unused		= 0;
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
+    if (cg.ch3_pot) {
+	*ck_ch3_pot_func = 0;
+	*ck_ch3_pot_rev  = 0;
+    }
 }
 
 

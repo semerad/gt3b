@@ -1,10 +1,4 @@
 
-linear CH3 with potentiometer
-    - global option to choose CH3 is a pot
-    - don't read CH3 key in read_keys()
-    - key mapping assign trim function and reverse
-    - at begin of CALC, convert CH3 val to assigned function
-    - calibrate low and high values at calib menu
 ? use also flash memory to store model configs
     - some models in EEPROM
     - other models in FLASH, one empty place

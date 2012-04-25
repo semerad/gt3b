@@ -63,11 +63,12 @@ typedef struct {
     u8	ppm_length:4;		// length of PPM sync signal (3..) or frame length (9..)
     u8	ppm_sync_frame:1;	// 0 = constant SYNC length, 1 = constant frame length
 
-    u8  unused1:3;		// reserve
+    u8  ch3_pot:1;		// potentiometer connected instead of CH3 button
+    u8  unused1:2;		// reserve
     u8  unused2;
+    u16 calib_ch3_left;
+    u16 calib_ch3_right;
     u16 unused3;
-    u16 unused4;
-    u16 unused5;
 } config_global_s;
 
 extern config_global_s config_global;
@@ -164,8 +165,10 @@ typedef struct {
 } config_model_s;
 
 extern config_model_s config_model;
-#define cm	config_model
-#define ck	cm.key_mapping
+#define cm		config_model
+#define ck		cm.key_mapping
+#define ck_ch3_pot_func	((u8 *)&ck.key_map[0])
+#define ck_ch3_pot_rev	((u8 *)&ck.key_map[0] + 1)
 
 
 

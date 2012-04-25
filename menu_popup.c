@@ -269,6 +269,24 @@ u8 menu_et_function_is_allowed(u8 n) {
     return 0;					// channel too big
 }
 
+// set function value from linear channel value
+// lin_val in range -5000..5000
+#define AVAL(x) \
+    if (etf->set_func)  etf->set_func(&x, SF_ROTATE); \
+    *(s8 *)etf->aval = (s8)(x)
+#define SF_ROTATE 0
+void menu_et_function_set_from_linear(u8 n, s16 lin_val) {
+    et_functions_s *etf = &et_functions[n];
+    s16 val;
+    if (n == 0 || n >= ET_FUNCTIONS_SIZE)  return;  // OFF or bad
+    // map lin_val between min and max
+    val = (s16)((s32)(lin_val + PPM(500)) * (etf->max - etf->min + 1)
+		/ PPM(1000)) + etf->min;
+    if (val > etf->max)  val = etf->max;	// lin_val was full right
+    AVAL(val);
+}
+#undef SF_ROTATE
+
 // find function by name
 static et_functions_s *menu_et_function_find_name(u8 *name) {
     u8 i, *n;
@@ -310,9 +328,6 @@ const u8 steps_map[STEPS_MAP_SIZE] = {
 #define RVAL(x) \
     if (etf->min >= 0)  x = *(u8 *)etf->aval; \
     else		x = *(s8 *)etf->aval;
-#define AVAL(x) \
-    if (etf->set_func)  etf->set_func(&x, SF_ROTATE); \
-    *(s8 *)etf->aval = (s8)(x)
 static u8 menu_popup_et(u8 trim_id) {
     u16 delay_time;
     s16 val;

@@ -191,6 +191,67 @@ static void km_trim(u8 action) {
 }
 
 
+// special function for ch3 potentiometer, select function and reverse
+static void km_ch3_pot(u8 action) {
+    s8 idx;
+    u8 new_idx = 0;
+    u8 *func = ck_ch3_pot_func;
+    u8 *rev  = ck_ch3_pot_rev;
+
+    if (action == 1) {
+	// change value
+	switch (menu_set) {
+	    case 0:
+		// function
+		// select new function, map through trim_functions
+		idx = menu_et_function_idx(*func);
+		if (idx == -1) {
+		    // there can be some bad value from timer when ch3 was not
+		    // set to potentiometer
+		    *func = 0;
+		    idx = 0;
+		}
+		while (1) {
+		    idx = (s8)menu_change_val(idx, 0, trim_functions_max, 1, 1);
+		    new_idx = trim_functions[idx];
+		    if (!new_idx)  continue;				// empty slot
+		    new_idx--;  // was one more
+		    if (menu_et_function_is_allowed(new_idx))  break;	// we have it
+		}
+		// set values to defaults
+		*func = new_idx;
+		break;
+	    case 1:
+		// reverse
+		if (*rev)  *rev = 0;
+		else	   *rev = 1;
+		break;
+	}
+    }
+
+    else if (action == 2) {
+	// switch to next setting
+	if (menu_set || *func) {
+	    if (++menu_set > 1)  menu_set = 0;
+	}
+    }
+
+    // show value of menu_set
+    switch (menu_set) {
+	case 0:
+	    // function
+	    lcd_chars(menu_et_function_name(*func));
+	    break;
+	case 1:
+	    // reverse
+	    lcd_chars("RE");
+	    lcd_char(LCHR3, (u8)(*rev ? '1' : '0'));
+	    menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
+	    break;
+    }
+}
+
+
 
 
 #define KEY_FUNCTIONS_SIZE  32
@@ -362,8 +423,11 @@ static void km_key(u8 action) {
 
 
 @inline static void km_trim_key(u8 action) {
-    if (menu_id < NUM_TRIMS)  km_trim(action);
-    else		      km_key(action);
+    if (menu_id < NUM_TRIMS)
+	km_trim(action);
+    else if (cg.ch3_pot && menu_id == NUM_TRIMS)
+	km_ch3_pot(action);
+    else km_key(action);
 }
 
 static const u8 key_ids[] = {
@@ -409,11 +473,15 @@ void menu_key_mapping_func(u8 action, void *p) {
 	km_trim_key(0);
 }
 
+// temporary disable ch3 potentiometer when in key mapping menu
+_Bool menu_ch3_pot_disabled;
 void menu_key_mapping(void) {
     lcd_set_blink(LMENU, LB_SPC);
+    menu_ch3_pot_disabled = 1;
 
     menu_common(menu_key_mapping_func, NULL, MCF_NONE);
 
+    menu_ch3_pot_disabled = 0;
     lcd_set_blink(LMENU, LB_OFF);
     config_model_save();
     apply_model_config();

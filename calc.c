@@ -269,6 +269,29 @@ static void calc_loop(void) {
     u16 adc_steering, adc_throttle;  // last 4 or 1 ADC values
 
     while (1) {
+
+	// handle channel3 potentiometer, cannot use channel_calib,
+	//   because we don't have calib middle and dead zone
+	if (cg.ch3_pot && !menu_ch3_pot_disabled) {
+	    // do it only if some function is assigned to CH3 pot
+	    if (*ck_ch3_pot_func) {
+		if (cg.adc_ovs_last)  val = adc_ch3_last << ADC_OVS_SHIFT;
+		else		  val = adc_ch3_ovs;
+		// map ch3 pot -5000..5000 range
+		val -= cg.calib_ch3_left << ADC_OVS_SHIFT;
+		val2 = (s16)((s32)(val) * PPM(1000) /
+		       ((cg.calib_ch3_right - cg.calib_ch3_left) << ADC_OVS_SHIFT))
+		       - PPM(500);
+		// safety checks to -5000..5000 limits
+		if (val2 < PPM(-500))	   val2 = PPM(-500);
+		else if (val2 > PPM(500))  val2 = PPM(500);
+		// do reverse
+		if (*ck_ch3_pot_rev)  val2 = -val2;
+		// set value to function
+		menu_et_function_set_from_linear(*ck_ch3_pot_func, val2);
+	    }
+	}
+
 	DIG_mix = menu_DIG_mix * PPM(5);  // to -5000..5000 range
 
 	// set used ADC values
