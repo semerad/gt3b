@@ -253,8 +253,7 @@ static void menu_model(u8 saveas) {
 
     // if new model choosed, save it
     if (model != cg.model) {
-	cg.model = model;
-	config_global_save();
+	config_set_model(model);
 	if (saveas) {
 	    // save to new model position
 	    config_model_save();

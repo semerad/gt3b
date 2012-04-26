@@ -143,6 +143,22 @@ static void gs_battery_low(u8 action) {
 }
 
 
+// set default number of model channels
+static void gs_channels_default(u8 action) {
+    u8 val = (u8)(cg.channels_default + 1);
+
+    // change value
+    if (action == MLA_CHG) {
+	val = (u8)menu_change_val(val, 2, MAX_CHANNELS, 1, 0);
+	cg.channels_default = (u8)(val - 1);
+    }
+
+    // show value
+    lcd_7seg(L7_C);
+    lcd_char_num3(val);
+}
+
+
 // set max endpoint value
 static void gs_endpoint_max(u8 action) {
     u8 *addr = &cg.endpoint_max;
@@ -373,6 +389,7 @@ static const menu_list_t gs_config[] = {
     gs_backlight_time,
     gs_inactivity_alarm,
     gs_battery_low,
+    gs_channels_default,
     gs_endpoint_max,
     gs_adc,
     gs_beep,

@@ -17,9 +17,24 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 
 
+Flashing firmware
+=================
+- uset STVP (ST Visual Programmer)
+- select "PROGRAM MEMORY" tab
+- load firmware "gt3b-VERSION.s19"
+- program it with "Program -> Address Range..."
+    - set "Start @" to "8000"
+    - set "End @"   to "E4FF" (it is possible to find place where zeroes
+			       will start and use last non-zero address)
+    - press "OK"
+- if "Program -> Current tab" will be used, all models stored at FLASH
+  will be erased
+
+
+
 Global characteristics:
 =======================
-- 17/14/12 model memories for 3/6/8 channel firmware
+- 72 model memories, first 8 in EEPROM, rest in FLASH
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
     > numbers 30-39 will show with Left+Right-Arrows
@@ -312,6 +327,7 @@ Global setup menu:
     L		backlight time			5s,10s...10m...MAX
     I		inactivity alarm		OFF,1m...10m
     LOW POWER!	battery low voltage		2.0...10.5V
+    C		default number of channels	2..8
     E		maximum allowed endpoint value	100...150%
 		DANGER - values greater than 120% can damage
 			    your servo or will not be possible

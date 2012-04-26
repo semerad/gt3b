@@ -117,7 +117,7 @@ static u8 encoder_timer;	// for rotate encoder slow/fast
 u16 buttons;
 u16 buttons_long;  // >1s press
 // variables for ADC values
-@near u16 adc_all_last[3], adc_battery_last;
+u16 adc_all_last[3], adc_battery_last;
 @near u16 adc_battery;
 @near u32 adc_battery_filt;
 

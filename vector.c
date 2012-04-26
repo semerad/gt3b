@@ -28,7 +28,7 @@ struct intr_vector {
 #define INTR_OP  0x82
 #define INTR_VEC(func) { INTR_OP, (intr_handler_t)func }
 
-@far @interrupt void DefaultInterrupt (void) {
+@interrupt void DefaultInterrupt (void) {
 	return;
 }
 #define INTR_DEFAULT INTR_VEC(DefaultInterrupt)

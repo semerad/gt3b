@@ -169,7 +169,7 @@ void lcd_init(void) {
 /* actual LCD controller segment memory and updating routine */
 
 #define MAX_SEGMENT 32
-@near static u8 lcd_segments[MAX_SEGMENT];
+static u8 lcd_segments[MAX_SEGMENT];
 // bit flags of segments, which were modified from last update
 static volatile u16 lcd_modified_segments;
 static volatile u16 lcd_modified_segments2;
@@ -223,7 +223,7 @@ static volatile _Bool lcd_set_flag;
 
 // low 4 bits contains actual segment values
 // high 8 bits contains segments, which will be blinking
-@near static u8 lcd_bitmap[MAX_SEGMENT];
+static u8 lcd_bitmap[MAX_SEGMENT];
 volatile _Bool lcd_blink_flag;		// set in timer interrupt in blink times
 volatile u8 lcd_blink_cnt;		// blink counter updated in timer
 volatile _Bool lcd_blink_something;  // there are some blink segments

@@ -31,7 +31,7 @@
 #define EXPO_MAX	100
 
 // amount of step when fast encoder rotate
-#define MODEL_FAST	2
+#define MODEL_FAST	4
 #define ENDPOINT_FAST	5
 #define TRIM_FAST	5
 #define SUBTRIM_FAST	5

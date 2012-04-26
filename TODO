@@ -1,14 +1,4 @@
 
-? use also flash memory to store model configs
-    - some models in EEPROM
-    - other models in FLASH, one empty place
-    - table in EEPROM mapping model numbers to EEPROM/FLASH pos
-    - order table of used EEPROM models
-    - when FLASH model requested, move least used EEPROM model to empty
-	FLASH pos and requested FLASH model to this EEPROM pos
-    - use Word FLASH/EEPROM programming
-    - do one 8-channel fw with global default channels setting
-    - use program range in STVP to not overwrite memory models
 ? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 
 ? PPM input for head tracking gyro

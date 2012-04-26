@@ -95,11 +95,11 @@ volatile u16 ADC_DB2R @0x53e4;
 volatile u16 ADC_DB3R @0x53e6;
 
 // last readed values
-extern @near volatile u16 adc_all_last[3];
+extern volatile u16 adc_all_last[3];
 #define adc_steering_last  adc_all_last[0]
 #define adc_throttle_last  adc_all_last[1]
 #define adc_ch3_last       adc_all_last[2]
-extern @near volatile u16 adc_battery_last;
+extern volatile u16 adc_battery_last;
 
 // ADC buffers, last 4 values for each channel
 //   average will be computed when used

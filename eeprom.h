@@ -39,8 +39,10 @@
 
 extern void eeprom_read_global(void);
 extern void eeprom_read_model(u8 model);
+extern void flash_read_model(u8 model);
 extern void eeprom_write_global(void);
 extern void eeprom_write_model(u8 model);
+extern void flash_write_model(u8 model);  // to flash starting at 0
 extern void eeprom_empty_models(void);
 
 
