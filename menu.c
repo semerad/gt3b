@@ -60,6 +60,7 @@ static void show_model_number(u8 model) {
     lcd_7seg((u8)(model % 10));
     lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
     lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
+    lcd_segment(LS_SYM_PERCENT, (u8)((u8)(model / 40) & 1));
 }
 
 
@@ -72,7 +73,6 @@ static void main_screen(u8 item) {
 	// model name
 	lcd_segment(LS_SYM_MODELNO, LS_ON);
 	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
-	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
 	show_model_number(cg.model);
@@ -85,7 +85,6 @@ static void main_screen(u8 item) {
 	// battery voltage
 	lcd_segment(LS_SYM_MODELNO, LS_ON);
 	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
-	lcd_segment(LS_SYM_PERCENT, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
 	show_model_number(cg.model);
@@ -237,7 +236,7 @@ static void menu_channel(u8 end_channel, u8 use_adc, u8 forced_values,
 static void menu_model_func(u8 action, u8 *model) {
     if (action == MCA_ID_CHG)
 	*model = (u8)menu_change_val((s16)*model, 0,
-				     MIN(CONFIG_MODEL_MAX, 40) - 1,
+				     MIN(CONFIG_MODEL_MAX, 80) - 1,
 				     MODEL_FAST, 1);
 
     lcd_segment(LS_SYM_MODELNO, LS_ON);

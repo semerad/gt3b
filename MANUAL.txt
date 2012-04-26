@@ -22,6 +22,8 @@ Global characteristics:
 - 17/14/12 model memories for 3/6/8 channel firmware
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
+    > numbers 30-39 will show with Left+Right-Arrows
+    > numbers 40-79 will show like 0-39 with additional Percent symbol
 - added Subtrims
 - added SaveAs to save model config to another memory location
 - added Global Setup menu to change function features, including backlight time,
