@@ -92,7 +92,7 @@ void eeprom_write_model(u8 model) {
 void eeprom_empty_models(void) {
     _Bool writed = 0;
     u8 i = 0;
-    u8 cnt = CONFIG_MODEL_MAX;
+    u8 cnt = CONFIG_MODEL_MAX_EEPROM;
     config_model_s *cm = (config_model_s *)EEPROM_CONFIG_MODEL;
     // enable write to eeprom
     FLASH_DUKR = 0xAE;

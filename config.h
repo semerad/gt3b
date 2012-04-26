@@ -174,8 +174,9 @@ extern config_model_s config_model;
 
 #include "eeprom.h"
 
-#define CONFIG_MODEL_MAX  ((EEPROM_SIZE - sizeof(config_global_s)) / \
-			    sizeof(config_model_s))
+#define CONFIG_MODEL_MAX_EEPROM  ((EEPROM_SIZE - sizeof(config_global_s)) / \
+				  sizeof(config_model_s))
+#define CONFIG_MODEL_MAX	CONFIG_MODEL_MAX_EEPROM
 
 // when name[0] is 0xff, that model memory was empty
 #define CONFIG_MODEL_EMPTY  0xff
