@@ -8,7 +8,7 @@
 	FLASH pos and requested FLASH model to this EEPROM pos
     - use Word FLASH/EEPROM programming
     - do one 8-channel fw with global default channels setting
-    - check if STVP erases whole flash
+    - use program range in STVP to not overwrite memory models
 ? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
 
 ? PPM input for head tracking gyro
