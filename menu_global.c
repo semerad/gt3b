@@ -348,7 +348,7 @@ static void gs_config_reset(u8 action) {
 	    if (menu_set)  cg.model = 0;
 	    else	   config_global_set_default();
 	    config_global_save();
-	    eeprom_empty_models();
+	    config_empty_models();
 	    menu_load_model();
 	}
 	if (++menu_set > 1)  menu_set = 0;

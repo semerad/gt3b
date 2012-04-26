@@ -191,6 +191,7 @@ extern void config_model_set_default(void);
 extern void config_model_read(void);
 extern u8 config_global_read(void);
 extern u8 *config_model_name(u8 model);
+extern void config_empty_models(void);
 
 // write values to eeprom
 #define config_global_save()  eeprom_write_global()

@@ -171,6 +171,12 @@ u8 *config_model_name(u8 model) {
 }
 
 
+// empty all model memories
+void config_empty_models(void) {
+    eeprom_empty_models();
+}
+
+
 
 // read global config from eeprom, if MAGICs changed, set to defaults
 // returns 1 if calibration values was set to defaults
