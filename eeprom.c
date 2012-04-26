@@ -23,15 +23,6 @@
 
 
 
-void eeprom_init(void) {
-    // enable writing to eeprom
-    /*  moved to eeprom_write to do it only temporary
-    FLASH_DUKR = 0xAE;
-    FLASH_DUKR = 0x56;
-    */
-}
-
-
 
 
 // read from eeprom
