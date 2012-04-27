@@ -61,6 +61,7 @@ static void show_model_number(u8 model) {
     lcd_segment(LS_SYM_RIGHT, (u8)((u8)(model / 10) & 1));
     lcd_segment(LS_SYM_LEFT, (u8)((u8)(model / 20) & 1));
     lcd_segment(LS_SYM_PERCENT, (u8)((u8)(model / 40) & 1));
+    lcd_segment(LS_SYM_MODELNO, LS_ON);
 }
 
 
@@ -71,7 +72,6 @@ static void main_screen(u8 item) {
     // chars is item dependent
     if (item == MS_NAME) {
 	// model name
-	lcd_segment(LS_SYM_MODELNO, LS_ON);
 	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_OFF);
 	lcd_segment(LS_SYM_VOLTS, LS_OFF);
@@ -83,7 +83,6 @@ static void main_screen(u8 item) {
 	static u16 bat_time;
 
 	// battery voltage
-	lcd_segment(LS_SYM_MODELNO, LS_ON);
 	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
 	lcd_segment(LS_SYM_DOT, LS_ON);
 	lcd_segment(LS_SYM_VOLTS, LS_ON);
@@ -239,7 +238,6 @@ static void menu_model_func(u8 action, u8 *model) {
 				     MIN(CONFIG_MODEL_MAX, 80) - 1,
 				     MODEL_FAST, 1);
 
-    lcd_segment(LS_SYM_MODELNO, LS_ON);
     show_model_number(*model);
     lcd_chars(config_model_name(*model));
 }
@@ -295,7 +293,7 @@ static void menu_name_func(u8 action, void *p) {
 
     // show name
     menu_blink = (u8)(1 << menu_set);	// blink only selected char
-    lcd_segment(LS_SYM_MODELNO, LS_ON);
+    show_model_number(cg.model);
     lcd_chars(cm.name);
 }
 
