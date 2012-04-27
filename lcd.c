@@ -334,8 +334,8 @@ static void lcd_clr_set(u16 data) {
     lcd_blink_flag = 0;
     lcd_blink_cnt = 0;		// reset blink counter
     // set memory locations
-    memset(lcd_segments, (u8)(data & 0x0f), MAX_SEGMENT);
-    memset(lcd_bitmap, (u8)(data & 0x0f), MAX_SEGMENT);
+    memset(lcd_segments, (u8)(data & 0x0f), sizeof(lcd_segments));
+    memset(lcd_bitmap, (u8)(data & 0x0f), sizeof(lcd_bitmap));
     lcd_modified_segments = 0;
     lcd_modified_segments2 = 0;
     lcd_blink_something = 0;

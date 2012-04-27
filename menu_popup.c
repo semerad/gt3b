@@ -48,7 +48,7 @@ static @near u8 menu_buttons_state[NUM_KEYS + 2 * NUM_TRIMS];
 
 // set state of buttons to do initialize
 void menu_buttons_initialize(void) {
-    memset(menu_buttons_state, MBS_INITIALIZE, NUM_KEYS + 2 * NUM_TRIMS);
+    memset(menu_buttons_state, MBS_INITIALIZE, sizeof(menu_buttons_state));
     menu_check_keys = 1;
 }
 
