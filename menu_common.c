@@ -90,9 +90,17 @@ void menu_load_model(void) {
     menu_4WS_mix = 0;
     menu_4WS_crab = 0;
     menu_DIG_mix = 0;
+
     memset(menu_MP_index, 0, sizeof(menu_MP_index));
     if (cm.channel_MP0 && cm.channel_MP0 != MP_DIG)
 	menu_channel3_8[cm.channel_MP0 - 3] = cm.multi_position0[0];
+    if (cm.channel_MP1 && cm.channel_MP1 != MP_DIG)
+	menu_channel3_8[cm.channel_MP1 - 3] = cm.multi_position1[0];
+    if (cm.channel_MP2 && cm.channel_MP2 != MP_DIG)
+	menu_channel3_8[cm.channel_MP2 - 3] = cm.multi_position2[0];
+    if (cm.channel_MP3 && cm.channel_MP3 != MP_DIG)
+	menu_channel3_8[cm.channel_MP3 - 3] = cm.multi_position3[0];
+
     menu_brake = 0;
 
     // set state of buttons to do initialize

@@ -143,9 +143,19 @@ void config_model_set_default(void) {
 
     cm.channel_4WS	= 0;
     cm.channel_DIG	= 0;
+
     cm.channel_MP0	= 0;
     memset(cm.multi_position0, (u8)MULTI_POSITION_END, sizeof(cm.multi_position0));
     cm.multi_position0[0]= -100;
+    cm.channel_MP1	= 0;
+    memset(cm.multi_position1, (u8)MULTI_POSITION_END, sizeof(cm.multi_position1));
+    cm.multi_position1[0]= -100;
+    cm.channel_MP2	= 0;
+    memset(cm.multi_position2, (u8)MULTI_POSITION_END, sizeof(cm.multi_position2));
+    cm.multi_position2[0]= -100;
+    cm.channel_MP3	= 0;
+    memset(cm.multi_position3, (u8)MULTI_POSITION_END, sizeof(cm.multi_position3));
+    cm.multi_position3[0]= -100;
 
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
     if (cg.ch3_pot) {
@@ -155,7 +165,6 @@ void config_model_set_default(void) {
 
     cm.unused		= 0;
     cm.unused2		= 0;
-    cm.unused3		= 0;
     memset(cm.reserve, 0, sizeof(cm.reserve));
 }
 
@@ -287,6 +296,21 @@ u8 config_get_MP(u8 index, u8 *pchannel_MP, s8 **pmulti_position) {
 	    *pchannel_MP = cm.channel_MP0;
 	    *pmulti_position = cm.multi_position0;
 	    return NUM_MULTI_POSITION0;
+	case 1:
+	    // multi position 1
+	    *pchannel_MP = cm.channel_MP1;
+	    *pmulti_position = cm.multi_position1;
+	    return NUM_MULTI_POSITION1;
+	case 2:
+	    // multi position 2
+	    *pchannel_MP = cm.channel_MP2;
+	    *pmulti_position = cm.multi_position2;
+	    return NUM_MULTI_POSITION2;
+	case 3:
+	    // multi position 3
+	    *pchannel_MP = cm.channel_MP3;
+	    *pmulti_position = cm.multi_position3;
+	    return NUM_MULTI_POSITION3;
     }
     // shouldn't come here
     return 0;

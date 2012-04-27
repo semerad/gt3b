@@ -136,6 +136,15 @@ static void mix_DIG(u8 action) {
 	case 0:
 	    cm.channel_MP0 = val;
 	    break;
+	case 1:
+	    cm.channel_MP1 = val;
+	    break;
+	case 2:
+	    cm.channel_MP2 = val;
+	    break;
+	case 3:
+	    cm.channel_MP3 = val;
+	    break;
     }
 }
 static void mix_MultiPosition(u8 action) {
@@ -145,6 +154,15 @@ static void mix_MultiPosition(u8 action) {
     s8 *multi_position;
     u8 channel_MP;
     u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
+
+    // check if this MP is allowed at set number of channels
+    if ((u8)(mp_id + 3) > channels) {
+	lcd_7seg(L7_P);
+	lcd_char(LCHR1, (u8)(mp_id + '1'));
+	lcd_chars2("NA");
+	menu_blink &= (u8)~MCB_CHR1;
+	return;
+    }
 
     if (action == MLA_CHG) {
 	// change value
@@ -191,7 +209,7 @@ static void mix_MultiPosition(u8 action) {
     lcd_7seg(L7_P);
     if (menu_set == 0) {
 	// show MP id
-	lcd_char(LCHR1, (u8)(mp_id + '0'));
+	lcd_char(LCHR1, (u8)(mp_id + '1'));
 	lcd_char(LCHR2, ' ');
 	// channel number/OFF
 	lcd_char(LCHR3, (u8)(channel_MP == MP_DIG ? 'D' : (u8)(channel_MP + '0')));
@@ -229,6 +247,9 @@ static void mix_brake_off(u8 action) {
 static const menu_list_t mix_funcs[] = {
     mix_4WS,
     mix_DIG,
+    mix_MultiPosition,
+    mix_MultiPosition,
+    mix_MultiPosition,
     mix_MultiPosition,
     mix_brake_off,
 };

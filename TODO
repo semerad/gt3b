@@ -1,6 +1,4 @@
 
-? more multi-positions - 2 for 6ch, 4 for 8ch, 4-pos is enought
-
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge

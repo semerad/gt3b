@@ -121,7 +121,7 @@ static void show_trim2(u8 *name, s16 val) {
 
 // multi-position show and set value
 static void show_MP(u8 *name, s16 val) {
-    u8 mp_id = (u8)(name[2] - '0');
+    u8 mp_id = (u8)(name[2] - '1');
     s8 *multi_position;
     u8 channel_MP;
     u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
@@ -141,7 +141,7 @@ static void show_MP(u8 *name, s16 val) {
     lcd_char_num3(multi_position[menu_MP_index[mp_id]]);
 }
 static void set_MP(u8 *name, s16 *aval, u8 rotate) {
-    u8 mp_id = (u8)(name[2] - '0');
+    u8 mp_id = (u8)(name[2] - '1');
     s8 *multi_position;
     u8 channel_MP;
     u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
@@ -244,8 +244,14 @@ static const et_functions_s et_functions[] = {
       4, &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
     { 37, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG | EF_NO2CHANNELS,
       L7_D, &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 38, "MP0", 0, EF_LIST | EF_NOCONFIG | EF_NO2CHANNELS, 0, &menu_MP_index[0],
+    { 38, "MP1", 0, EF_LIST | EF_NOCONFIG, 3, &menu_MP_index[0],
       0, NUM_MULTI_POSITION0 - 1, 0, 1, set_MP, show_MP, NULL },
+    { 39, "MP2", 0, EF_LIST | EF_NOCONFIG, 4, &menu_MP_index[1],
+      0, NUM_MULTI_POSITION1 - 1, 0, 1, set_MP, show_MP, NULL },
+    { 40, "MP3", 0, EF_LIST | EF_NOCONFIG, 5, &menu_MP_index[2],
+      0, NUM_MULTI_POSITION2 - 1, 0, 1, set_MP, show_MP, NULL },
+    { 41, "MP4", 0, EF_LIST | EF_NOCONFIG, 6, &menu_MP_index[3],
+      0, NUM_MULTI_POSITION3 - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
 
@@ -786,7 +792,7 @@ static void kf_brake(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
 // table of key functions
 static const key_functions_s key_functions[] = {
     { 0, "OFF", KF_NONE, NULL, NULL, 0 },
-    { 23, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
+    { 29, "BLS", KF_NOSHOW, kf_battery_low_shutup, NULL, 0 },  // default END-long
     { 1, "CH3", KF_2STATE, kf_set_switch, NULL, 3 },
     { 7, "C3R", KF_NONE, kf_reset, "CH3", 3 },
 #if MAX_CHANNELS >= 4
@@ -812,13 +818,20 @@ static const key_functions_s key_functions[] = {
     { 13, "4WS", KF_2STATE, kf_4ws, NULL, 3 },
     { 14, "DIG", KF_2STATE, kf_set_switch, NULL, 3 },
     { 15, "DGR", KF_NONE, kf_reset, "DIG", 3 },
-    { 16, "MP0", KF_NONE, kf_multi_position, (u8 *)0, 3 },
-    { 17, "MR0", KF_NONE, kf_multi_position_reset, (u8 *)0, 3 },
-    { 18, "T1S", KF_NOSHOW, kf_menu_timer_start, (u8 *)0, 0 },
-    { 19, "T1R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)0, 0 },
-    { 20, "T2S", KF_NOSHOW, kf_menu_timer_start, (u8 *)1, 0 },
-    { 21, "T2R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)1, 0 },
-    { 22, "BRK", KF_2STATE, kf_brake, NULL, 0 },
+    { 16, "MP1", KF_NONE, kf_multi_position, (u8 *)0, 3 },
+    { 17, "MR1", KF_NONE, kf_multi_position_reset, (u8 *)0, 3 },
+    { 18, "MP2", KF_NONE, kf_multi_position, (u8 *)1, 4 },
+    { 19, "MR2", KF_NONE, kf_multi_position_reset, (u8 *)1, 4 },
+    { 20, "MP3", KF_NONE, kf_multi_position, (u8 *)2, 5 },
+    { 21, "MR3", KF_NONE, kf_multi_position_reset, (u8 *)2, 5 },
+    { 22, "MP4", KF_NONE, kf_multi_position, (u8 *)3, 6 },
+    { 23, "MR4", KF_NONE, kf_multi_position_reset, (u8 *)3, 6 },
+    { 24, "T1S", KF_NOSHOW, kf_menu_timer_start, (u8 *)0, 0 },
+    { 25, "T1R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)0, 0 },
+    { 26, "T2S", KF_NOSHOW, kf_menu_timer_start, (u8 *)1, 0 },
+    { 27, "T2R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)1, 0 },
+    { 28, "BRK", KF_2STATE, kf_brake, NULL, 0 },
+    // beware of BLS with last id
 };
 #define KEY_FUNCTIONS_SIZE  (sizeof(key_functions) / sizeof(key_functions_s))
 

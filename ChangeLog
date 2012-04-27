@@ -1,5 +1,6 @@
 *0.6.0 ()
     increased model memories by using FLASH also
+    added more Multi-Positions
 
 *0.5.1 (26 Apr 2012)
     added possibility to connect potentiometer instead of CH3 button

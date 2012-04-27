@@ -127,8 +127,11 @@ typedef struct {
     config_et_map_s	et_map[NUM_TRIMS];
 } config_key_mapping_s;
 
-#define MP_COUNT	     1
+#define MP_COUNT	     4
 #define NUM_MULTI_POSITION0  8
+#define NUM_MULTI_POSITION1  6
+#define NUM_MULTI_POSITION2  4
+#define NUM_MULTI_POSITION3  4
 #define MULTI_POSITION_END   -128
 #define MP_DIG               0x0f
 
@@ -139,7 +142,7 @@ typedef struct {
 // also add code to setting default values
 // length must by multiple of 4 because of EEPROM/FLASH Word programming
 // 54(30 reserved) + 22(keys) + channels * 4 bytes = 108 for 8-channel fw
-#define CONFIG_MODEL_MAGIC  (0xe018 | (MAX_CHANNELS - 1))
+#define CONFIG_MODEL_MAGIC  (0xd820 | (MAX_CHANNELS - 1))
 typedef struct {
     u8	name[3];
     u8	reverse;			// bit for each channel
@@ -160,23 +163,28 @@ typedef struct {
 #define expo_steering	expo[0]
 #define expo_forward	expo[1]
 #define expo_back	expo[2]
-    s8	multi_position0[NUM_MULTI_POSITION0];  // values for MultiPosition
+    s8	multi_position0[NUM_MULTI_POSITION0];  // values for MultiPosition 0
+    s8	multi_position1[NUM_MULTI_POSITION1];  // values for MultiPosition 1
+    s8	multi_position2[NUM_MULTI_POSITION2];  // values for MultiPosition 2
+    s8	multi_position3[NUM_MULTI_POSITION3];  // values for MultiPosition 3
 
     u8	channels:3;			// number of channels for this model - 1
     u8	brake_off:1;			// don't use brake side of throttle
     u8	channel_4WS:4;			// channel for 4WS mix or 0 when off
     u8	channel_DIG:4;			// channel for DIG mix or 0 when off
-    u8	channel_MP0:4;			// channel for MultiPosition or 0 when off
+    u8	channel_MP0:4;			// channel for MultiPosition0 or 0 when off
+    u8	channel_MP1:4;			// channel for MultiPosition1 or 0 when off
+    u8	channel_MP2:4;			// channel for MultiPosition2 or 0 when off
+    u8	channel_MP3:4;			// channel for MultiPosition3 or 0 when off
     u8	thspd_onlyfwd:1;		// throttle speed only at forward side
     u8	abs_type:2;
 
-    u8	unused:5;
+    u8	unused:1;
     u16	unused2;
-    u16	unused3;
 
     config_key_mapping_s key_mapping;
 
-    u8	reserve[26];
+    u8	reserve[13];
 } config_model_s;
 
 extern @near config_model_s config_model;
