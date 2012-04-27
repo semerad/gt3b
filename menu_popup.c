@@ -93,9 +93,12 @@ typedef struct {
     void *aval;		// address of variable
     s16 min, max, reset; // limits of variable
     u8 rot_fast_step;	// step for fast encoder rotate
-    void (*set_func)(s16 *aval, u8 rotate);	// set function
-    void (*show_func)(s16 val);			// show function
-    void (*long_func)(s16 *aval, u16 btn_l, u16 btn_r);  // function for special long-press handling
+    // set function - used instead of directly value assign
+    void (*set_func)(u8 *name, s16 *aval, u8 rotate);
+    // show function - used to show value instead to show raw value
+    void (*show_func)(u8 *name, s16 val);
+    // function for special long-press handling
+    void (*long_func)(u8 *name, s16 *aval, u16 btn_l, u16 btn_r);
 } et_functions_s;
 #define EF_NONE		0
 #define EF_RIGHT	0b00000001
@@ -109,33 +112,46 @@ typedef struct {
 
 
 // trims with labels
-static void show_trim1(s16 val) {
+static void show_trim1(u8 *name, s16 val) {
     lcd_char_num2_lbl((s8)val, "LNR");
 }
-static void show_trim2(s16 val) {
+static void show_trim2(u8 *name, s16 val) {
     lcd_char_num2_lbl((s8)val, "FNB");
 }
 
 // multi-position show and set value
-static void show_MP(s16 val) {
+static void show_MP(u8 *name, s16 val) {
+    u8 mp_id = (u8)(name[2] - '0');
+    s8 *multi_position;
+    u8 channel_MP;
+    u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
+
     // show also selected channel/DIG
-    if (cm.channel_MP == MP_DIG) {
+    if (channel_MP == MP_DIG) {
 	lcd_7seg(L7_D);
 	lcd_menu(LM_EPO);
 	lcd_set_blink(LMENU, LB_SPC);
 	lcd_segment(LS_SYM_CHANNEL, LS_OFF);
 	lcd_segment(LS_SYM_PERCENT, LS_ON);
     }
-    else  lcd_7seg(cm.channel_MP);
-    lcd_char_num3(cm.multi_position[menu_MP_index]);
+    else {
+	lcd_7seg(channel_MP);
+	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    }
+    lcd_char_num3(multi_position[menu_MP_index[mp_id]]);
 }
-static void set_MP(s16 *aval, u8 rotate) {
+static void set_MP(u8 *name, s16 *aval, u8 rotate) {
+    u8 mp_id = (u8)(name[2] - '0');
+    s8 *multi_position;
+    u8 channel_MP;
+    u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
+
     // if END value selected, return it back to previous
-    if (cm.multi_position[*aval] == MULTI_POSITION_END) {
+    if (multi_position[*aval] == MULTI_POSITION_END) {
 	if (rotate) {
-	    if (!menu_MP_index) {
+	    if (!menu_MP_index[mp_id]) {
 		// rotated left through 0, find right value
-		while (cm.multi_position[*aval] == MULTI_POSITION_END)
+		while (multi_position[*aval] == MULTI_POSITION_END)
 		    (*aval)--;
 	    }
 	    else  *aval = 0;  // rotated right, return to 0
@@ -143,9 +159,9 @@ static void set_MP(s16 *aval, u8 rotate) {
 	else  (*aval)--;  // no rotate, return back to previous index
     }
     // set value of channel
-    if (cm.channel_MP) {
-	if (cm.channel_MP == MP_DIG)  menu_DIG_mix = cm.multi_position[*aval];
-	else  menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[*aval];
+    if (channel_MP) {
+	if (channel_MP == MP_DIG)  menu_DIG_mix = multi_position[*aval];
+	else  menu_channel3_8[channel_MP - 3] = multi_position[*aval];
     }
 }
 
@@ -228,8 +244,8 @@ static const et_functions_s et_functions[] = {
       4, &menu_4WS_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
     { 37, "DIG", LM_EPO, EF_BLINK | EF_PERCENT | EF_NOCHANNEL | EF_NOCONFIG | EF_NO2CHANNELS,
       L7_D, &menu_DIG_mix, -100, 100, 0, MIX_FAST, NULL, NULL, NULL },
-    { 38, "MPO", 0, EF_LIST | EF_NOCONFIG | EF_NO2CHANNELS, 0, &menu_MP_index,
-      0, NUM_MULTI_POSITION - 1, 0, 1, set_MP, show_MP, NULL },
+    { 38, "MP0", 0, EF_LIST | EF_NOCONFIG | EF_NO2CHANNELS, 0, &menu_MP_index[0],
+      0, NUM_MULTI_POSITION0 - 1, 0, 1, set_MP, show_MP, NULL },
 };
 #define ET_FUNCTIONS_SIZE  (sizeof(et_functions) / sizeof(et_functions_s))
 
@@ -272,7 +288,7 @@ u8 menu_et_function_is_allowed(u8 n) {
 // set function value from linear channel value
 // lin_val in range -5000..5000
 #define AVAL(x) \
-    if (etf->set_func)  etf->set_func(&x, SF_ROTATE); \
+    if (etf->set_func)  etf->set_func(etf->name, &x, SF_ROTATE); \
     *(s8 *)etf->aval = (s8)(x)
 #define SF_ROTATE 0
 void menu_et_function_set_from_linear(u8 n, s16 lin_val) {
@@ -405,7 +421,7 @@ static u8 menu_popup_et(u8 trim_id) {
 	    }
 
 	    // show current value
-	    if (etf->show_func)  etf->show_func(val);
+	    if (etf->show_func)  etf->show_func(etf->name, val);
 	    else		 lcd_char_num3(val);
 	    lcd_update();
 
@@ -452,7 +468,7 @@ static u8 menu_popup_et(u8 trim_id) {
 	    key_beep();
 	    if (etf->long_func && etm->buttons == ETB_SPECIAL)
 		// special handling
-		etf->long_func(&val, btn_l, btn_r);
+		etf->long_func(etf->name, &val, btn_l, btn_r);
 	    else {
 		// reset to given reset value
 		val = etf->reset;
@@ -468,7 +484,7 @@ static u8 menu_popup_et(u8 trim_id) {
 		if (etf->long_func && etm->buttons == ETB_SPECIAL &&
 		    btnl(btn_lr))
 		    // special handling
-		    etf->long_func(&val, btn_l, btn_r);
+		    etf->long_func(etf->name, &val, btn_l, btn_r);
 		else if ((etm->buttons == ETB_LONG_RESET ||
 			  etm->buttons == ETB_LONG_ENDVAL) && btnl(btn_lr)) {
 		    // handle long key press
@@ -530,7 +546,7 @@ static u8 menu_popup_et(u8 trim_id) {
 	if ((buttons_state & ~btn_lr) != buttons_state_last)  break;
 
 	// show current value
-	if (etf->show_func)  etf->show_func(val);
+	if (etf->show_func)  etf->show_func(etf->name, val);
 	else		 lcd_char_num3(val);
 	lcd_update();
 
@@ -704,46 +720,44 @@ static void kf_4ws(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
 
 // switch multi-position to next index
 static void kf_multi_position(u8 *id, u8 *param, u8 flags, s16 *prev_val) {
-    if (++menu_MP_index >= NUM_MULTI_POSITION ||
-        cm.multi_position[menu_MP_index] == MULTI_POSITION_END)
-	    menu_MP_index = 0;
-    if (cm.channel_MP) {
-	if (cm.channel_MP == MP_DIG)
-	    menu_DIG_mix = cm.multi_position[menu_MP_index];
+    u8 mp_id = (u8)(u16)param;
+    s8 *multi_position;
+    u8 channel_MP;
+    u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
+    u8 *mp_index = &menu_MP_index[mp_id];
+
+    if (++*mp_index >= num_MP ||
+        multi_position[*mp_index] == MULTI_POSITION_END)
+	    *mp_index = 0;
+    if (channel_MP) {
+	if (channel_MP == MP_DIG)
+	    menu_DIG_mix = multi_position[*mp_index];
 	else
-	    menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[menu_MP_index];
+	    menu_channel3_8[channel_MP - 3] = multi_position[*mp_index];
     }
 
     if (flags & FF_SHOW) {
-	if (!menu_MP_index)  BEEP_RESET;
-	if (cm.channel_MP == MP_DIG) {
-	    lcd_7seg(L7_D);
-	    lcd_menu(LM_EPO);
-	    lcd_set_blink(LMENU, LB_SPC);
-	    lcd_segment(LS_SYM_PERCENT, LS_ON);
-	}
-	else {
-	    lcd_7seg(cm.channel_MP);
-	    lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	}
-	lcd_char_num3(cm.multi_position[menu_MP_index]);
+	if (!*mp_index)  BEEP_RESET;
+	show_MP(id, 0);
     }
 }
 static void kf_multi_position_reset(u8 *id, u8 *param, u8 flags, s16 *pv) {
-    menu_MP_index = 0;
-    if (cm.channel_MP) {
-	if (cm.channel_MP == MP_DIG)
-	    menu_DIG_mix = cm.multi_position[0];
+    u8 mp_id = (u8)(u16)param;
+    s8 *multi_position;
+    u8 channel_MP;
+    u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
+
+    menu_MP_index[mp_id] = 0;
+    if (channel_MP) {
+	if (channel_MP == MP_DIG)
+	    menu_DIG_mix = multi_position[0];
 	else
-	    menu_channel3_8[cm.channel_MP - 3] = cm.multi_position[0];
+	    menu_channel3_8[channel_MP - 3] = multi_position[0];
     }
 
     if (flags & FF_SHOW) {
 	BEEP_RESET;
-	if (cm.channel_MP == MP_DIG)  lcd_7seg(L7_D);
-	else			      lcd_7seg(cm.channel_MP);
-	lcd_segment(LS_SYM_CHANNEL, LS_ON);
-	lcd_char_num3(cm.multi_position[0]);
+	show_MP(id, 0);
     }
 }
 
@@ -798,8 +812,8 @@ static const key_functions_s key_functions[] = {
     { 13, "4WS", KF_2STATE, kf_4ws, NULL, 3 },
     { 14, "DIG", KF_2STATE, kf_set_switch, NULL, 3 },
     { 15, "DGR", KF_NONE, kf_reset, "DIG", 3 },
-    { 16, "MPO", KF_NONE, kf_multi_position, NULL, 3 },
-    { 17, "MPR", KF_NONE, kf_multi_position_reset, NULL, 3 },
+    { 16, "MP0", KF_NONE, kf_multi_position, (u8 *)0, 3 },
+    { 17, "MR0", KF_NONE, kf_multi_position_reset, (u8 *)0, 3 },
     { 18, "T1S", KF_NOSHOW, kf_menu_timer_start, (u8 *)0, 0 },
     { 19, "T1R", KF_NOSHOW, kf_menu_timer_reset, (u8 *)0, 0 },
     { 20, "T2S", KF_NOSHOW, kf_menu_timer_start, (u8 *)1, 0 },

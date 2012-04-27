@@ -131,45 +131,58 @@ static void mix_DIG(u8 action) {
 }
 
 
+@inline static void set_channel_MP(u8 mp_id, u8 val) {
+    switch (mp_id) {
+	case 0:
+	    cm.channel_MP0 = val;
+	    break;
+    }
+}
 static void mix_MultiPosition(u8 action) {
     s8 val;
+    // get mp_id from menu_id, MP starts at menu_id 2
+    u8 mp_id = (u8)(menu_id - 2);
+    s8 *multi_position;
+    u8 channel_MP;
+    u8 num_MP = config_get_MP(mp_id, &channel_MP, &multi_position);
 
     if (action == MLA_CHG) {
 	// change value
 	if (menu_set == 0) {
 	    // channel number/off
-	    val = cm.channel_MP;
+	    val = channel_MP;
 	    if (!val)  val = 2;
 	    else if (val == MP_DIG)  val = (s8)(channels + 1);
 	    val = (u8)menu_change_val(val, 2, channels + 1, 1, 1);
-	    if (val == 2)   			cm.channel_MP = 0;
-	    else if (val == (s8)(channels + 1))	cm.channel_MP = MP_DIG;
-	    else	    			cm.channel_MP = val;
+	    if (val == 2)   		val = 0;
+	    else if (val > channels)	val = MP_DIG;
+	    channel_MP = val;
+	    set_channel_MP(mp_id, channel_MP);
 	}
 	else {
 	    // position value + END state (END not for first position)
-	    val = cm.multi_position[menu_set - 1];
+	    val = multi_position[menu_set - 1];
 	    if (val == MULTI_POSITION_END)  val = -101;
 	    val = (s8)menu_change_val(val, menu_set == 1 ? -100 : -101, 100,
 				      CHANNEL_FAST, 0);
 	    if (val == -101) {
 		// set all from this to END value
-		memset(&cm.multi_position[menu_set - 1], (u8)MULTI_POSITION_END,
-		       NUM_MULTI_POSITION + 1 - menu_set);
+		memset(&multi_position[menu_set - 1], (u8)MULTI_POSITION_END,
+		       num_MP - (menu_set - 1));
 	    }
-	    else cm.multi_position[menu_set - 1] = val;
+	    else multi_position[menu_set - 1] = val;
 	}
     }
     else if (action == MLA_NEXT) {
 	// select next value
-	if (cm.channel_MP) {
+	if (channel_MP) {
 	    if (menu_set == 0)  menu_set = 1;
-	    else if (cm.multi_position[menu_set - 1] == MULTI_POSITION_END
-		    || ++menu_set > NUM_MULTI_POSITION)  menu_set = 0;
+	    else if (multi_position[menu_set - 1] == MULTI_POSITION_END
+		    || ++menu_set > num_MP)  menu_set = 0;
 	}
 	// allow forcing channel value
-	if (menu_set && cm.channel_MP && cm.channel_MP <= channels) {
-	    menu_force_value_channel = cm.channel_MP;
+	if (menu_set && channel_MP && channel_MP <= channels) {
+	    menu_force_value_channel = channel_MP;
 	}
 	else menu_force_value_channel = 0;
     }
@@ -177,22 +190,23 @@ static void mix_MultiPosition(u8 action) {
     // show value
     lcd_7seg(L7_P);
     if (menu_set == 0) {
+	// show MP id
+	lcd_char(LCHR1, (u8)(mp_id + '0'));
+	lcd_char(LCHR2, ' ');
 	// channel number/OFF
-	if (!cm.channel_MP)	lcd_chars("OFF");
-	else if (cm.channel_MP == MP_DIG)
-				lcd_chars("DIG");
-	else			lcd_char_num3(cm.channel_MP);
+	lcd_char(LCHR3, (u8)(channel_MP == MP_DIG ? 'D' : (u8)(channel_MP + '0')));
 	lcd_segment(LS_SYM_CHANNEL, LS_ON);
+	menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);
     }
     else {
 	// position value
-	val = cm.multi_position[menu_set - 1];
+	val = multi_position[menu_set - 1];
 	if (val == MULTI_POSITION_END) {
 	    lcd_chars("END");
 	    val = -100;
 	}
 	else  lcd_char_num3(val);
-	if (cm.channel_MP == MP_DIG)	menu_DIG_mix = val;
+	if (channel_MP == MP_DIG)	menu_DIG_mix = val;
 	else				menu_force_value = val * PPM(5);
     }
 }

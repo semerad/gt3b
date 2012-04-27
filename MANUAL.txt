@@ -150,6 +150,7 @@ Standard menu:
 	> for 4WS press ENTER and select crab (CR1) or no-crab (CR0)
       for Multi-Position:
 	> press ENTER and choose channel for this function or OFF
+	    - channel can be "D" also, which means map to DIG function
 	> press ENTER and set channel value for first position
 	> press ENTER and set channel value for second position or END
 	> ... up to eight position
@@ -177,7 +178,7 @@ Standard menu:
 		 centre/reset value
 	    EN - long press of trim key will set to coresponding end value
 	- step: select trim step for one trim key press (1, 2, ... 100, 200),
-		not available when buttons MO or fuction is list of items (MPO)
+		not available when buttons MO or fuction is list of items (multi-position)
 		is identified by symbol "V"
 	- RE reverse:
 	    0 - no change
@@ -187,11 +188,11 @@ Standard menu:
 	    1 - when trim key is pressed and value is at opposite
 		side of center/reset, set value to centre/reset,
 	- PV previous_val: available only when buttons MO or fuction is list of
-			   items (MPO)
+			   items (multi-position)
 	    0 - no change
 	    1 - instead of setting value to centre/reset when key is released,
 		it is set to previous value, which was active before key press
-	- RO rotate: available only if fuction is list of items (MPO)
+	- RO rotate: available only if fuction is list of items (multi-position)
 	    0 - no rotate
 	    1 - rotate from max item to first item and back
     -----
@@ -382,7 +383,7 @@ CHn		- change channel "n" value in range -100...100
 STn		- subtrim of channel "n"
 4WS		- 4 wheel steering mix -100...100%
 DIG		- DIG throttle mix -100...100%
-MPO		- Multi-POsition, switches position up/down
+MP0		- Multi-Position 0, switches position up/down
 SST		- steering speed turn 1...100%
 SSR		- steering speed return 1...100%
 CSn		- channel speed for channel "n" 1...100%
@@ -403,8 +404,8 @@ CnR		- reset value of channel "n" to centre
 DIG		- switch DIG mix between -100 and 100 (more useable when using
 		  return to previous val key setting)
 DGR		- reset DIG mix to centre
-MPO		- Multi-POsition, switches position up (at END back to 1.)
-MPR		- Multi-Position Reset, switches position to first one
+MP0		- Multi-Position 0, switches position up (at END back to 1.)
+MR0		- Multi-Position 0 Reset, switches position to first one
 T1S		- start/pause timer1
 T1R		- stop + reset timer1
 T2S		- start/pause timer2

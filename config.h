@@ -127,9 +127,10 @@ typedef struct {
     config_et_map_s	et_map[NUM_TRIMS];
 } config_key_mapping_s;
 
-#define NUM_MULTI_POSITION  8
-#define MULTI_POSITION_END  -128
-#define MP_DIG              0x0f
+#define MP_COUNT	     1
+#define NUM_MULTI_POSITION0  8
+#define MULTI_POSITION_END   -128
+#define MP_DIG               0x0f
 
 
 
@@ -159,13 +160,13 @@ typedef struct {
 #define expo_steering	expo[0]
 #define expo_forward	expo[1]
 #define expo_back	expo[2]
-    s8	multi_position[NUM_MULTI_POSITION];  // values for MultiPosition
+    s8	multi_position0[NUM_MULTI_POSITION0];  // values for MultiPosition
 
     u8	channels:3;			// number of channels for this model - 1
     u8	brake_off:1;			// don't use brake side of throttle
     u8	channel_4WS:4;			// channel for 4WS mix or 0 when off
     u8	channel_DIG:4;			// channel for DIG mix or 0 when off
-    u8	channel_MP:4;			// channel for MultiPosition or 0 when off
+    u8	channel_MP0:4;			// channel for MultiPosition or 0 when off
     u8	thspd_onlyfwd:1;		// throttle speed only at forward side
     u8	abs_type:2;
 
@@ -183,6 +184,10 @@ extern @near config_model_s config_model;
 #define ck		cm.key_mapping
 #define ck_ch3_pot_func	((u8 *)&ck.key_map[0])
 #define ck_ch3_pot_rev	((u8 *)&ck.key_map[0] + 1)
+
+// get multi_position channel and array of values
+// return number of multi_position items
+extern u8 config_get_MP(u8 index, u8 *pchannel_MP, s8 **pmulti_position);
 
 
 

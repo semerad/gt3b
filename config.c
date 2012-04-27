@@ -143,9 +143,9 @@ void config_model_set_default(void) {
 
     cm.channel_4WS	= 0;
     cm.channel_DIG	= 0;
-    cm.channel_MP	= 0;
-    memset(cm.multi_position, (u8)MULTI_POSITION_END, sizeof(cm.multi_position));
-    cm.multi_position[0]= -100;
+    cm.channel_MP0	= 0;
+    memset(cm.multi_position0, (u8)MULTI_POSITION_END, sizeof(cm.multi_position0));
+    cm.multi_position0[0]= -100;
 
     memcpy(&cm.key_mapping, &default_key_mapping, sizeof(config_key_mapping_s));
     if (cg.ch3_pot) {
@@ -271,5 +271,24 @@ u8 config_global_read(void) {
     }
 
     return calib_changed;
+}
+
+
+
+
+
+// get multi_position channel and array of values
+// return number of multi_position items
+// change function set_channel_MP() at menu_mix.c also
+u8 config_get_MP(u8 index, u8 *pchannel_MP, s8 **pmulti_position) {
+    switch (index) {
+	case 0:
+	    // multi position 0
+	    *pchannel_MP = cm.channel_MP0;
+	    *pmulti_position = cm.multi_position0;
+	    return NUM_MULTI_POSITION0;
+    }
+    // shouldn't come here
+    return 0;
 }
 
