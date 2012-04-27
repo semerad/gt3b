@@ -1,6 +1,6 @@
 @if "%TOOLSET%"=="" goto NoToolset
 @if not "%CHANNELS%"=="" goto ChannelOK
-@set CHANNELS=3
+@set CHANNELS=8
 :ChannelOK
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% task.c
 %TOOLSET%/cxstm8 +warn +proto +mods0 +debug -i. -i%TOOLSET%/Hstm8 -l  -pxp -ac -dMAX_CHANNELS=%CHANNELS% main.c
