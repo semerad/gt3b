@@ -1,0 +1,426 @@
+****************************
+*                          *
+*  Flysky GT3B/C-PSX manual  *
+*                          *
+****************************
+
+
+
+This is a preliminary manual for alternative firmware for FlySky FS-GT3B/C radio
+and clones. This manual is written as differences to original firmware.
+
+This firmware is completely written from scratch and is not compatible with the
+original Flysky firmware. It is distributed with NO-WARRANTY.
+All of the model setups saved by original firmware will be erased!!!
+You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
+"DATA MEMORY" in STVP to read it from radio a save it to disk.
+
+
+
+Flashing firmware
+=================
+- uset STVP (ST Visual Programmer)
+- select "PROGRAM MEMORY" tab
+- load firmware "gt3b-VERSION.s19"
+- program it with "Program -> Address Range..."
+    - set "Start @" to "8000"
+    - set "End @"   to "E70F" (it is possible to find place where zeroes
+			       will start and use last non-zero address)
+    - press "OK"
+- if "Program -> Current tab" will be used, all models stored at FLASH
+  will be erased
+
+
+
+Global characteristics:
+=======================
+- 67 model memories, first 8 in EEPROM, rest in FLASH
+    > numbers 10-19 will show with Right-Arrow
+    > numbers 20-29 will show with Left-Arrow
+    > numbers 30-39 will show with Left+Right-Arrows
+    > numbers 40-79 will show like 0-39 with additional Percent symbol
+- added Subtrims
+- added SaveAs to save model config to another memory location
+- added Global Setup menu to change function features, including backlight time,
+    battery low voltage, etc. 
+- dead zone for steering and throttle
+- added key mapping specific for each model memory
+- calibrate menu will be automatically invoked after first power-on with
+  this firmware, so 6 menu items will start to blink
+- when radio is powered on with steering/throttle not in dead center,
+    it beeps 3 times if poweron not-centered warning is allowed
+- added inactivity alarm
+- added settable servo speed
+- added 4WS, DIG, MultiPosition functions
+- added timers (up, down, lap, lap count)
+
+
+
+Buttons:
+========
+- it is now possible to differentiate between long press (>1 second) to
+  normal button press (short) and it will be recognized like "ENTER-long"
+- Trims, DualRate and other popup informations
+    > now shows changed value only temporaly (5 seconds or till another
+	key press), values are saved to EEPROm automatically when it disappears
+    > when autorepeat disabled on trims (default), reset trim to 0
+	by pressing both trim keys together for long
+	(eg. TRIM_LEFT-long + TRIM_RIGHT-long and similar for channel 2 trim)
+    > while value is showed, it is possible to change it with rotate
+        encoder also
+    > when value set to reset_value (usualy 0), longer beep sounds to
+	attention to it and short pause is intruduced to ignore keys
+
+
+
+Main screens:
+=============
+- changeable by rotate encoder:
+    model name
+    battery voltage
+    timer1 - ENTER and ENTER-long operates this timer, not standard menu
+    timer2 - ENTER and ENTER-long operates this timer, not standard menu
+
+
+
+Standard menu:
+==============
+- swapped behaviour of ENTER and END when editing items, ENTER now select
+    next value and END (+ ENTER-long) will end editing items
+- ENTER-long on ABS will leave menu also (as BACK)
+- Trims are now only for steering and throttle
+    > trim move center position without moving endpoint positions
+- Expo
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+    > positive values are those You want to use like at Spektrum radios
+- DualRate
+    > value for channel 2 is splitted to forward and back and is indicated
+	by arrows
+- SaveAs
+    > choose menu MODEL and press ENTER-long
+    > menu MODEL will blink
+    > choose memory position where to save model config
+    > press ENTER/BACK to save it
+- Model number of channels and Model reset
+    > choose menu NAME and press ENTER-long
+    > menu NAME will blink
+    > choose "C" for number of model channels or "r" for model reset
+	- reset will show NO/YES
+- Subtrims
+    > subtrim moves center position together with endpoint positions
+    > choose menu TRIM and press ENTER-long
+    > menu TRIM will blink
+    > set subtrims for each channel
+- channel speed
+    > choose menu D/R and press ENTER-long
+    > menu D/R will blink
+    > select channel
+    > for channels 1 and 2 (steering and throttle)
+	- turn wheel left to show left arrow
+	    - this represents Turn speed or throttle speed
+	- turn wheel right to show right arrow
+	    - this represents Return speed or
+	      "throttle speed only for forward" (OFF/ON)
+    > select required speed 1...100%
+	- 100% means no delay
+	-   1% means above 4s delay end to end
+- directly setting channel value of channels 3..8
+    > values for 4WS and DIG channels cannot be changed
+    > this can be used instead of mapping some key to appropriate function
+    > choose menu EXPO and press ENTER-long
+    > menu EXPO will blink
+    > select channel and press ENTER
+    > select value in range -100..100 and press enter
+- mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
+  throttle), Multi-Position (to set arbitrary up to 8 positions)
+    > choose menu EPOINT and press ENTER-long
+    > menu EPOINT will blink
+    > select one of mixes 4WS (4), DIG (d), brake cut-off (b),
+	multi-position (P)
+      for mixes 4WS, DIG:
+	> press ENTER and choose channel for this mix or OFF
+	    - for dual-ESC steering (boat, tank, ...) select DIG channel 1 and
+	    with steering D/R reduce required ESC travel (at 100% it will go to
+	    contra to allow steering at place)
+	> press ENTER and set mix in range -100...0...100 %
+	    0%   is default and means both channels have same max steering/throttle
+	    100% means 100% reduce on rear steering/throttle (eg. no steering)
+	    -100% means 100% reduce on front steering/throttle (eg. no steering)
+	> for 4WS press ENTER and select crab (CR1) or no-crab (CR0)
+      for Multi-Position:
+	> there are 4 Multi-Positions identified by numbers 1..4, they have
+	    8/6/4/4 positions
+	> press ENTER and choose channel for this function or OFF
+	    - channel can be "D" also, which means map to DIG function
+	> press ENTER and set channel value for first position
+	> press ENTER and set channel value for second position or END
+	> ... up to eight position
+      for brake cut-off:
+	> set OFF or CUT
+- Key mapping specific for each model:
+    > choose menu REV and press ENTER-long
+    > menu REV will blink
+    > choose trims (id: 1 2 3 d) or other keys (CH3: C, Back: b, End: E) or
+        if trim is OFF, then also trim keys (id 1 2 3 d with left/right arrow)
+    > press ENTER and modify first setting
+    > press ENTER and modify next setting
+    > ....
+    -----
+    steps of settings of trims (1 2 3 and D/R):
+	- sequence:
+	  function -> buttons -> step -> reverse -> opposite_reset -> previous_val -> rotate
+	- function: selected function listed at the end of manual
+	- B buttons:
+	    MO - momentary, hold left/right trim key to get end values,
+		 when nothing pressed, servo is at center
+	    NL - no long keys, long press is the same as short press
+	    AR - autorepeat is on
+	    RS - long press of one of trim keys will reset to
+		 centre/reset value
+	    EN - long press of trim key will set to coresponding end value
+	- step: select trim step for one trim key press (1, 2, ... 100, 200),
+		not available when buttons MO or fuction is list of items (multi-position)
+		is identified by symbol "V"
+	- RE reverse:
+	    0 - no change
+	    1 - swap left/right trim keys
+	- OR opposite_reset: not available when buttons MO
+	    0 - no change
+	    1 - when trim key is pressed and value is at opposite
+		side of center/reset, set value to centre/reset,
+	- PV previous_val: available only when buttons MO or fuction is list of
+			   items (multi-position)
+	    0 - no change
+	    1 - instead of setting value to centre/reset when key is released,
+		it is set to previous value, which was active before key press
+	- RO rotate: available only if fuction is list of items (multi-position)
+	    0 - no rotate
+	    1 - rotate from max item to first item and back
+    -----
+    steps of setting of keys (C b E 1< 1> 2< 2> 3< 3> d< d>):
+	- sequence:
+	  function -> momentary -> reverse -> prev_val -> function_long -> reverse_long -> prev_val_long
+	- function: selected function listed at the end of manual
+	- MO momentary: only available for 2-state functions (channel, ...)
+	    0 - switch, key press will switch something (channel value, ...)
+	    1 - momentary, value change will be active only while key is pressed
+	- RE reverse: only available for 2-state functions
+	    0 - normal, no-press or default value is left endpoint
+	    1 - reverse, no-press or default value is right endpoint
+	- PV prev_val: only available for 2-state functions
+	    0 - key release or OFF state sets value to left endpoint (noREV)
+	    1 - key release or OFF state sets value to value active before
+		  key press or ON state
+	- function_long: function applied when long press of key happens,
+	                 choose from the same list as function,
+			 identified by "V" symbol
+	- reverse_long: same as "reverse" + "V" symbol
+	- prev_val_long: same as "prev_val" + "V" symbol
+    -----
+    steps of settings of ch3 potentiometer (if enabled at global config):
+	- sequence:
+	  function -> reverse
+	- function: selected function listed at the end of manual
+	- RE reverse:
+	    0 - no change
+	    1 - swap left/right sides
+		   
+
+
+Operating timers:
+=================
+- select timer1 or timer2 main screen with rotate encoder
+- timer1 is identified by left arrow, timer2 by right arrow
+- lap count is written to 3char LCD place
+- timer value is writen to 7seg + 3char LCD place in format:
+    0000    - MMSS  minutes, seconds
+    0000 %  - SSHH  seconds, hundredths (0.01 seconds)
+- press ENTER to set timer params, use it as usual menu:
+    H	set throttle trigger start	OFF/ON
+	    timer will start after
+	      throttle forward applied
+    A	set alarm			0..255
+	    in laps for lap counter
+	    in minutes for others
+    P	set timer type:
+	    OFF		timer is off
+	    UP		up timer
+			    TxS start/pause timer
+			    TxR stop + reset timer
+	    DWN		down timer
+			    TxS start/pause timer
+			    TxR stop + reset timer and save rest time
+				to lap times
+			    when alarmed at time 0, starts counting
+				up with "V" symbol blinking
+	    LAP		lap timer - 100 lap times are saved
+			    TxS record lap time, show it for 3s blinking
+				  and during this time presses are ignored
+				  to eliminate double click
+				when timer not running, start timer
+				when timer alarmed, stop timer and save
+				  lap time
+			    TxR stop timer
+	    LPC		lap counter - till 255 laps
+			    TxS increment lap counter, minimum 3 seconds
+				between presses are required to eliminate
+				double click
+			    TxR zero lap counter
+- pres ENTER-long to show saved lap times (only for LAP and DWN timers):
+    > It is possible to see lap number (indicated by 'L' at 7seg number)
+      or time showed as other timer values. Press ENTER to switch between
+      lap number and time value
+    > use rotate encoder to switch between lap numbers or lap times
+    > there are special lap number identificators also at 3char display:
+	- Txx	- total time, 'xx' is number of laps
+	- Axx	- average time, 'xx' is number of laps
+	- RES	- pres ENTER and lap times will be erased, it is also
+		  displayed when showing lap time
+
+
+
+Calibrate menu:
+===============
+- enter it by wheel right-turn and ENTER-long
+- 6 menu items starts to blink (+ 2 arrows if CH3 is potentiometer)
+- use END or ROTATE to change channels
+- there is also channel 3 representing CH3 button (for those who will do
+    some 3-position switch/potentiometer modification)
+    > There is 1K resistor connected between CH3 button and +5V, so
+      simply connecting linear potentiometer instead of CH3 button
+      will not work. Usefull results can be done with logarithmic
+      potentiometer 10K which has 1K at half of turn. Or eliminate
+      internal resistor to +5V, connect potentiometer between +5V
+      and GND and potentiometer output instead of CH3 button.
+- there is also channal 4 representing battery voltage
+- calibrate as usual (for channel 1/2 left+mid+right and ENTER)
+    > calibrated value will disappear from menu
+    > it is not needed to calibrate all values
+- calibrate CH3 potentiometer (if selected at global config)
+    > only left + right positions
+- calibrate battery (it will not be probably needed to use this)
+    > select channel 4
+    > press ENTER
+    > set your current battery voltage (measure it by voltmeter)
+    > press ENTER to save it or END to no-save
+- press BACK-long or ENTER-long to end calibrate menu and save values
+
+
+Key-test menu:
+==============
+- enter it by wheel left-turn and ENTER-long
+- if ENTER-long keep pressed, all segments on display will stay on till
+    ENTER is released
+- now check keys by pressing them short or long
+- if keys long pressed, an "L" symbol will appear left to displayed key symbols
+- press BACK-long or ENTER-long to end key-test menu
+
+
+Global setup menu:
+==================
+- enter it by ENTER-long
+- now menu items MODEL and NAME will start blinking
+- select requested item by ROTATE and press ENTER
+- use ROTATE to change value and press ENTER to end value changing
+- press BACK or END or ENTER-long to end global setup menu,
+    values will be saved to EEPROM
+- selected menu items are indicated by following symbols:
+    F		firmware version (this of course cannot be changed :-)
+    L		backlight time			5s,10s...10m...MAX
+    I		inactivity alarm		OFF,1m...10m
+    LOW POWER!	battery low voltage		2.0...10.5V
+    C		default number of channels	2..8
+    E		maximum allowed endpoint value	100...150%
+		DANGER - values greater than 120% can damage
+			    your servo or will not be possible
+			    to transmit to receiver because of
+			    2.4GHz HF module limitation
+		This danger zone will be indicated with a flashing
+		  '%' symbol for values greater than 120%
+    A		analog settings, dead zones, ADC samples used
+		    steering dead zone		S00..S50
+		    throttle dead zone		T00..T50
+		    number of ADC values	A_4/A_1
+    b		beeps
+		    key beep			K_N/K_Y
+		    value at center/reset beep	V_N/V_Y
+		    poweron beep		P_N/P_Y
+		    poweron not-centered warn	C_N/C_Y
+    d		long press key delay		100...1000 miliseconds
+    H		setting of hardware features
+		    reverse rotate encoder	E_N/E_R (Normal/Reverse) - for GT3C
+		    ch3 is potentiometer	P3N/P3Y (No/Yes)
+		    select ppm sync/frame	PTS/PTF (constant SYNC/frame length)
+		    select ppm length		Lxx - 3-18ms for constant SYNC length
+						      9-24ms for constant frame length
+    r		global or all models reset
+		    all configs (global+model)	G_N/G_Y (No/Yes)
+		    all models			M_N/M_Y (No/Yes
+
+
+
+
+Return to original (and modified) firmware:
+===========================================
+- flash original firmware
+- delete whole EEPROM (tab DATA MEMORY in STVP and write those empty zeroes)
+    or return back your saved config (also tab DATA MEMORY in STVP, read
+    your saved config from disk and write it to radio)
+- calibrate steering and throttle (not needed when You returned back saved
+    config)
+
+
+
+
+
+Functions assignable to trims:
+==============================
+OFF		- nothing, it is possible to assign each button individualy
+		  as key
+TR1, TR2	- trim of channel 1/2
+DRS, DRF, DRB	- dualrate of steering/forward/back
+EXS, EXF, EXB	- expo of steering/forward/back
+CHn		- change channel "n" value in range -100...100
+STn		- subtrim of channel "n"
+SST		- steering speed turn 1...100%
+SSR		- steering speed return 1...100%
+CSn		- channel speed for channel "n" 1...100%
+4WS		- 4 wheel steering mix -100...100%
+DIG		- DIG throttle mix -100...100%
+MP1		- Multi-Position 1, switches position up/down
+MP2		- Multi-Position 2, switches position up/down
+MP3		- Multi-Position 3, switches position up/down
+MP4		- Multi-Position 4, switches position up/down
+
+
+
+Functions assignable to keys:
+=============================
+OFF		- nothing
+CHn		- switch channel "n" value from one end value to opposite end
+		  value. There is special handling for CH3 button. When using
+		  3-position switch instead of CH3 button and momentary is
+		  selected for this button, then centre 3-pos value will also
+		  be detected and set to servo (use 1K resistor to GND to get
+		  middle state)
+CnR		- reset value of channel "n" to centre
+4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
+DIG		- switch DIG mix between -100 and 100 (more useable when using
+		  return to previous val key setting)
+DGR		- reset DIG mix to centre
+MP1		- Multi-Position 1, switches position up (at END back to 1.)
+MR1		- Multi-Position 1 Reset, switches position to first one
+MP2		- Multi-Position 2, switches position up (at END back to 1.)
+MR2		- Multi-Position 2 Reset, switches position to first one
+MP3		- Multi-Position 3, switches position up (at END back to 1.)
+MR3		- Multi-Position 3 Reset, switches position to first one
+MP4		- Multi-Position 4, switches position up (at END back to 1.)
+MR4		- Multi-Position 4 Reset, switches position to first one
+T1S		- start/pause timer1
+T1R		- stop + reset timer1
+T2S		- start/pause timer2
+T2R		- stop + reset timer2
+BRK		- switch on full brake, this overrides throttle position
+BLS		- battery low shutup, stop beeping, predefined to END-long
+
