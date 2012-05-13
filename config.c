@@ -143,6 +143,7 @@ void config_model_set_default(void) {
 
     cm.channel_4WS	= 0;
     cm.channel_DIG	= 0;
+    cm.channel_brake	= 0;
 
     cm.channel_MP0	= 0;
     memset(cm.multi_position0, (u8)MULTI_POSITION_END, sizeof(cm.multi_position0));
@@ -165,6 +166,7 @@ void config_model_set_default(void) {
 
     cm.unused		= 0;
     cm.unused2		= 0;
+    cm.unused3		= 0;
     memset(cm.reserve, 0, sizeof(cm.reserve));
 }
 

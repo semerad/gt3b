@@ -63,6 +63,8 @@ void apply_model_config(void) {
 	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_4WS - 1));
     if (cm.channel_DIG)
 	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_DIG - 1));
+    if (cm.channel_brake)
+	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_brake - 1));
 
     // set autorepeat
     for (i = 0; i < 4; i++) {

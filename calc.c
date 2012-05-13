@@ -376,7 +376,6 @@ static void calc_loop(void) {
 				cg.calib_throttle_mid << ADC_OVS_SHIFT,
 				cg.calib_throttle_bck << ADC_OVS_SHIFT,
 				cg.throttle_dead_zone << ADC_OVS_SHIFT);
-	if (cm.brake_off && val > 0)  val = 0;  // throttle brake cut off
 	val = expo(val, (u8)(val < 0 ? cm.expo_forward : cm.expo_back));
 	if (cm.abs_type) {
 	    // apply selected ABS
@@ -403,6 +402,16 @@ static void calc_loop(void) {
 	    }
 	}
 	val = dualrate(val, (u8)(val < 0 ? cm.dr_forward : cm.dr_back));
+	// brake to extra channel
+	if (cm.channel_brake) {
+	    val2 = val;
+	    if (val2 < 0)  val2 = 0;		// eliminate forward
+	    val2 = val2 * 2 - PPM(500);		// to whole servo range
+	    channel_params(cm.channel_brake, channel_speed(val2, cm.channel_brake));
+	}
+	// throttle brake cut off
+	if (cm.brake_off && val > 0)  val = 0;
+	// set to servo
 	if (!cm.channel_DIG) {
 	    if (cm.brake_off)  val = val * 2 + PPM(500);
 	    channel_params(2, channel_speed(val, 2));

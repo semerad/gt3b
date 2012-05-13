@@ -240,6 +240,25 @@ static void mix_brake_off(u8 action) {
 }
 
 
+static void mix_brake_channel(u8 action) {
+    u8 val = cm.channel_brake;
+
+    if (action == MLA_CHG) {
+        // channel number/off
+        if (!val)  val = 2;
+        val = (u8)menu_change_val(val, 2, channels, 1, 1);
+        if (val == 2)  val = 0;
+        cm.channel_brake = val;
+    }
+
+    // show value
+    lcd_7seg(8);
+    lcd_segment(LS_SYM_CHANNEL, LS_ON);
+    // channel number/OFF
+    if (!val)  lcd_chars("OFF");
+    else       lcd_char_num3(val);
+}
+
 
 
 
@@ -252,6 +271,7 @@ static const menu_list_t mix_funcs[] = {
     mix_MultiPosition,
     mix_MultiPosition,
     mix_brake_off,
+    mix_brake_channel,
 };
 
 

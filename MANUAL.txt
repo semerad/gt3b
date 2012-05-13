@@ -34,7 +34,7 @@ Flashing firmware
 
 Global characteristics:
 =======================
-- 67 model memories, first 8 in EEPROM, rest in FLASH
+- 65 model memories, first 8 in EEPROM, rest in FLASH
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
     > numbers 30-39 will show with Left+Right-Arrows
@@ -133,11 +133,12 @@ Standard menu:
     > select channel and press ENTER
     > select value in range -100..100 and press enter
 - mixes 4WS, DIG, throttle brake cut-off (for boats with forward-only
-  throttle), Multi-Position (to set arbitrary up to 8 positions)
+  throttle), Multi-Position (to set arbitrary up to 8 positions),
+  brake channel (to send brake side of throttle to extra channel)
     > choose menu EPOINT and press ENTER-long
     > menu EPOINT will blink
     > select one of mixes 4WS (4), DIG (d), brake cut-off (b),
-	multi-position (P)
+	multi-position (P), brake channel (8)
       for mixes 4WS, DIG:
 	> press ENTER and choose channel for this mix or OFF
 	    - for dual-ESC steering (boat, tank, ...) select DIG channel 1 and
@@ -157,7 +158,9 @@ Standard menu:
 	> press ENTER and set channel value for second position or END
 	> ... up to eight position
       for brake cut-off:
-	> set OFF or CUT
+	> press ENTER and choose OFF or CUT
+      for brake channel:
+	> press ENTER and choose channel fro brake or OFF
 - Key mapping specific for each model:
     > choose menu REV and press ENTER-long
     > menu REV will blink

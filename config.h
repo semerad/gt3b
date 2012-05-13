@@ -180,7 +180,10 @@ typedef struct {
     u8	abs_type:2;
 
     u8	unused:1;
-    u16	unused2;
+    u8	channel_brake:4;		// channel for brake side of throttle
+
+    u8  unused2:4;
+    u8	unused3;
 
     config_key_mapping_s key_mapping;
 
