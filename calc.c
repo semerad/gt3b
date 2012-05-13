@@ -23,6 +23,7 @@
 #include "ppm.h"
 #include "config.h"
 #include "input.h"
+#include "timer.h"
 
 
 
@@ -379,16 +380,16 @@ static void calc_loop(void) {
 	val = expo(val, (u8)(val < 0 ? cm.expo_forward : cm.expo_back));
 	if (cm.abs_type) {
 	    // apply selected ABS
-	    static u8    abs_cnt;
+	    static u8    abs_time;
 	    static _Bool abs_state;	// when 1, lower brake value
+	    // cycle time in 1ms steps: 120/80/60ms
+	    u8 cycle_time = (u8)(cm.abs_type == 1 ? 120 :
+				 cm.abs_type == 2 ? 80 : 60);
 
 	    if (val > ABS_THRESHOLD) {
-		// count ABS
-		abs_cnt++;
-		if (cm.abs_type == 1 && abs_cnt >= 6
-			|| cm.abs_type == 2 && abs_cnt >= 4
-			|| cm.abs_type == 3 && abs_cnt >=3) {
-		    abs_cnt = 0;
+		// check time with 40ms reserve and change abs_state
+		if ((u8)(ppm_timer - abs_time) <= 40) {
+		    abs_time = (u8)(ppm_timer + cycle_time);
 		    abs_state ^= 1;
 		}
 		// apply ABS
@@ -397,7 +398,7 @@ static void calc_loop(void) {
 	    }
 	    else {
 		// no ABS
-		abs_cnt = 0;
+		abs_time = (u8)(ppm_timer + cycle_time);
 		abs_state = 0;
 	    }
 	}
