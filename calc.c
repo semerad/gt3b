@@ -186,7 +186,7 @@ static s16 steering_speed(s16 val, u8 channel) {
 
     // calculate max delta
     if (stspd == 100)  max_delta = PPM(1000);
-    else  max_delta = PPM(1000) / 2 / (100 - stspd);
+    else  max_delta = PPM(1000) / 2 / 20 * ppm_frame_length / (100 - stspd);
 
     // compare delta with max_delta
     if (delta < 0) {
@@ -207,7 +207,7 @@ static s16 steering_speed(s16 val, u8 channel) {
     // check if it is moving from return to turn
     if (delta2) {
 	if (cm.stspd_turn == 100)  max_delta = PPM(1000);
-	else  max_delta = PPM(1000) / 2 / (100 - cm.stspd_turn);
+	else  max_delta = PPM(1000) / 2 / 20 * ppm_frame_length / (100 - cm.stspd_turn);
 
 	if (delta2 < 0) {
 	    if (max_delta < -delta2)  val = -max_delta;
@@ -245,7 +245,7 @@ static s16 channel_speed(s16 val, u8 channel) {
 	}
     }
 
-    max_delta = PPM(1000) / 2 / (100 - speed);
+    max_delta = PPM(1000) / 2 / 20 * ppm_frame_length / (100 - speed);
     if (delta < 0) {
 	if (max_delta < -delta)  val = last - max_delta;
     }

@@ -57,6 +57,7 @@ u8 ppm_timer;			// timer incremented every 1ms
 u8 ppm_start;			// when to start servo pulses
 u8 ppm_end;			// when must last PPM frame end (to not start again before)
 u8 ppm_calc_awake;		// when to awake CALC task
+u8 ppm_frame_length;		// last length of ppm frame
 
 
 
@@ -172,19 +173,19 @@ void ppm_calc_sync(void) {
     ppm_calc_len -= ppm_calc_awake;
     ppm_calc_len++;
 
-    // calculate new ppm_end
-    ppm_end = (u8)((ppm_microsecs01 + 9999) / 10000);
+    // calculate frame length and new ppm_end
+    ppm_frame_length = (u8)((ppm_microsecs01 + 9999) / 10000);
     if (cg.ppm_sync_frame) {
 	// constant frame length
 	u8 fl = (u8)(cg.ppm_length + 9);
-	ppm_end += PPM_SYNC_LENGTH_MIN;		// minimal frame with SYNC signal
-	if (ppm_end < fl)  ppm_end = fl;
+	ppm_frame_length += PPM_SYNC_LENGTH_MIN;	// minimal frame with SYNC signal
+	if (ppm_frame_length < fl)  ppm_frame_length = fl;
     }
     else {
 	// constant sync length
-	ppm_end += (u8)(cg.ppm_length + 3);
+	ppm_frame_length += (u8)(cg.ppm_length + 3);
     }
-    ppm_end += ppm_start;
+    ppm_end = (u8)(ppm_start + ppm_frame_length);
     ppm_microsecs01 = 0;
 
     // set new ppm_calc_awake

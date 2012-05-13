@@ -48,6 +48,7 @@ extern u8 ppm_values[];		// as bytes for ppm_interrupt and timer_interrupt
 extern u8 ppm_timer;		// timer incremented every 1ms
 extern u8 ppm_start;		// when to start servo pulses
 extern u8 ppm_calc_awake;	// when to awake CALC task
+extern u8 ppm_frame_length;	// last length of ppm frame
 
 // set actual number of channels
 extern void ppm_set_channels(u8 n);

@@ -1,6 +1,8 @@
 *0.6.1 ()
     repaired ABS to use cycle length same as before PPM frame length changes
     added extra brake channel for throttle brake side
+    repaired steering/throttle/channel speed to not beeing dependent
+	on ppm frame length
 
 *0.6.0 (28 Apr 2012)
     increased model memories by using FLASH also
