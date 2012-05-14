@@ -279,6 +279,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
 		// select next menu setting
 		func_init(flags);
 		func(MCA_SET_NEXT, params);
+		if (menu_set == 255)  break;	// exit menu when requested
 		if (menu_set || (flags & MCF_SET_ONLY)) {
 		    // some > 0 menu setting
 		    lcd_chars_blink_mask(LB_SPC, menu_blink);
@@ -324,7 +325,7 @@ void menu_common(menu_common_t func, void *params, u8 flags) {
     }
 
     // call to select next value which can do some action (such as reset)
-    if (menu_id_set)  func(MCA_SET_NEXT, params);
+    if (menu_id_set && menu_set != 255)  func(MCA_SET_NEXT, params);
 
     // cleanup display
     func_init(flags);
