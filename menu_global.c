@@ -379,6 +379,24 @@ static void gs_config_reset(u8 action) {
 }
 
 
+// lock keys till ENTER-long
+static void gs_lock(u8 action) {
+    // change value
+    if (action == MLA_CHG)
+	menu_tmp_flag ^= 1;
+
+    // select next value, do lock when flag is set
+    else if (action == MLA_NEXT && menu_tmp_flag) {
+	menu_set = 255;		// flag to exit menu
+	return;
+    }
+
+    // show value
+    lcd_7seg(L7_O);
+    lcd_chars(menu_tmp_flag ? "YES" : "NO ");
+}
+
+
 
 
 
@@ -396,11 +414,13 @@ static const menu_list_t gs_config[] = {
     gs_long_press_delay,
     gs_hardware,
     gs_config_reset,
+    gs_lock,
 };
 #define GS_CONFIG_SIZE  (sizeof(gs_config) / sizeof(u8 *))
 
 
 void menu_global_setup(void) {
+    menu_tmp_flag = 0;
     // cleanup screen and disable possible low bat warning
     buzzer_off();
     key_beep();
@@ -422,5 +442,16 @@ void menu_global_setup(void) {
     config_global_save();
     apply_global_config();
     btnra();
+
+    // if LOCK was selected, wait for ENTER-long to continue
+    if (menu_set == 255) {
+	lcd_chars("LCK");
+	lcd_chars_blink(LB_SPC);
+	do {
+	    btnra();
+	    menu_stop();
+	} while (!btnl(BTN_ENTER));
+	buzzer_on(60, 0, 1);
+    }
 }
 

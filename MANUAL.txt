@@ -34,7 +34,7 @@ Flashing firmware
 
 Global characteristics:
 =======================
-- 65 model memories, first 8 in EEPROM, rest in FLASH
+- 63 model memories, first 8 in EEPROM, rest in FLASH
     > numbers 10-19 will show with Right-Arrow
     > numbers 20-29 will show with Left-Arrow
     > numbers 30-39 will show with Left+Right-Arrows
@@ -360,6 +360,7 @@ Global setup menu:
     r		global or all models reset
 		    all configs (global+model)	G_N/G_Y (No/Yes)
 		    all models			M_N/M_Y (No/Yes
+    o		lock keys till ENTER-long	No/Yes
 
 
 
