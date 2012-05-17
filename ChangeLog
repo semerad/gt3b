@@ -4,6 +4,7 @@
     repaired steering/throttle/channel speed to not beeing dependent
 	on ppm frame length
     added buttons LOCK until ENTER-long to global menu
+    repaired key setting, buttons long RS and EN were unaccesible
 
 *0.6.0 (28 Apr 2012)
     increased model memories by using FLASH also

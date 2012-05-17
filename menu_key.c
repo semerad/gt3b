@@ -44,7 +44,7 @@
 static const u8 trim_buttons[][3] = {
     "NL", "AR", "MO", "RS", "EN", "SP"
 };
-#define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / 4)
+#define TRIM_BUTTONS_SIZE  (sizeof(trim_buttons) / 3)
 // 7seg:  1 2 3 d
 // chars:
 // function
