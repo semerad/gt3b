@@ -1,6 +1,6 @@
 *0.6.2 ()
 
-*0.6.1 (18 Jun 2012)
+*0.6.1 (18 May 2012)
     repaired ABS to use cycle length same as before PPM frame length changes
     added extra brake channel for throttle brake side
     repaired steering/throttle/channel speed to not beeing dependent
