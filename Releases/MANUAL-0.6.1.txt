@@ -24,7 +24,7 @@ Flashing firmware
 - load firmware "gt3b-VERSION.s19"
 - program it with "Program -> Address Range..."
     - set "Start @" to "8000"
-    - set "End @"   to "E70F" (it is possible to find place where zeroes
+    - set "End @"   to "E861" (it is possible to find place where zeroes
 			       will start and use last non-zero address)
     - press "OK"
 - if "Program -> Current tab" will be used, all models stored at FLASH
