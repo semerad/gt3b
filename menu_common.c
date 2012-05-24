@@ -50,14 +50,8 @@ u16 battery_low_raw;
 
 
 
-// apply model settings to variables
-void apply_model_config(void) {
-    u8 i, autorepeat = 0;
-
-    // set number of channels for this model
-    ppm_set_channels((u8)(cm.channels + 1));
-
-    // set mixed channels to ignore them from menu_channel3_8
+// set menu_channels_mixed to ignore them from menu_channel3_8
+void set_menu_channels_mixed(void) {
     menu_channels_mixed = 0;
     if (cm.channel_4WS)
 	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_4WS - 1));
@@ -65,6 +59,17 @@ void apply_model_config(void) {
 	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_DIG - 1));
     if (cm.channel_brake)
 	menu_channels_mixed |= (u8)(1 << (u8)(cm.channel_brake - 1));
+}
+
+
+// apply model settings to variables
+void apply_model_config(void) {
+    u8 i, autorepeat = 0;
+
+    // set number of channels for this model
+    ppm_set_channels((u8)(cm.channels + 1));
+
+    set_menu_channels_mixed();
 
     // set autorepeat
     for (i = 0; i < 4; i++) {

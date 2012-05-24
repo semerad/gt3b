@@ -46,6 +46,7 @@ static void mix_4WS(u8 action) {
 		val = (u8)menu_change_val(val, 2, channels, 1, 1);
 		if (val == 2)   cm.channel_4WS = 0;
 		else		cm.channel_4WS = val;
+		set_menu_channels_mixed();
 		break;
 	    case 1:
 		// mix value
@@ -99,6 +100,7 @@ static void mix_DIG(u8 action) {
 		val = (u8)menu_change_val(val, 1, channels, 1, 1);
 		if (val == 2)   cm.channel_DIG = 0;
 		else		cm.channel_DIG = val;
+		set_menu_channels_mixed();
 		break;
 	    case 1:
 		// mix value
@@ -249,6 +251,7 @@ static void mix_brake_channel(u8 action) {
         val = (u8)menu_change_val(val, 2, channels, 1, 1);
         if (val == 2)  val = 0;
         cm.channel_brake = val;
+	set_menu_channels_mixed();
     }
 
     // show value
