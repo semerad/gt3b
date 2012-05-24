@@ -68,8 +68,9 @@ typedef struct {
     u8	ppm_sync_frame:1;	// 0 = constant SYNC length, 1 = constant frame length
     u8	channels_default:3;	// default number of channels for model
     u8  ch3_pot:1;		// potentiometer connected instead of CH3 button
+    u8	encoder_2detents:1;	// use 2 encoder detents to change value (weak GT3C encoder)
 
-    u8  unused:7;		// reserve
+    u8  unused:6;		// reserve
     u8	reserve[16];
 } config_global_s;
 

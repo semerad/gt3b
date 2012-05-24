@@ -70,6 +70,7 @@ u8 config_global_set_default(void) {
     cg.ppm_length	= 1;		// 4ms constant SYNC length
     cg.rotate_reverse	= 0;		// not-reversed
     cg.ch3_pot		= 0;		// CH3 is button
+    cg.encoder_2detents	= 0;		// use 2 detents to change value
 
     // set calibrate values only when they are out of limits
     cc |= check_val(&cg.calib_steering_left, 0, CALIB_ST_LOW_MID, 0);

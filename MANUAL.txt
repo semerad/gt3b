@@ -352,7 +352,8 @@ Global setup menu:
 		    poweron not-centered warn	C_N/C_Y
     d		long press key delay		100...1000 miliseconds
     H		setting of hardware features
-		    reverse rotate encoder	E_N/E_R (Normal/Reverse) - for GT3C
+		    reverse rotate encoder	ER0/ER1 (Normal/Reverse) - for GT3C
+		    encoder 2 detents for move	ED1/ED2 (1/2 detents) - for weak GT3C encoder
 		    ch3 is potentiometer	P3N/P3Y (No/Yes)
 		    select ppm sync/frame	PTS/PTF (constant SYNC/frame length)
 		    select ppm length		Lxx - 3-18ms for constant SYNC length

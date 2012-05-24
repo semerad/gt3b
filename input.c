@@ -279,24 +279,27 @@ static void read_keys(void) {
     if (encoder_timer)  encoder_timer--;
     if (TIM1_CNTRL) {
 	// encoder changed
-	u16 btn;
-	if ((s8)TIM1_CNTRL >= 0) {
+	u16 btn = 0;
+	if ((s8)TIM1_CNTRL > cg.encoder_2detents) {
 	    // left
 	    if (cg.rotate_reverse)  btn = BTN_ROT_R;
 	    else		    btn = BTN_ROT_L;
 	}
-	else {
+	else if ((s8)TIM1_CNTRL < -cg.encoder_2detents) {
 	    // right
 	    if (cg.rotate_reverse)  btn = BTN_ROT_L;
 	    else		    btn = BTN_ROT_R;
 	}
-	buttons |= btn;
-	if (encoder_timer)  buttons_long |= btn;
-	// set it back to default value
-	TIM1_CNTRL = 0;
-	// init timer
-	encoder_timer = ENCODER_FAST_THRESHOLD;
-	backlight_on();
+	if (btn) {
+	    // only when enought rotate was applied
+	    buttons |= btn;
+	    if (encoder_timer)  buttons_long |= btn;
+	    // set it back to default value
+	    TIM1_CNTRL = 0;
+	    // init timer
+	    encoder_timer = ENCODER_FAST_THRESHOLD;
+	    backlight_on();
+	}
     }
 
 

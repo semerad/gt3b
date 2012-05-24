@@ -295,9 +295,12 @@ static void gs_hardware(u8 action) {
 		cg.rotate_reverse ^= 1;
 		break;
 	    case 1:
-		cg.ch3_pot ^= 1;
+		cg.encoder_2detents ^= 1;
 		break;
 	    case 2:
+		cg.ch3_pot ^= 1;
+		break;
+	    case 3:
 		if (cg.ppm_sync_frame) {
 		    cg.ppm_sync_frame = 0;
 		    cg.ppm_length = 1;   // 4ms SYNC
@@ -307,7 +310,7 @@ static void gs_hardware(u8 action) {
 		    cg.ppm_length = 11;  // 20ms frame
 		}
 		break;
-	    case 3:
+	    case 4:
 		if (cg.ppm_sync_frame)
 		    // constant frame length
 		    cg.ppm_length =
@@ -322,7 +325,7 @@ static void gs_hardware(u8 action) {
 
     // select next value
     else if (action == MLA_NEXT) {
-	if (++menu_set > 3)  menu_set = 0;
+	if (++menu_set > 4)  menu_set = 0;
     }
 
     // show values
@@ -330,18 +333,22 @@ static void gs_hardware(u8 action) {
     menu_blink &= (u8)~(MCB_CHR1 | MCB_CHR2);	// only last char will blink
     switch (menu_set) {
 	case 0:
-	    lcd_chars("E ");
-	    lcd_char(LCHR3, (u8)(cg.rotate_reverse ? 'R' : 'N'));
+	    lcd_chars("ER");
+	    lcd_char(LCHR3, (u8)(cg.rotate_reverse + '0'));
 	    break;
 	case 1:
+	    lcd_chars("ED");
+	    lcd_char(LCHR3, (u8)(cg.encoder_2detents + 1 + '0'));
+	    break;
+	case 2:
 	    lcd_chars("P3");
 	    lcd_char(LCHR3, (u8)(cg.ch3_pot ? 'Y' : 'N'));
 	    break;
-	case 2:
+	case 3:
 	    lcd_chars("PT");
 	    lcd_char(LCHR3, (u8)(cg.ppm_sync_frame ? 'F' : 'S'));
 	    break;
-	case 3:
+	case 4:
 	    lcd_char_num3(cg.ppm_length + (u8)(cg.ppm_sync_frame ? 9 : 3));
 	    lcd_char(LCHR1, 'L');
 	    menu_blink |= MCB_CHR2;	// blink char2 too
