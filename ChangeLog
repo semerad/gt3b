@@ -1,6 +1,8 @@
 *0.6.2 ()
     added global option to select between 1 or 2 detents of rotate encoder,
 	which must be applied to change value
+    for 4WS/DIG/BRAKE, enable it directly after choosing channel, previously
+	it was after leaving menu
 
 *0.6.1 (18 May 2012)
     repaired ABS to use cycle length same as before PPM frame length changes
