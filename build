@@ -19,7 +19,10 @@ fi
 
 # manual, set FIRMWARE_END_ADDRESS to actual value
 FEA=$(perl -e "printf \"%x\", $(grep 'segment \.text' gt3b.map | head -n 1 | awk '{print "0x"$4}') - 1;");
-sed -e "s/FIRMWARE_END_ADDR/$FEA/" MANUAL.txt >$R/MANUAL-$V.txt
+NMODELS=$(( (0xffff - 0x$FEA) / 108 + 8 ))
+sed -e "s/FIRMWARE_END_ADDR/$FEA/" \
+    -e "s/NUMBER_OF_MODELS/$NMODELS/" \
+    MANUAL.txt >$R/MANUAL-$V.txt
 git add $R/MANUAL-$V.txt
 
 
