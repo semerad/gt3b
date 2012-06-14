@@ -1,13 +1,20 @@
 
+ARC - Adjustable Rate Control
+    - two linear curves with settable point and rate
+    - for steering, forward and back
+steering speed with 2 settings and point where it changes
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
 	- set timer_interrupt and ppm_interrupt to lower level as it
 	  can be interrupted by PPM in signal
-    - read timer register, timer_1s, timer_5s to cyclic buffer
+    - read timer register, ppm_timer to cyclic buffer
+	- problem with determining if timer interrupt already incremented
+	  ppm_timer or not
     - wakeup PPM_INPUT task
 	- read values from cyclic buffer
 	- compute PPM servo signals and assign them to ppm_in variables
+    - in menu set mapping of channels to PPM INPUT channels
 
 
 
