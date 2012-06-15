@@ -11,6 +11,16 @@ steering speed with 2 settings and point where it changes
     - read timer register, ppm_timer to cyclic buffer
 	- problem with determining if timer interrupt already incremented
 	  ppm_timer or not
+	    - timer_interrupt
+		- store ppm_timer to ppm_timer_old
+		- set bit flag ppm_timer_incrementing
+		- increment ppm_timer
+		- clear bit flag ppm_timer_incrementing
+	    - ppm_input_interrupt
+		- read ppm_timer
+		- if bit flag ppm_timer_incrementing is set
+		    - compare ppm_timer with ppm_timer_old
+			- if same, increment readed ppm_timer value
     - wakeup PPM_INPUT task
 	- read values from cyclic buffer
 	- compute PPM servo signals and assign them to ppm_in variables
