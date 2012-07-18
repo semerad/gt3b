@@ -1,4 +1,5 @@
 
+add function to disable/enable steering D/R to make it really dualrate
 do one timer model specific
 ARC - Adjustable Rate Control
     - two linear curves with settable point and rate
