@@ -1,4 +1,5 @@
 
+save 4WS mix to model config
 add function to disable/enable steering D/R to make it really dualrate
 do one timer model specific
 add throttle hold button function
