@@ -1,14 +1,18 @@
 
-save 4WS mix to model config
+save 4WS mix to model config (selectable)
 add function to disable/enable steering D/R to make it really dualrate
-do one timer model specific
+    (or leave it to extended multi-position ?)
+do one timer model specific (selectable)
 add throttle hold button function
-MultiPosition for 4WS mix also (as for DIG mix)
+MultiPosition for all trim functions (except lists == MultiPosition)
 ARC - Adjustable Rate Control
     - two linear curves with settable point and rate
     - for steering, forward and back
 steering speed with 2 settings and point where it changes
-? default value for DIG mix
+losikid
+    ? changing saved value when at momentary-state
+    ? MultiPosition momentary keys + changing values with trims
+    ? default value for DIG mix
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
