@@ -10,6 +10,8 @@ ARC - Adjustable Rate Control
     - for steering, forward and back
 steering speed with 2 settings and point where it changes
 losikid
+    ? timer down settings in smaller increments (not whole minutes)
+    ? timer down beeps 60s(1) 30s(2) 15s(3) 10-1s(each) 0s(rapid beeping)
     ? changing saved value when at momentary-state
     ? MultiPosition momentary keys + changing values with trims
     ? default value for DIG mix
