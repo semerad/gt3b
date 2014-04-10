@@ -19,7 +19,7 @@ You can backup your original firmware and config, use tabs "PROGRAM MEMORY" and
 
 Flashing firmware
 =================
-- uset STVP (ST Visual Programmer)
+- use STVP (ST Visual Programmer)
 - select "PROGRAM MEMORY" tab
 - load firmware "gt3b-VERSION.s19"
 - program it with "Program -> Address Range..."
@@ -160,7 +160,7 @@ Standard menu:
       for brake cut-off:
 	> press ENTER and choose OFF or CUT
       for brake channel:
-	> press ENTER and choose channel fro brake or OFF
+	> press ENTER and choose channel for brake or OFF
 - Key mapping specific for each model:
     > choose menu REV and press ENTER-long
     > menu REV will blink
@@ -296,7 +296,7 @@ Calibrate menu:
       potentiometer 10K which has 1K at half of turn. Or eliminate
       internal resistor to +5V, connect potentiometer between +5V
       and GND and potentiometer output instead of CH3 button.
-- there is also channal 4 representing battery voltage
+- there is also channel 4 representing battery voltage
 - calibrate as usual (for channel 1/2 left+mid+right and ENTER)
     > calibrated value will disappear from menu
     > it is not needed to calibrate all values
@@ -355,9 +355,9 @@ Global setup menu:
 		    reverse rotate encoder	ER0/ER1 (Normal/Reverse) - for GT3C
 		    encoder 2 detents for move	ED1/ED2 (1/2 detents) - for weak GT3C encoder
 		    ch3 is potentiometer	P3N/P3Y (No/Yes)
-		    select ppm sync/frame	PTS/PTF (constant SYNC/frame length)
-		    select ppm length		Lxx - 3-18ms for constant SYNC length
-						      9-24ms for constant frame length
+		    select ppm sync/frame	PTS/PTF (constant Sync/Frame length)
+		    select ppm length		Lxx - 3-18ms for constant Sync length
+						      9-24ms for constant Frame length
     r		global or all models reset
 		    all configs (global+model)	G_N/G_Y (No/Yes)
 		    all models			M_N/M_Y (No/Yes
@@ -411,7 +411,7 @@ CHn		- switch channel "n" value from one end value to opposite end
 		  middle state)
 CnR		- reset value of channel "n" to centre
 4WS		- switch crab (CRB) no-crab (NOC) for 4 wheel steering
-DIG		- switch DIG mix between -100 and 100 (more useable when using
+DIG		- switch DIG mix between -100 and 100 (more usable when using
 		  return to previous val key setting)
 DGR		- reset DIG mix to centre
 MP1		- Multi-Position 1, switches position up (at END back to 1.)
