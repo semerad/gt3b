@@ -15,6 +15,8 @@ losikid
     ? changing saved value when at momentary-state
     ? MultiPosition momentary keys + changing values with trims
     ? default value for DIG mix
+? RS232 communication to get/set global/model config data
+
 ? PPM input for head tracking gyro
     - pin PD7 TLI non-maskable interrupt at signal edge
     - or pin PD1 (SWIM), PD5, PD6 with pin change interrupt at signal edge
